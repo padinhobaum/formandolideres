@@ -62,8 +62,8 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body rounded transition-colors ${
                 active ?
-                "bg-secondary text-primary font-medium" :
-                "text-foreground hover:bg-secondary"}`
+                "bg-sidebar-accent text-sidebar-accent-foreground font-medium" :
+                "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"}`
                 }>
                 
                 <item.icon className="w-4 h-4" strokeWidth={1.5} />
