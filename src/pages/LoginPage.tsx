@@ -50,77 +50,77 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="border bg-card p-8 rounded-lg shadow-sm">
           <div className="flex justify-center mb-6">
-            <img src={logoImg} alt="Formando Líderes" className="h-14 w-auto" />
+            <img alt="Formando Líderes" className="h-14 w-auto" src="/lovable-uploads/d52473b9-ea3a-4883-9166-d1045f638583.png" />
           </div>
           <p className="text-sm text-muted-foreground mb-8 text-center">
             {mode === "login" ? "Acesse sua conta" : "Recuperar senha"}
           </p>
 
-          {mode === "login" ? (
-            <form onSubmit={handleLogin} className="space-y-4">
+          {mode === "login" ?
+          <form onSubmit={handleLogin} className="space-y-4">
               <div>
                 <Label htmlFor="email" className="text-sm font-body">E-mail</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="mt-1"
-                  placeholder="seu@email.com"
-                />
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="mt-1"
+                placeholder="seu@email.com" />
+              
               </div>
               <div>
                 <Label htmlFor="password" className="text-sm font-body">Senha</Label>
                 <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  className="mt-1"
-                  placeholder="••••••••"
-                />
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="mt-1"
+                placeholder="••••••••" />
+              
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
               <button
-                type="button"
-                onClick={() => setMode("reset")}
-                className="w-full text-sm text-primary hover:underline mt-2"
-              >
+              type="button"
+              onClick={() => setMode("reset")}
+              className="w-full text-sm text-primary hover:underline mt-2">
+              
                 Esqueci minha senha
               </button>
-            </form>
-          ) : (
-            <form onSubmit={handleReset} className="space-y-4">
+            </form> :
+
+          <form onSubmit={handleReset} className="space-y-4">
               <div>
                 <Label htmlFor="reset-email" className="text-sm font-body">E-mail</Label>
                 <Input
-                  id="reset-email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  className="mt-1"
-                  placeholder="seu@email.com"
-                />
+                id="reset-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="mt-1"
+                placeholder="seu@email.com" />
+              
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Enviando..." : "Enviar link de recuperação"}
               </Button>
               <button
-                type="button"
-                onClick={() => setMode("login")}
-                className="w-full text-sm text-primary hover:underline mt-2"
-              >
+              type="button"
+              onClick={() => setMode("login")}
+              className="w-full text-sm text-primary hover:underline mt-2">
+              
                 Voltar ao login
               </button>
             </form>
-          )}
+          }
         </div>
       </div>
-    </div>
-  );
+    </div>);
+
 }
