@@ -62,9 +62,9 @@ export default function MaterialsPage() {
         <div className="space-y-2">
             {filtered.map((m) =>
           <div key={m.id} className="border bg-card p-4 flex items-center gap-4">
-                <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
+                <FileText className="text-muted-foreground flex-shrink-0 w-[30px] h-[30px]" strokeWidth={1.5} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-body font-medium truncate">{m.title}</p>
+                  <p className="font-body font-medium truncate text-lg text-primary">{m.title}</p>
                   <p className="text-xs text-muted-foreground">
                     {m.category} · {formatDate(m.created_at)}
                     {m.file_size ? ` · ${formatSize(m.file_size)}` : ""}
