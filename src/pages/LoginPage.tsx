@@ -53,7 +53,7 @@ export default function LoginPage() {
             <img alt="Formando Líderes" className="h-14 w-auto" src="/lovable-uploads/d52473b9-ea3a-4883-9166-d1045f638583.png" />
           </div>
           <p className="text-sm text-muted-foreground mb-8 text-center">
-            {mode === "login" ? "Acesse sua conta" : "Recuperar senha"}
+            {mode === "login" ? "Acesse o Portal do Líder" : "Recuperar senha"}
           </p>
 
           {mode === "login" ?
