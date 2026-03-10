@@ -11,28 +11,28 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Alunos", path: "/alunos", icon: Users },
-  { label: "Materiais", path: "/materiais", icon: Download },
-  { label: "Mural", path: "/mural", icon: Megaphone },
-  { label: "Admin", path: "/admin", icon: Shield, adminOnly: true },
-];
+{ label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+{ label: "Alunos", path: "/alunos", icon: Users },
+{ label: "Materiais", path: "/materiais", icon: Download },
+{ label: "Mural", path: "/mural", icon: Megaphone },
+{ label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
-function UserInitials({ name }: { name: string }) {
-  const initials = name
-    .split(" ")
-    .map((n) => n[0])
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
+
+function UserInitials({ name }: {name: string;}) {
+  const initials = name.
+  split(" ").
+  map((n) => n[0]).
+  slice(0, 2).
+  join("").
+  toUpperCase();
   return (
     <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center">
       <span className="text-xs font-body font-semibold text-background">{initials}</span>
-    </div>
-  );
+    </div>);
+
 }
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default function AppLayout({ children }: {children: ReactNode;}) {
   const { profile, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -49,7 +49,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-56 border-r bg-card min-h-screen">
         <div className="p-5 border-b">
-          <h1 className="text-lg font-heading font-bold tracking-tight">Portal Escolar</h1>
+          <h1 className="text-lg font-bold tracking-tight font-sans">Portal Escolar</h1>
         </div>
 
         <nav className="flex-1 p-3">
@@ -60,15 +60,15 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body rounded transition-colors ${
-                  active
-                    ? "bg-secondary text-primary font-medium"
-                    : "text-foreground hover:bg-secondary"
-                }`}
-              >
+                active ?
+                "bg-secondary text-primary font-medium" :
+                "text-foreground hover:bg-secondary"}`
+                }>
+                
                 <item.icon className="w-4 h-4" strokeWidth={1.5} />
                 <span>{item.label}</span>
-              </button>
-            );
+              </button>);
+
           })}
         </nav>
 
@@ -84,8 +84,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-destructive hover:bg-destructive/10 rounded transition-colors mt-1"
-          >
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-destructive hover:bg-destructive/10 rounded transition-colors mt-1">
+            
             <LogOut className="w-4 h-4" strokeWidth={1.5} />
             <span>Sair</span>
           </button>
@@ -116,26 +116,26 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
-                active ? "text-primary font-medium" : "text-muted-foreground"
-              }`}
-            >
+              active ? "text-primary font-medium" : "text-muted-foreground"}`
+              }>
+              
               <item.icon className="w-5 h-5" strokeWidth={1.5} />
               <span>{item.label}</span>
-            </button>
-          );
+            </button>);
+
         })}
-        {isAdmin && (
-          <button
-            onClick={() => navigate("/admin")}
-            className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
-              location.pathname === "/admin" ? "text-primary font-medium" : "text-muted-foreground"
-            }`}
-          >
+        {isAdmin &&
+        <button
+          onClick={() => navigate("/admin")}
+          className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
+          location.pathname === "/admin" ? "text-primary font-medium" : "text-muted-foreground"}`
+          }>
+          
             <Shield className="w-5 h-5" strokeWidth={1.5} />
             <span>Admin</span>
           </button>
-        )}
+        }
       </nav>
-    </div>
-  );
+    </div>);
+
 }
