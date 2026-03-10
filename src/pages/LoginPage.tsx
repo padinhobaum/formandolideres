@@ -85,13 +85,13 @@ export default function LoginPage() {
               <Button type="submit" className="w-full" disabled={loading}>
                 {loading ? "Entrando..." : "Entrar"}
               </Button>
-              <button
-              type="button"
-              onClick={() => setMode("reset")}
-              className="w-full text-sm text-primary hover:underline mt-2">
               
-                Esqueci minha senha
-              </button>
+
+
+
+
+
+            
             </form> :
 
           <form onSubmit={handleReset} className="space-y-4">
