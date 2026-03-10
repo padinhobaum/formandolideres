@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, Users, Download, Megaphone, Shield, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Download, Megaphone, Shield, LogOut, Video } from "lucide-react";
 
 interface NavItem {
   label: string;
