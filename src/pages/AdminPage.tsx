@@ -45,6 +45,7 @@ export default function AdminPage() {
         {tab === "notices" && <AdminNotices />}
         {tab === "students" && <AdminStudents />}
         {tab === "materials" && <AdminMaterials />}
+        {tab === "videos" && <AdminVideos />}
         {tab === "users" && <AdminUsers />}
       </div>
     </AppLayout>
