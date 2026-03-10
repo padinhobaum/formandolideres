@@ -9,6 +9,7 @@ import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import DashboardPage from "@/pages/DashboardPage";
 import StudentsPage from "@/pages/StudentsPage";
 import MaterialsPage from "@/pages/MaterialsPage";
+import VideoLessonsPage from "@/pages/VideoLessonsPage";
 import NoticesPage from "@/pages/NoticesPage";
 import AdminPage from "@/pages/AdminPage";
 import NotFound from "@/pages/NotFound";
