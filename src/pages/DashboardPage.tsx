@@ -48,7 +48,7 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <div className="max-w-4xl">
-        <h2 className="font-heading font-bold mb-1 text-4xl">
+        <h2 className="font-heading font-bold mb-1 text-4xl text-accent">
           Olá, {profile?.full_name?.split(" ")[0]}
         </h2>
         <p className="text-muted-foreground mb-8 text-lg">
@@ -82,7 +82,7 @@ export default function DashboardPage() {
 
         {/* Pinned / latest notices */}
         <section className="mb-8">
-          <h3 className="text-lg font-heading font-bold mb-3">Últimos Avisos</h3>
+          <h3 className="font-heading font-bold mb-3 text-2xl">Últimos Avisos</h3>
           {notices.length === 0 ?
           <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
 
@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
         {/* Latest materials */}
         <section>
-          <h3 className="text-lg font-heading font-bold mb-3">Materiais Recentes</h3>
+          <h3 className="font-heading font-bold mb-3 text-2xl">Materiais Recentes</h3>
           {materials.length === 0 ?
           <p className="text-sm text-muted-foreground">Nenhum material disponível.</p> :
 
