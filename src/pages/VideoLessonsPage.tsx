@@ -154,7 +154,7 @@ export default function VideoLessonsPage() {
 
                   {/* Info */}
                   <div className="p-4">
-                    <h3 className="text-sm font-heading font-bold">{v.title}</h3>
+                    <h3 className="font-heading font-bold text-lg">{v.title}</h3>
                     {v.description &&
                   <p className="text-sm text-muted-foreground mt-1">{v.description}</p>
                   }
