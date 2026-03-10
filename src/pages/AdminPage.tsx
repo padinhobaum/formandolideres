@@ -17,6 +17,7 @@ export default function AdminPage() {
     { key: "notices", label: "Avisos" },
     { key: "students", label: "Alunos" },
     { key: "materials", label: "Materiais" },
+    { key: "videos", label: "Videoaulas" },
     { key: "users", label: "Usuários" },
   ];
 
