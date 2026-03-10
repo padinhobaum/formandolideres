@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Trash2, Plus } from "lucide-react";
 
-type Tab = "users" | "students" | "notices" | "materials";
+type Tab = "users" | "students" | "notices" | "materials" | "videos";
 
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("notices");
