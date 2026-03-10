@@ -21,11 +21,11 @@ export default function StudentsPage() {
 
   useEffect(() => {
     const fetchStudents = async () => {
-      const { data } = await supabase
-        .from("students")
-        .select("*")
-        .order("class_name")
-        .order("call_number");
+      const { data } = await supabase.
+      from("students").
+      select("*").
+      order("class_name").
+      order("call_number");
       if (data) setStudents(data);
     };
     fetchStudents();
@@ -42,7 +42,7 @@ export default function StudentsPage() {
   return (
     <AppLayout>
       <div className="max-w-3xl">
-        <h2 className="text-2xl font-heading font-bold mb-6">Informações dos Alunos</h2>
+        <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Informações dos Alunos</h2>
 
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <div className="relative flex-1">
@@ -51,33 +51,33 @@ export default function StudentsPage() {
               placeholder="Pesquisar por nome..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-9"
-            />
+              className="pl-9" />
+            
           </div>
           <select
             value={classFilter}
             onChange={(e) => setClassFilter(e.target.value)}
-            className="border bg-card px-3 py-2 text-sm font-body rounded"
-          >
+            className="border bg-card px-3 py-2 text-sm font-body rounded">
+            
             <option value="">Todas as turmas</option>
-            {classes.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
+            {classes.map((c) =>
+            <option key={c} value={c}>{c}</option>
+            )}
           </select>
         </div>
 
-        {filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum aluno encontrado.</p>
-        ) : (
-          <div className="space-y-1">
+        {filtered.length === 0 ?
+        <p className="text-sm text-muted-foreground">Nenhum aluno encontrado.</p> :
+
+        <div className="space-y-1">
             {filtered.map((student) => {
-              const isExpanded = expandedId === student.id;
-              return (
-                <div key={student.id} className="border bg-card">
+            const isExpanded = expandedId === student.id;
+            return (
+              <div key={student.id} className="border bg-card">
                   <button
-                    onClick={() => setExpandedId(isExpanded ? null : student.id)}
-                    className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary transition-colors"
-                  >
+                  onClick={() => setExpandedId(isExpanded ? null : student.id)}
+                  className="w-full flex items-center justify-between p-4 text-left hover:bg-secondary transition-colors">
+                  
                     <div className="flex items-center gap-4">
                       <span className="text-xs text-muted-foreground w-8 text-center font-body">
                         {student.call_number ?? "—"}
@@ -86,15 +86,15 @@ export default function StudentsPage() {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="text-xs text-muted-foreground">{student.class_name}</span>
-                      {isExpanded ? (
-                        <ChevronUp className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-                      ) : (
-                        <ChevronDown className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
-                      )}
+                      {isExpanded ?
+                    <ChevronUp className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} /> :
+
+                    <ChevronDown className="w-4 h-4 text-muted-foreground" strokeWidth={1.5} />
+                    }
                     </div>
                   </button>
-                  {isExpanded && (
-                    <div className="px-4 pb-4 border-t">
+                  {isExpanded &&
+                <div className="px-4 pb-4 border-t">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                         <div>
                           <p className="text-xs text-muted-foreground mb-1">Turma</p>
@@ -114,13 +114,13 @@ export default function StudentsPage() {
                         </div>
                       </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
+                }
+                </div>);
+
+          })}
           </div>
-        )}
+        }
       </div>
-    </AppLayout>
-  );
+    </AppLayout>);
+
 }
