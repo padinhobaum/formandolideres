@@ -52,7 +52,7 @@ export default function LoginPage() {
           <div className="flex justify-center mb-6">
             <img alt="Formando Líderes" className="h-14 w-auto" src="/lovable-uploads/d52473b9-ea3a-4883-9166-d1045f638583.png" />
           </div>
-          <p className="text-sm text-muted-foreground mb-8 text-center">
+          <p className="mb-8 text-center text-xl text-muted-foreground">
             {mode === "login" ? "Acesse o Portal do Líder" : "Recuperar senha"}
           </p>
 
