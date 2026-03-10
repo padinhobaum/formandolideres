@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import logoImg from "@/assets/logo-formando-lideres.png";
 
 export default function LoginPage() {
   const { signIn, resetPassword, session } = useAuth();
