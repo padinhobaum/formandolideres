@@ -18,11 +18,11 @@ export default function NoticesPage() {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase
-        .from("notices")
-        .select("*")
-        .order("is_pinned", { ascending: false })
-        .order("created_at", { ascending: false });
+      const { data } = await supabase.
+      from("notices").
+      select("*").
+      order("is_pinned", { ascending: false }).
+      order("created_at", { ascending: false });
       if (data) setNotices(data);
     };
     fetch();
@@ -43,38 +43,38 @@ export default function NoticesPage() {
   }, [focusedId, handleKeyDown]);
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    });
+  new Date(d).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
 
   const focusedNotice = notices.find((n) => n.id === focusedId);
 
   return (
     <AppLayout>
       <div className="max-w-3xl">
-        <h2 className="text-2xl font-heading font-bold mb-6">Mural de Avisos</h2>
+        <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Mural de Avisos</h2>
 
-        {notices.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p>
-        ) : (
-          <div className="space-y-3">
-            {notices.map((n) => (
-              <div
-                key={n.id}
-                className={`border bg-card p-5 ${n.is_pinned ? "bg-secondary" : ""}`}
-              >
+        {notices.length === 0 ?
+        <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
+
+        <div className="space-y-3">
+            {notices.map((n) =>
+          <div
+            key={n.id}
+            className={`border bg-card p-5 ${n.is_pinned ? "bg-secondary" : ""}`}>
+            
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
                     {n.is_pinned && <Pin className="w-3 h-3 text-primary" strokeWidth={1.5} />}
                     <h3 className="font-heading font-bold text-base">{n.title}</h3>
                   </div>
                   <button
-                    onClick={() => setFocusedId(n.id)}
-                    className="text-muted-foreground hover:text-primary transition-colors p-1"
-                    title="Modo Foco"
-                  >
+                onClick={() => setFocusedId(n.id)}
+                className="text-muted-foreground hover:text-primary transition-colors p-1"
+                title="Modo Foco">
+                
                     <Maximize2 className="w-4 h-4" strokeWidth={1.5} />
                   </button>
                 </div>
@@ -85,14 +85,14 @@ export default function NoticesPage() {
                   {n.author_name} · {formatDate(n.created_at)}
                 </p>
               </div>
-            ))}
+          )}
           </div>
-        )}
+        }
       </div>
 
       {/* Focus Mode Overlay */}
-      {focusedNotice && (
-        <>
+      {focusedNotice &&
+      <>
           <div className="focus-overlay" onClick={() => setFocusedId(null)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <div className="focus-content max-w-2xl w-full p-8 pointer-events-auto max-h-[80vh] overflow-y-auto">
@@ -109,7 +109,7 @@ export default function NoticesPage() {
             </div>
           </div>
         </>
-      )}
-    </AppLayout>
-  );
+      }
+    </AppLayout>);
+
 }
