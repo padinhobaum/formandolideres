@@ -48,10 +48,10 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <div className="max-w-4xl">
-        <h2 className="text-2xl font-heading font-bold mb-1">
+        <h2 className="font-heading font-bold mb-1 text-4xl">
           Olá, {profile?.full_name?.split(" ")[0]}
         </h2>
-        <p className="text-sm text-muted-foreground mb-8">
+        <p className="text-muted-foreground mb-8 text-lg">
           {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
         </p>
 
