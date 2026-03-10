@@ -102,7 +102,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       <main className="flex-1 pb-20 md:pb-0 overflow-y-auto">
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
-          <h1 className="text-base font-heading font-bold text-primary">Formando Líderes</h1>
+          <img src={logoImg} alt="Formando Líderes" className="h-8 w-auto" />
           <div className="flex items-center gap-2">
             <UserInitials name={profile?.full_name || "U"} />
             <button onClick={handleSignOut}>
