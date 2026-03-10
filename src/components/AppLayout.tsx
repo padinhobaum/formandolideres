@@ -68,7 +68,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
                 }>
                 
                 <item.icon className="w-4 h-4" strokeWidth={1.5} />
-                <span>{item.label}</span>
+                <span className="text-lg">{item.label}</span>
               </button>);
 
           })}
