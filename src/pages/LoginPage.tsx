@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
+import logoImg from "@/assets/logo-formando-lideres.png";
 
 export default function LoginPage() {
   const { signIn, resetPassword, session } = useAuth();
@@ -47,9 +48,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-sm">
-        <div className="border bg-card p-8">
-          <h1 className="text-2xl font-heading font-bold mb-1">Portal Escolar</h1>
-          <p className="text-sm text-muted-foreground mb-8">
+        <div className="border bg-card p-8 rounded-lg shadow-sm">
+          <div className="flex justify-center mb-6">
+            <img src={logoImg} alt="Formando Líderes" className="h-14 w-auto" />
+          </div>
+          <p className="text-sm text-muted-foreground mb-8 text-center">
             {mode === "login" ? "Acesse sua conta" : "Recuperar senha"}
           </p>
 

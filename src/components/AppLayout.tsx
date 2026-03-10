@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import logoImg from "@/assets/logo-formando-lideres.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LayoutDashboard, Users, Download, Megaphone, Shield, LogOut, Video } from "lucide-react";
@@ -49,8 +50,8 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-56 border-r bg-sidebar text-sidebar-foreground min-h-screen">
-        <div className="p-5 border-b border-sidebar-border">
-          <h1 className="text-lg font-bold tracking-tight font-heading text-sidebar-foreground">Formando Líderes</h1>
+        <div className="p-4 border-b border-sidebar-border flex items-center justify-center">
+          <img src={logoImg} alt="Formando Líderes" className="h-10 w-auto brightness-0 invert" />
         </div>
 
         <nav className="flex-1 p-3">
@@ -101,7 +102,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       <main className="flex-1 pb-20 md:pb-0 overflow-y-auto">
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
-          <h1 className="text-base font-heading font-bold text-primary">Formando Líderes</h1>
+          <img src={logoImg} alt="Formando Líderes" className="h-8 w-auto" />
           <div className="flex items-center gap-2">
             <UserInitials name={profile?.full_name || "U"} />
             <button onClick={handleSignOut}>
