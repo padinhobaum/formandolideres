@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import logoImg from "@/assets/logo-formando-lideres.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LayoutDashboard, Users, Download, Megaphone, Shield, LogOut, Video } from "lucide-react";
