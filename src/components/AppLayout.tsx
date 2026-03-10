@@ -51,7 +51,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-56 border-r bg-sidebar text-sidebar-foreground min-h-screen">
         <div className="p-4 border-b border-sidebar-border flex items-center justify-center">
-          <img src={logoImg} alt="Formando Líderes" className="h-10 w-auto brightness-0 invert" />
+          <img alt="Formando Líderes" className="h-10 w-auto brightness-0 invert" src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png" />
         </div>
 
         <nav className="flex-1 p-3">
