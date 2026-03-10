@@ -59,22 +59,22 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
           <button onClick={() => navigate("/mural")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <Megaphone className="w-4 h-4 text-primary" strokeWidth={1.5} />
-              <span className="text-sm font-body text-muted-foreground">Avisos</span>
+              <Megaphone className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
+              <span className="font-body text-muted-foreground text-lg">Avisos</span>
             </div>
             <p className="text-2xl font-heading font-bold">{notices.length}</p>
           </button>
           <button onClick={() => navigate("/materiais")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors">
             <div className="flex items-center gap-2 mb-2 font-sans">
-              <Download className="w-4 h-4 text-primary" strokeWidth={1.5} />
-              <span className="text-sm font-body text-muted-foreground">Materiais</span>
+              <Download className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
+              <span className="font-body text-muted-foreground text-lg">Materiais</span>
             </div>
             <p className="text-2xl font-heading font-bold">{materials.length}</p>
           </button>
           <button onClick={() => navigate("/alunos")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors">
             <div className="flex items-center gap-2 mb-2">
-              <Users className="w-4 h-4 text-primary" strokeWidth={1.5} />
-              <span className="text-sm font-body text-muted-foreground">Alunos</span>
+              <Users className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
+              <span className="font-body text-muted-foreground text-lg">Alunos</span>
             </div>
             <p className="text-2xl font-heading font-bold">{studentCount}</p>
           </button>
