@@ -67,7 +67,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
                 "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"}`
                 }>
                 
-                <item.icon className="w-4 h-4" strokeWidth={1.5} />
+                <item.icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                 <span className="text-lg">{item.label}</span>
               </button>);
 
