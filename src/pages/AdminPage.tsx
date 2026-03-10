@@ -13,33 +13,33 @@ type Tab = "users" | "students" | "notices" | "materials" | "videos";
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("notices");
 
-  const tabs: { key: Tab; label: string }[] = [
-    { key: "notices", label: "Avisos" },
-    { key: "students", label: "Alunos" },
-    { key: "materials", label: "Materiais" },
-    { key: "videos", label: "Videoaulas" },
-    { key: "users", label: "Usuários" },
-  ];
+  const tabs: {key: Tab;label: string;}[] = [
+  { key: "notices", label: "Avisos" },
+  { key: "students", label: "Alunos" },
+  { key: "materials", label: "Materiais" },
+  { key: "videos", label: "Videoaulas" },
+  { key: "users", label: "Usuários" }];
+
 
   return (
     <AppLayout>
       <div className="max-w-4xl">
-        <h2 className="text-2xl font-heading font-bold mb-6">Painel Administrativo</h2>
+        <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Painel Administrativo</h2>
 
         <div className="flex gap-1 mb-6 border-b">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`px-4 py-2 text-sm font-body border-b-2 transition-colors ${
-                tab === t.key
-                  ? "border-primary text-primary font-medium"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
+          {tabs.map((t) =>
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`px-4 py-2 text-sm font-body border-b-2 transition-colors ${
+            tab === t.key ?
+            "border-primary text-primary font-medium" :
+            "border-transparent text-muted-foreground hover:text-foreground"}`
+            }>
+            
               {t.label}
             </button>
-          ))}
+          )}
         </div>
 
         {tab === "notices" && <AdminNotices />}
@@ -48,8 +48,8 @@ export default function AdminPage() {
         {tab === "videos" && <AdminVideos />}
         {tab === "users" && <AdminUsers />}
       </div>
-    </AppLayout>
-  );
+    </AppLayout>);
+
 }
 
 /* ───── Notices ───── */
@@ -64,7 +64,7 @@ function AdminNotices() {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
     if (data) setNotices(data);
   };
-  useEffect(() => { fetchNotices(); }, []);
+  useEffect(() => {fetchNotices();}, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,17 +74,17 @@ function AdminNotices() {
       content: content.trim(),
       author_id: user!.id,
       author_name: profile?.full_name || "",
-      is_pinned: pinned,
+      is_pinned: pinned
     });
-    if (error) { toast.error("Erro ao criar aviso."); return; }
+    if (error) {toast.error("Erro ao criar aviso.");return;}
     toast.success("Aviso criado.");
-    setTitle(""); setContent(""); setPinned(false);
+    setTitle("");setContent("");setPinned(false);
     fetchNotices();
   };
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("notices").delete().eq("id", id);
-    if (error) { toast.error("Erro ao excluir."); return; }
+    if (error) {toast.error("Erro ao excluir.");return;}
     toast.success("Aviso excluído.");
     fetchNotices();
   };
@@ -103,8 +103,8 @@ function AdminNotices() {
             value={content}
             onChange={(e) => setContent(e.target.value)}
             className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[100px] resize-y"
-            required
-          />
+            required />
+          
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
@@ -114,8 +114,8 @@ function AdminNotices() {
       </form>
 
       <div className="space-y-2">
-        {notices.map((n) => (
-          <div key={n.id} className="border bg-card p-4 flex items-start justify-between">
+        {notices.map((n) =>
+        <div key={n.id} className="border bg-card p-4 flex items-start justify-between">
             <div>
               <p className="text-sm font-heading font-medium">{n.title}</p>
               <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("pt-BR")}</p>
@@ -124,10 +124,10 @@ function AdminNotices() {
               <Trash2 className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 /* ───── Students ───── */
@@ -143,7 +143,7 @@ function AdminStudents() {
     const { data } = await supabase.from("students").select("*").order("class_name").order("call_number");
     if (data) setStudents(data);
   };
-  useEffect(() => { fetchStudents(); }, []);
+  useEffect(() => {fetchStudents();}, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,17 +153,17 @@ function AdminStudents() {
       call_number: callNumber ? parseInt(callNumber) : null,
       class_name: className.trim(),
       guardian_contact: guardianContact.trim() || null,
-      notes: notes.trim() || null,
+      notes: notes.trim() || null
     });
-    if (error) { toast.error("Erro ao cadastrar aluno."); return; }
+    if (error) {toast.error("Erro ao cadastrar aluno.");return;}
     toast.success("Aluno cadastrado.");
-    setFullName(""); setCallNumber(""); setClassName(""); setGuardianContact(""); setNotes("");
+    setFullName("");setCallNumber("");setClassName("");setGuardianContact("");setNotes("");
     fetchStudents();
   };
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("students").delete().eq("id", id);
-    if (error) { toast.error("Erro ao excluir."); return; }
+    if (error) {toast.error("Erro ao excluir.");return;}
     toast.success("Aluno excluído.");
     fetchStudents();
   };
@@ -195,15 +195,15 @@ function AdminStudents() {
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
-            className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y"
-          />
+            className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y" />
+          
         </div>
         <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Cadastrar</Button>
       </form>
 
       <div className="space-y-2">
-        {students.map((s) => (
-          <div key={s.id} className="border bg-card p-4 flex items-center justify-between">
+        {students.map((s) =>
+        <div key={s.id} className="border bg-card p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-body font-medium">{s.full_name}</p>
               <p className="text-xs text-muted-foreground">{s.class_name} · Nº {s.call_number ?? "—"}</p>
@@ -212,10 +212,10 @@ function AdminStudents() {
               <Trash2 className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 /* ───── Materials ───── */
@@ -231,7 +231,7 @@ function AdminMaterials() {
     const { data } = await supabase.from("materials").select("*").order("created_at", { ascending: false });
     if (data) setMaterials(data);
   };
-  useEffect(() => { fetchMaterials(); }, []);
+  useEffect(() => {fetchMaterials();}, []);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,7 +240,7 @@ function AdminMaterials() {
 
     const filePath = `${Date.now()}_${file.name}`;
     const { error: uploadError } = await supabase.storage.from("materials").upload(filePath, file);
-    if (uploadError) { toast.error("Erro no upload."); setUploading(false); return; }
+    if (uploadError) {toast.error("Erro no upload.");setUploading(false);return;}
 
     const { data: urlData } = supabase.storage.from("materials").getPublicUrl(filePath);
 
@@ -250,13 +250,13 @@ function AdminMaterials() {
       file_name: file.name,
       file_url: urlData.publicUrl,
       file_size: file.size,
-      uploaded_by: user!.id,
+      uploaded_by: user!.id
     });
 
     setUploading(false);
-    if (error) { toast.error("Erro ao registrar material."); return; }
+    if (error) {toast.error("Erro ao registrar material.");return;}
     toast.success("Material publicado.");
-    setTitle(""); setCategory("Geral"); setFile(null);
+    setTitle("");setCategory("Geral");setFile(null);
     fetchMaterials();
   };
 
@@ -265,7 +265,7 @@ function AdminMaterials() {
     const path = fileUrl.split("/materials/")[1];
     if (path) await supabase.storage.from("materials").remove([path]);
     const { error } = await supabase.from("materials").delete().eq("id", id);
-    if (error) { toast.error("Erro ao excluir."); return; }
+    if (error) {toast.error("Erro ao excluir.");return;}
     toast.success("Material excluído.");
     fetchMaterials();
   };
@@ -290,8 +290,8 @@ function AdminMaterials() {
             type="file"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
             className="mt-1 block w-full text-sm font-body"
-            required
-          />
+            required />
+          
         </div>
         <Button type="submit" size="sm" disabled={uploading}>
           <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
@@ -300,8 +300,8 @@ function AdminMaterials() {
       </form>
 
       <div className="space-y-2">
-        {materials.map((m) => (
-          <div key={m.id} className="border bg-card p-4 flex items-center justify-between">
+        {materials.map((m) =>
+        <div key={m.id} className="border bg-card p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-body font-medium">{m.title}</p>
               <p className="text-xs text-muted-foreground">{m.category} · {m.file_name}</p>
@@ -310,10 +310,10 @@ function AdminMaterials() {
               <Trash2 className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 /* ───── Videos ───── */
@@ -329,7 +329,7 @@ function AdminVideos() {
     const { data } = await supabase.from("video_lessons").select("*").order("created_at", { ascending: false });
     if (data) setVideos(data);
   };
-  useEffect(() => { fetchVideos(); }, []);
+  useEffect(() => {fetchVideos();}, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -339,17 +339,17 @@ function AdminVideos() {
       description: description.trim() || null,
       video_url: videoUrl.trim(),
       category: category.trim(),
-      created_by: user!.id,
+      created_by: user!.id
     });
-    if (error) { toast.error("Erro ao adicionar videoaula."); return; }
+    if (error) {toast.error("Erro ao adicionar videoaula.");return;}
     toast.success("Videoaula adicionada.");
-    setTitle(""); setDescription(""); setVideoUrl(""); setCategory("Geral");
+    setTitle("");setDescription("");setVideoUrl("");setCategory("Geral");
     fetchVideos();
   };
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("video_lessons").delete().eq("id", id);
-    if (error) { toast.error("Erro ao excluir."); return; }
+    if (error) {toast.error("Erro ao excluir.");return;}
     toast.success("Videoaula excluída.");
     fetchVideos();
   };
@@ -377,15 +377,15 @@ function AdminVideos() {
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y"
-          />
+            className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y" />
+          
         </div>
         <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Publicar</Button>
       </form>
 
       <div className="space-y-2">
-        {videos.map((v) => (
-          <div key={v.id} className="border bg-card p-4 flex items-center justify-between">
+        {videos.map((v) =>
+        <div key={v.id} className="border bg-card p-4 flex items-center justify-between">
             <div>
               <p className="text-sm font-body font-medium">{v.title}</p>
               <p className="text-xs text-muted-foreground">{v.category} · {new Date(v.created_at).toLocaleDateString("pt-BR")}</p>
@@ -394,10 +394,10 @@ function AdminVideos() {
               <Trash2 className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
 
 /* ───── Users ───── */
@@ -413,7 +413,7 @@ function AdminUsers() {
     const { data } = await supabase.from("profiles").select("*, user_roles(role)");
     if (data) setUsers(data);
   };
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => {fetchUsers();}, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -424,7 +424,7 @@ function AdminUsers() {
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password: password.trim(),
-      options: { data: { full_name: fullName.trim() } },
+      options: { data: { full_name: fullName.trim() } }
     });
 
     if (signUpError || !signUpData.user) {
@@ -436,7 +436,7 @@ function AdminUsers() {
     // Assign role
     const { error: roleError } = await supabase.from("user_roles").insert({
       user_id: signUpData.user.id,
-      role,
+      role
     });
 
     setCreating(false);
@@ -445,7 +445,7 @@ function AdminUsers() {
     } else {
       toast.success("Usuário criado com sucesso.");
     }
-    setEmail(""); setPassword(""); setFullName("");
+    setEmail("");setPassword("");setFullName("");
     fetchUsers();
   };
 
@@ -471,8 +471,8 @@ function AdminUsers() {
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as "admin" | "leader")}
-              className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10"
-            >
+              className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10">
+              
               <option value="leader">Líder de Classe</option>
               <option value="admin">Administrador</option>
             </select>
@@ -485,15 +485,15 @@ function AdminUsers() {
       </form>
 
       <div className="space-y-2">
-        {users.map((u) => (
-          <div key={u.id} className="border bg-card p-4">
+        {users.map((u) =>
+        <div key={u.id} className="border bg-card p-4">
             <p className="text-sm font-body font-medium">{u.full_name}</p>
             <p className="text-xs text-muted-foreground">
               {(u.user_roles as any[])?.map((r: any) => r.role === "admin" ? "Administrador" : "Líder").join(", ") || "Sem papel"}
             </p>
           </div>
-        ))}
+        )}
       </div>
-    </div>
-  );
+    </div>);
+
 }
