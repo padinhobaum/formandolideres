@@ -36,32 +36,32 @@ export default function MaterialsPage() {
   };
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 
   return (
     <AppLayout>
       <div className="max-w-3xl">
-        <h2 className="text-2xl font-heading font-bold mb-6">Biblioteca de Materiais</h2>
+        <h2 className="font-heading font-bold mb-6 text-accent text-4xl">Biblioteca de Materiais</h2>
 
         <div className="mb-6">
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="border bg-card px-3 py-2 text-sm font-body rounded"
-          >
+            className="border bg-card px-3 py-2 text-sm font-body rounded">
+            
             <option value="">Todas as categorias</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
+            {categories.map((c) =>
+            <option key={c} value={c}>{c}</option>
+            )}
           </select>
         </div>
 
-        {filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum material disponível.</p>
-        ) : (
-          <div className="space-y-2">
-            {filtered.map((m) => (
-              <div key={m.id} className="border bg-card p-4 flex items-center gap-4">
+        {filtered.length === 0 ?
+        <p className="text-sm text-muted-foreground">Nenhum material disponível.</p> :
+
+        <div className="space-y-2">
+            {filtered.map((m) =>
+          <div key={m.id} className="border bg-card p-4 flex items-center gap-4">
                 <FileText className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-body font-medium truncate">{m.title}</p>
@@ -71,19 +71,19 @@ export default function MaterialsPage() {
                   </p>
                 </div>
                 <a
-                  href={m.file_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-sm text-primary hover:underline flex-shrink-0"
-                >
+              href={m.file_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1 text-sm text-primary hover:underline flex-shrink-0">
+              
                   <Download className="w-4 h-4" strokeWidth={1.5} />
                   <span className="hidden sm:inline">Baixar</span>
                 </a>
               </div>
-            ))}
+          )}
           </div>
-        )}
+        }
       </div>
-    </AppLayout>
-  );
+    </AppLayout>);
+
 }
