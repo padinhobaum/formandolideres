@@ -48,9 +48,9 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-56 border-r bg-card min-h-screen">
-        <div className="p-5 border-b">
-          <h1 className="text-lg font-bold tracking-tight font-sans">Portal Escolar</h1>
+      <aside className="hidden md:flex flex-col w-56 border-r bg-sidebar text-sidebar-foreground min-h-screen">
+        <div className="p-5 border-b border-sidebar-border">
+          <h1 className="text-lg font-bold tracking-tight font-heading text-sidebar-foreground">Formando Líderes</h1>
         </div>
 
         <nav className="flex-1 p-3">
