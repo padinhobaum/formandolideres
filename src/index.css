@@ -6,48 +6,48 @@
 
 @layer base {
   :root {
-    /* Cinza Concreto - superfície de trabalho */
-    --background: 0 0% 96%;
-    --foreground: 0 0% 12%;
+    --background: 210 20% 97%;
+    --foreground: 210 30% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 12%;
+    --card-foreground: 210 30% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 12%;
+    --popover-foreground: 210 30% 15%;
 
-    /* Azul Institucional */
-    --primary: 210 100% 30%;
-    --primary-foreground: 0 0% 96%;
+    /* Azul Formando Líderes */
+    --primary: 207 100% 27%;
+    --primary-foreground: 0 0% 100%;
 
-    /* Azul Pálido */
-    --secondary: 213 100% 93%;
-    --secondary-foreground: 0 0% 12%;
+    /* Azul Claro */
+    --secondary: 207 60% 92%;
+    --secondary-foreground: 207 100% 27%;
 
-    --muted: 0 0% 92%;
-    --muted-foreground: 0 0% 40%;
+    --muted: 210 15% 92%;
+    --muted-foreground: 210 10% 45%;
 
-    --accent: 213 100% 93%;
-    --accent-foreground: 0 0% 12%;
+    /* Verde Formando Líderes */
+    --accent: 145 65% 33%;
+    --accent-foreground: 0 0% 100%;
 
     /* Vermelho Segurança */
-    --destructive: 1 79% 55%;
-    --destructive-foreground: 0 0% 96%;
+    --destructive: 1 79% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 0 0% 12%;
-    --input: 0 0% 80%;
-    --ring: 210 100% 30%;
+    --border: 210 15% 85%;
+    --input: 210 15% 80%;
+    --ring: 207 100% 27%;
 
-    --radius: 0.25rem;
+    --radius: 0.375rem;
 
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 0 0% 12%;
-    --sidebar-primary: 210 100% 30%;
-    --sidebar-primary-foreground: 0 0% 96%;
-    --sidebar-accent: 213 100% 93%;
-    --sidebar-accent-foreground: 0 0% 12%;
-    --sidebar-border: 0 0% 12%;
-    --sidebar-ring: 210 100% 30%;
+    --sidebar-background: 207 100% 22%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 145 65% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 207 80% 32%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 207 80% 30%;
+    --sidebar-ring: 145 65% 45%;
   }
 }
 

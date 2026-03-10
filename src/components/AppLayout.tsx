@@ -48,9 +48,9 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-56 border-r bg-card min-h-screen">
-        <div className="p-5 border-b">
-          <h1 className="text-lg font-bold tracking-tight font-sans">Portal Escolar</h1>
+      <aside className="hidden md:flex flex-col w-56 border-r bg-sidebar text-sidebar-foreground min-h-screen">
+        <div className="p-5 border-b border-sidebar-border">
+          <h1 className="text-lg font-bold tracking-tight font-heading text-sidebar-foreground">Formando Líderes</h1>
         </div>
 
         <nav className="flex-1 p-3">
@@ -62,8 +62,8 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body rounded transition-colors ${
                 active ?
-                "bg-secondary text-primary font-medium" :
-                "text-foreground hover:bg-secondary"}`
+                "bg-sidebar-accent text-sidebar-accent-foreground font-medium" :
+                "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"}`
                 }>
                 
                 <item.icon className="w-4 h-4" strokeWidth={1.5} />
@@ -73,19 +73,23 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
           })}
         </nav>
 
-        <div className="p-3 border-t">
+        <div className="p-3 border-t border-sidebar-border">
           <div className="flex items-center gap-3 px-3 py-2">
-            <UserInitials name={profile?.full_name || "U"} />
+            <div className="w-9 h-9 rounded-full bg-sidebar-primary flex items-center justify-center">
+              <span className="text-xs font-body font-semibold text-sidebar-primary-foreground">
+                {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+              </span>
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{profile?.full_name}</p>
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-sm font-medium truncate text-sidebar-foreground">{profile?.full_name}</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">
                 {isAdmin ? "Administrador" : "Líder de Classe"}
               </p>
             </div>
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-destructive hover:bg-destructive/10 rounded transition-colors mt-1">
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/60 hover:text-destructive hover:bg-sidebar-accent/50 rounded transition-colors mt-1">
             
             <LogOut className="w-4 h-4" strokeWidth={1.5} />
             <span>Sair</span>
@@ -97,7 +101,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       <main className="flex-1 pb-20 md:pb-0 overflow-y-auto">
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
-          <h1 className="text-base font-heading font-bold">Portal Escolar</h1>
+          <h1 className="text-base font-heading font-bold text-primary">Formando Líderes</h1>
           <div className="flex items-center gap-2">
             <UserInitials name={profile?.full_name || "U"} />
             <button onClick={handleSignOut}>
