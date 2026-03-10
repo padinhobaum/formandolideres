@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Trash2, Plus } from "lucide-react";
 
-type Tab = "users" | "students" | "notices" | "materials";
+type Tab = "users" | "students" | "notices" | "materials" | "videos";
 
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("notices");
@@ -17,6 +17,7 @@ export default function AdminPage() {
     { key: "notices", label: "Avisos" },
     { key: "students", label: "Alunos" },
     { key: "materials", label: "Materiais" },
+    { key: "videos", label: "Videoaulas" },
     { key: "users", label: "Usuários" },
   ];
 
@@ -44,6 +45,7 @@ export default function AdminPage() {
         {tab === "notices" && <AdminNotices />}
         {tab === "students" && <AdminStudents />}
         {tab === "materials" && <AdminMaterials />}
+        {tab === "videos" && <AdminVideos />}
         {tab === "users" && <AdminUsers />}
       </div>
     </AppLayout>
@@ -305,6 +307,90 @@ function AdminMaterials() {
               <p className="text-xs text-muted-foreground">{m.category} · {m.file_name}</p>
             </div>
             <button onClick={() => handleDelete(m.id, m.file_url)} className="text-destructive hover:text-destructive/80 p-1">
+              <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+            </button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ───── Videos ───── */
+function AdminVideos() {
+  const { user } = useAuth();
+  const [videos, setVideos] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
+  const [category, setCategory] = useState("Geral");
+
+  const fetchVideos = async () => {
+    const { data } = await supabase.from("video_lessons").select("*").order("created_at", { ascending: false });
+    if (data) setVideos(data);
+  };
+  useEffect(() => { fetchVideos(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !videoUrl.trim()) return;
+    const { error } = await supabase.from("video_lessons").insert({
+      title: title.trim(),
+      description: description.trim() || null,
+      video_url: videoUrl.trim(),
+      category: category.trim(),
+      created_by: user!.id,
+    });
+    if (error) { toast.error("Erro ao adicionar videoaula."); return; }
+    toast.success("Videoaula adicionada.");
+    setTitle(""); setDescription(""); setVideoUrl(""); setCategory("Geral");
+    fetchVideos();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("video_lessons").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir."); return; }
+    toast.success("Videoaula excluída.");
+    fetchVideos();
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3">
+        <h3 className="font-heading font-bold text-sm mb-2">Nova Videoaula</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-sm">Título</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
+          </div>
+          <div>
+            <Label className="text-sm">Categoria</Label>
+            <Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" />
+          </div>
+        </div>
+        <div>
+          <Label className="text-sm">URL do vídeo (YouTube ou Vimeo)</Label>
+          <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." required />
+        </div>
+        <div>
+          <Label className="text-sm">Descrição (opcional)</Label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y"
+          />
+        </div>
+        <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Publicar</Button>
+      </form>
+
+      <div className="space-y-2">
+        {videos.map((v) => (
+          <div key={v.id} className="border bg-card p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-body font-medium">{v.title}</p>
+              <p className="text-xs text-muted-foreground">{v.category} · {new Date(v.created_at).toLocaleDateString("pt-BR")}</p>
+            </div>
+            <button onClick={() => handleDelete(v.id)} className="text-destructive hover:text-destructive/80 p-1">
               <Trash2 className="w-4 h-4" strokeWidth={1.5} />
             </button>
           </div>

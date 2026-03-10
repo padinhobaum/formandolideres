@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { LayoutDashboard, Users, Download, Megaphone, Shield, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, Download, Megaphone, Shield, LogOut, Video } from "lucide-react";
 
 interface NavItem {
   label: string;
@@ -14,6 +14,7 @@ const navItems: NavItem[] = [
 { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
 { label: "Alunos", path: "/alunos", icon: Users },
 { label: "Materiais", path: "/materiais", icon: Download },
+{ label: "Videoaulas", path: "/videoaulas", icon: Video },
 { label: "Mural", path: "/mural", icon: Megaphone },
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
