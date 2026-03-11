@@ -49,6 +49,8 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_url: string | null
+          parent_reply_id: string | null
           topic_id: string
         }
         Insert: {
@@ -58,6 +60,8 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
+          parent_reply_id?: string | null
           topic_id: string
         }
         Update: {
@@ -67,9 +71,18 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
+          parent_reply_id?: string | null
           topic_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "forum_replies_parent_reply_id_fkey"
+            columns: ["parent_reply_id"]
+            isOneToOne: false
+            referencedRelation: "forum_replies"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "forum_replies_topic_id_fkey"
             columns: ["topic_id"]
@@ -87,6 +100,7 @@ export type Database = {
           content: string
           created_at: string
           id: string
+          image_url: string | null
           is_poll: boolean
           title: string
           updated_at: string
@@ -98,6 +112,7 @@ export type Database = {
           content: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_poll?: boolean
           title: string
           updated_at?: string
@@ -109,6 +124,7 @@ export type Database = {
           content?: string
           created_at?: string
           id?: string
+          image_url?: string | null
           is_poll?: boolean
           title?: string
           updated_at?: string
@@ -274,6 +290,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      reply_likes: {
+        Row: {
+          created_at: string
+          id: string
+          reply_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reply_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reply_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reply_likes_reply_id_fkey"
+            columns: ["reply_id"]
+            isOneToOne: false
+            referencedRelation: "forum_replies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       students: {
         Row: {
