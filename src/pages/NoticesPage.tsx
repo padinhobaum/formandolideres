@@ -131,17 +131,17 @@ export default function NoticesPage() {
       <>
           <div className="focus-overlay" onClick={() => setFocusedId(null)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-            <div className="focus-content max-w-2xl w-full p-8 pointer-events-auto max-h-[80vh] overflow-y-auto">
+            <div className="focus-content max-w-2xl w-full p-8 pointer-events-auto max-h-[80vh] overflow-y-auto rounded-xl">
               {focusedNotice.image_url &&
             <img
               src={focusedNotice.image_url}
               alt=""
-              className="w-full max-h-72 object-cover rounded mb-4" />
+              className="w-full max-h-72 rounded mb-4 object-contain" />
 
             }
               <div className="flex items-center gap-2 mb-4">
                 {focusedNotice.is_pinned && <Pin className="w-3 h-3 text-primary" strokeWidth={1.5} />}
-                <h2 className="text-xl font-heading font-bold">{focusedNotice.title}</h2>
+                <h2 className="font-heading font-bold text-2xl">{focusedNotice.title}</h2>
               </div>
               <p className="font-heading text-base leading-relaxed whitespace-pre-wrap mb-6">
                 {focusedNotice.content}
