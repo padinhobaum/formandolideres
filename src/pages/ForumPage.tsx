@@ -452,6 +452,19 @@ export default function ForumPage() {
 
             {/* Image attachment */}
             <div>
+              <Label className="text-sm">Categoria</Label>
+              <select
+                value={newCategoryId}
+                onChange={(e) => setNewCategoryId(e.target.value)}
+                className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10"
+              >
+                <option value="">Sem categoria</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
               <Label className="text-sm flex items-center gap-1">
                 <ImagePlus className="w-4 h-4" /> Imagem (opcional)
               </Label>
