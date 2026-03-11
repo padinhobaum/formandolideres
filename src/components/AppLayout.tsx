@@ -151,7 +151,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
         <div className="p-4 md:p-8 flex-1">{children}</div>
 
         {/* Footer */}
-        <footer className="border-t bg-sidebar text-sidebar-foreground py-8 px-6 md:px-10">
+        <footer className="border-t bg-card text-foreground py-8 px-6 md:px-10">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12">
             <div className="flex flex-col items-center md:items-start gap-3">
               <img
