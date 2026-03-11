@@ -216,27 +216,27 @@ export default function DashboardPage() {
               
                   <div className="relative aspect-video bg-muted">
                     {n.image_url ?
-                    <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" loading="lazy" /> :
-                    <div className="w-full h-full flex items-center justify-center">
+                <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" loading="lazy" /> :
+                <div className="w-full h-full flex items-center justify-center">
                       <Megaphone className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
                     </div>
-                    }
-                    {n.is_pinned && (
-                      <div className="absolute top-2 right-2 bg-primary/80 rounded-full p-1">
+                }
+                    {n.is_pinned &&
+                <div className="absolute top-2 right-2 bg-primary/80 rounded-full p-1">
                         <Pin className="w-3 h-3 text-primary-foreground" strokeWidth={2} />
                       </div>
-                    )}
+                }
                   </div>
                   <div className="p-3 flex flex-col flex-1">
-                    <h4 className="font-heading font-medium text-sm line-clamp-2">{n.title}</h4>
+                    <h4 className="font-heading line-clamp-2 font-bold text-primary text-base">{n.title}</h4>
                     <p className="text-xs text-muted-foreground mt-1">{n.author_name} · {formatDate(n.created_at)}</p>
                     <div className="mt-auto pt-2">
                       <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs"
-                        onClick={() => setSelectedNotice(n)}
-                      >
+                    variant="outline"
+                    size="sm"
+                    className="w-full text-xs"
+                    onClick={() => setSelectedNotice(n)}>
+                    
                         Ler aviso completo
                       </Button>
                     </div>
@@ -250,18 +250,18 @@ export default function DashboardPage() {
         {/* Modal de Aviso Completo */}
         <Dialog open={!!selectedNotice} onOpenChange={(open) => !open && setSelectedNotice(null)}>
           <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-            {selectedNotice && (
-              <>
+            {selectedNotice &&
+            <>
                 <DialogHeader>
                   <DialogTitle className="font-heading text-xl">{selectedNotice.title}</DialogTitle>
                   <p className="text-xs text-muted-foreground">{selectedNotice.author_name} · {formatDate(selectedNotice.created_at)}</p>
                 </DialogHeader>
-                {selectedNotice.image_url && (
-                  <img src={selectedNotice.image_url} alt={selectedNotice.title} className="w-full rounded-lg object-cover max-h-64" />
-                )}
+                {selectedNotice.image_url &&
+              <img src={selectedNotice.image_url} alt={selectedNotice.title} className="w-full rounded-lg object-cover max-h-64" />
+              }
                 <div className="text-sm whitespace-pre-wrap leading-relaxed">{selectedNotice.content}</div>
               </>
-            )}
+            }
           </DialogContent>
         </Dialog>
 
