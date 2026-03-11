@@ -99,9 +99,9 @@ export default function DashboardPage() {
 
         {/* Videoaulas Recentes */}
         <section className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-heading font-bold text-2xl">Videoaulas Recentes</h3>
-            <button onClick={() => navigate("/videoaulas")} className="text-xs text-primary hover:underline font-body">
+          <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-accent rounded-xl">
+            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Videoaulas Recentes</h3>
+            <button onClick={() => navigate("/videoaulas")} className="text-xs hover:underline font-body text-primary-foreground">
               Ver todas
             </button>
           </div>
