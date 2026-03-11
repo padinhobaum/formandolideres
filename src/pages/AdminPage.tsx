@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Trash2, Plus, GripVertical, ExternalLink, Image as ImageIcon } from "lucide-react";
 
-type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links";
+type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories";
 
 interface CtaButton {
   text: string;
