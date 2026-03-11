@@ -100,7 +100,7 @@ export default function DashboardPage() {
         {/* Videoaulas Recentes */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-heading font-bold">Videoaulas Recentes</h3>
+            <h3 className="font-heading font-bold text-2xl">Videoaulas Recentes</h3>
             <button onClick={() => navigate("/videoaulas")} className="text-xs text-primary hover:underline font-body">
               Ver todas
             </button>
@@ -151,7 +151,7 @@ export default function DashboardPage() {
 
         {/* Pinned / latest notices */}
         <section className="mb-8">
-          <h3 className="text-lg font-heading font-bold mb-3">Últimos Avisos</h3>
+          <h3 className="font-heading font-bold mb-3 text-2xl">Últimos Avisos</h3>
           {notices.length === 0 ?
           <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
 
@@ -180,7 +180,7 @@ export default function DashboardPage() {
 
         {/* Latest materials */}
         <section>
-          <h3 className="text-lg font-heading font-bold mb-3">Materiais Recentes</h3>
+          <h3 className="font-heading font-bold mb-3 text-2xl">Materiais Recentes</h3>
           {materials.length === 0 ?
           <p className="text-sm text-muted-foreground">Nenhum material disponível.</p> :
 
