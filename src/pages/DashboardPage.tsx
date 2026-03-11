@@ -12,6 +12,7 @@ interface Notice {
   author_name: string;
   is_pinned: boolean;
   created_at: string;
+  image_url: string | null;
 }
 
 interface Material {
