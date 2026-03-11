@@ -144,7 +144,12 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
           <img src={logoImg} alt="Formando Líderes" className="h-8 w-auto" />
           <div className="flex items-center gap-2">
-            <UserInitials name={profile?.full_name || "U"} />
+            <Avatar className="w-9 h-9">
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="text-xs font-body font-semibold bg-foreground text-background">
+                {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <button onClick={handleSignOut}>
               <LogOut className="w-4 h-4 text-destructive" strokeWidth={1.5} />
             </button>
