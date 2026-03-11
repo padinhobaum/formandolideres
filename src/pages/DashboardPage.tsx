@@ -86,7 +86,7 @@ export default function DashboardPage() {
               <Download className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
               <span className="font-body text-muted-foreground text-lg">Materiais</span>
             </div>
-            <p className="text-2xl font-heading font-bold">{materials.length}</p>
+            <p className="font-heading font-bold text-primary text-3xl">{materials.length}</p>
           </button>
           <button onClick={() => navigate("/alunos")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors">
             <div className="flex items-center gap-2 mb-2">
