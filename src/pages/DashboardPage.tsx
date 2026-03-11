@@ -131,7 +131,7 @@ export default function DashboardPage() {
                         </div>
                     }
                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-accent">
+                        <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                           <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />
                         </div>
                       </div>
