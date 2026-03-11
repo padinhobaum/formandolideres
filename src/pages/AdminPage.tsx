@@ -609,7 +609,7 @@ function AdminUsers() {
           <div key={u.id} className="border bg-card p-4">
             <p className="text-sm font-body font-medium">{u.full_name}</p>
             <p className="text-xs text-muted-foreground">
-              {(u.user_roles as any[])?.map((r: any) => r.role === "admin" ? "Administrador" : "Líder").join(", ") || "Sem papel"}
+              {(u.roles as string[])?.map((r: string) => r === "admin" ? "Administrador" : "Líder").join(", ") || "Sem papel"}
             </p>
           </div>
         ))}
