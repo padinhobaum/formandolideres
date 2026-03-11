@@ -92,10 +92,15 @@ export default function ForumPage() {
     return data.publicUrl;
   };
 
+  const fetchCategories = async () => {
+    const { data } = await supabase.from("forum_categories").select("*").order("sort_order");
+    if (data) setCategories(data as ForumCategory[]);
+  };
+
   const fetchTopics = async () => {
     const { data } = await supabase
       .from("forum_topics")
-      .select("*")
+      .select("*, forum_categories(name)")
       .order("created_at", { ascending: false });
     if (!data) return;
 
@@ -110,7 +115,11 @@ export default function ForumPage() {
       countMap[r.topic_id] = (countMap[r.topic_id] || 0) + 1;
     });
 
-    setTopics(data.map((t: any) => ({ ...t, reply_count: countMap[t.id] || 0 })));
+    setTopics(data.map((t: any) => ({
+      ...t,
+      reply_count: countMap[t.id] || 0,
+      category_name: t.forum_categories?.name || null,
+    })));
   };
 
   const fetchOnlineUsers = async () => {
