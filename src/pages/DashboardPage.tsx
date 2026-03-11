@@ -189,7 +189,7 @@ export default function DashboardPage() {
             <button
               key={m.id}
               onClick={() => navigate("/materiais")}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors">
+              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
               
                   <div className="flex items-center justify-between">
                     <span className="font-body text-sm">{m.title}</span>
