@@ -48,7 +48,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-sidebar-border">
       <div className="w-full max-w-sm">
-        <div className="border bg-card p-8 shadow-sm px-[32px] rounded-lg">
+        <div className="border bg-card p-8 shadow-sm px-[32px] rounded-xl">
           <div className="flex justify-center mb-6">
             <img alt="Formando Líderes" className="h-14 w-auto" src="/lovable-uploads/d52473b9-ea3a-4883-9166-d1045f638583.png" />
           </div>
