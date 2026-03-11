@@ -527,7 +527,7 @@ export default function ForumPage() {
           <p className="text-sm text-muted-foreground">Nenhum tópico ainda. Seja o primeiro a criar!</p>
         ) : (
           <div className="space-y-3">
-            {topics.map((topic) => {
+            {topics.filter((t) => selectedCategoryFilter === "all" || t.category_id === selectedCategoryFilter).map((topic) => {
               const isExpanded = expandedTopicId === topic.id;
               const { topLevel, childrenMap } = getThreadedReplies(topic.id);
               const topicPoll = pollData[topic.id] || [];
