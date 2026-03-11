@@ -75,6 +75,9 @@ export default function ForumPage() {
   const [showNewTopic, setShowNewTopic] = useState(false);
   const [categories, setCategories] = useState<ForumCategory[]>([]);
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
+
+  // New topic form
+  const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
   const [newImage, setNewImage] = useState<File | null>(null);
   const [isPoll, setIsPoll] = useState(false);
