@@ -115,7 +115,7 @@ export default function DashboardPage() {
                 <button
                   key={v.id}
                   onClick={() => navigate("/videoaulas")}
-                  className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group">
+                  className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
                   
                     <div className="relative aspect-video bg-muted">
                       {thumbnail ?
