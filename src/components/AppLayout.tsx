@@ -31,7 +31,7 @@ const navItems: NavItem[] = [
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
 
-}
+
 
 export default function AppLayout({ children }: {children: ReactNode;}) {
   const { profile, isAdmin, signOut } = useAuth();
