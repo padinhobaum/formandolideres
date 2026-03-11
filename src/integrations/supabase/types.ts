@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      custom_links: {
+        Row: {
+          created_at: string
+          icon_url: string | null
+          id: string
+          label: string
+          sort_order: number
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          icon_url?: string | null
+          id?: string
+          label: string
+          sort_order?: number
+          url: string
+        }
+        Update: {
+          created_at?: string
+          icon_url?: string | null
+          id?: string
+          label?: string
+          sort_order?: number
+          url?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           category: string
@@ -53,7 +80,9 @@ export type Database = {
           author_name: string
           content: string
           created_at: string
+          cta_buttons: Json | null
           id: string
+          image_url: string | null
           is_pinned: boolean
           title: string
           updated_at: string
@@ -63,7 +92,9 @@ export type Database = {
           author_name?: string
           content: string
           created_at?: string
+          cta_buttons?: Json | null
           id?: string
+          image_url?: string | null
           is_pinned?: boolean
           title: string
           updated_at?: string
@@ -73,7 +104,9 @@ export type Database = {
           author_name?: string
           content?: string
           created_at?: string
+          cta_buttons?: Json | null
           id?: string
+          image_url?: string | null
           is_pinned?: boolean
           title?: string
           updated_at?: string

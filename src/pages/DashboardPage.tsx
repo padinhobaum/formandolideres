@@ -12,6 +12,7 @@ interface Notice {
   author_name: string;
   is_pinned: boolean;
   created_at: string;
+  image_url: string | null;
 }
 
 interface Material {
@@ -50,7 +51,7 @@ export default function DashboardPage() {
         supabase.from("students").select("id", { count: "exact", head: true }),
         supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4),
       ]);
-      if (noticesRes.data) setNotices(noticesRes.data);
+      if (noticesRes.data) setNotices(noticesRes.data as Notice[]);
       if (materialsRes.data) setMaterials(materialsRes.data);
       if (studentsRes.count !== null) setStudentCount(studentsRes.count);
       if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
@@ -161,10 +162,15 @@ export default function DashboardPage() {
                   onClick={() => navigate("/mural")}
                   className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors"
                 >
-                  <div className="flex items-center gap-2">
-                    {n.is_pinned && <Pin className="w-3 h-3 text-primary" strokeWidth={1.5} />}
-                    <span className="font-heading font-medium text-sm">{n.title}</span>
-                    <span className="ml-auto text-xs text-muted-foreground">{formatDate(n.created_at)}</span>
+                  <div className="flex items-center gap-3">
+                    {n.image_url && (
+                      <img src={n.image_url} alt="" className="w-10 h-10 object-cover rounded flex-shrink-0" loading="lazy" />
+                    )}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {n.is_pinned && <Pin className="w-3 h-3 text-primary flex-shrink-0" strokeWidth={1.5} />}
+                      <span className="font-heading font-medium text-sm truncate">{n.title}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground flex-shrink-0">{formatDate(n.created_at)}</span>
                   </div>
                 </button>
               ))}
