@@ -151,25 +151,25 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
         <div className="p-4 md:p-8 flex-1">{children}</div>
 
         {/* Footer */}
-        <footer className="border-t bg-sidebar text-sidebar-foreground py-8 px-6 md:px-10">
+        <footer className="border-t bg-card text-foreground py-8 px-6 md:px-10">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12">
             <div className="flex flex-col items-center md:items-start gap-3">
               <img
                 src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png"
                 alt="Formando Líderes"
-                className="h-10 w-auto brightness-0 invert"
+                className="h-10 w-auto"
               />
               <a
                 href="https://www.formandolideres.com.br"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors underline underline-offset-2"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
               >
                 www.formandolideres.com.br
               </a>
             </div>
             <div className="flex-1" />
-            <p className="text-xs text-sidebar-foreground/50 text-center md:text-right mt-2 md:mt-auto">
+            <p className="text-xs text-muted-foreground text-center md:text-right mt-2 md:mt-auto">
               © {new Date().getFullYear()} Formando Líderes – Todos os direitos reservados.
             </p>
           </div>
