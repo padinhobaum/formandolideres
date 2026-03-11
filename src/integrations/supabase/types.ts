@@ -41,6 +41,80 @@ export type Database = {
         }
         Relationships: []
       }
+      forum_replies: {
+        Row: {
+          author_avatar_url: string | null
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          topic_id: string
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_id: string
+          author_name?: string
+          content: string
+          created_at?: string
+          id?: string
+          topic_id: string
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "forum_replies_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      forum_topics: {
+        Row: {
+          author_avatar_url: string | null
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          is_poll: boolean
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_id: string
+          author_name?: string
+          content: string
+          created_at?: string
+          id?: string
+          is_poll?: boolean
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_poll?: boolean
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           category: string
@@ -113,8 +187,67 @@ export type Database = {
         }
         Relationships: []
       }
+      poll_options: {
+        Row: {
+          id: string
+          label: string
+          sort_order: number
+          topic_id: string
+        }
+        Insert: {
+          id?: string
+          label: string
+          sort_order?: number
+          topic_id: string
+        }
+        Update: {
+          id?: string
+          label?: string
+          sort_order?: number
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_options_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "forum_topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "poll_votes_option_id_fkey"
+            columns: ["option_id"]
+            isOneToOne: false
+            referencedRelation: "poll_options"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          avatar_url: string | null
           class_name: string | null
           created_at: string
           full_name: string
@@ -123,6 +256,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          avatar_url?: string | null
           class_name?: string | null
           created_at?: string
           full_name?: string
@@ -131,6 +265,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          avatar_url?: string | null
           class_name?: string | null
           created_at?: string
           full_name?: string
@@ -170,6 +305,24 @@ export type Database = {
           id?: string
           notes?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_presence: {
+        Row: {
+          is_online: boolean
+          last_seen: string
+          user_id: string
+        }
+        Insert: {
+          is_online?: boolean
+          last_seen?: string
+          user_id: string
+        }
+        Update: {
+          is_online?: boolean
+          last_seen?: string
+          user_id?: string
         }
         Relationships: []
       }
