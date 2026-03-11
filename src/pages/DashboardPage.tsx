@@ -153,7 +153,7 @@ export default function DashboardPage() {
         <section className="mb-8 px-[20px] py-[20px] rounded-xl bg-primary">
           <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Últimos Avisos</h3>
           {notices.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
+          <p className="text-sm text-primary-foreground">Nenhum aviso publicado.</p> :
 
           <div className="space-y-2">
               {notices.map((n) =>
