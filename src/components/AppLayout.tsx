@@ -42,6 +42,7 @@ function UserInitials({ name }: {name: string;}) {
 
 export default function AppLayout({ children }: {children: ReactNode;}) {
   const { profile, isAdmin, signOut } = useAuth();
+  usePresence();
   const navigate = useNavigate();
   const location = useLocation();
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
