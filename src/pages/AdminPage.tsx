@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Trash2, Plus, GripVertical, ExternalLink, Image as ImageIcon } from "lucide-react";
+import { Trash2, Plus, GripVertical, ExternalLink, Image as ImageIcon, Pencil } from "lucide-react";
 
-type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links";
+type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories";
 
 interface CtaButton {
   text: string;
@@ -24,6 +24,7 @@ export default function AdminPage() {
     { key: "students", label: "Alunos" },
     { key: "materials", label: "Materiais" },
     { key: "videos", label: "Videoaulas" },
+    { key: "forum-categories", label: "Categorias Fórum" },
     { key: "links", label: "Links Menu" },
     { key: "users", label: "Usuários" },
   ];
@@ -54,6 +55,7 @@ export default function AdminPage() {
         {tab === "materials" && <AdminMaterials />}
         {tab === "videos" && <AdminVideos />}
         {tab === "links" && <AdminLinks />}
+        {tab === "forum-categories" && <AdminForumCategories />}
         {tab === "users" && <AdminUsers />}
       </div>
     </AppLayout>
@@ -613,6 +615,119 @@ function AdminUsers() {
             </p>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/* ───── Forum Categories ───── */
+function AdminForumCategories() {
+  const [categories, setCategories] = useState<any[]>([]);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+
+  const fetchCategories = async () => {
+    const { data } = await supabase.from("forum_categories").select("*").order("sort_order");
+    if (data) setCategories(data);
+  };
+  useEffect(() => { fetchCategories(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    const maxOrder = categories.length > 0 ? Math.max(...categories.map((c) => c.sort_order)) + 1 : 0;
+    const { error } = await supabase.from("forum_categories").insert({
+      name: name.trim(),
+      description: description.trim() || null,
+      sort_order: maxOrder,
+    } as any);
+    if (error) { toast.error("Erro ao criar categoria."); return; }
+    toast.success("Categoria criada.");
+    setName(""); setDescription("");
+    fetchCategories();
+  };
+
+  const handleUpdate = async (id: string) => {
+    if (!editName.trim()) return;
+    const { error } = await supabase.from("forum_categories").update({
+      name: editName.trim(),
+      description: editDescription.trim() || null,
+    } as any).eq("id", id);
+    if (error) { toast.error("Erro ao atualizar."); return; }
+    toast.success("Categoria atualizada.");
+    setEditingId(null);
+    fetchCategories();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("forum_categories").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir."); return; }
+    toast.success("Categoria excluída.");
+    fetchCategories();
+  };
+
+  const startEdit = (cat: any) => {
+    setEditingId(cat.id);
+    setEditName(cat.name);
+    setEditDescription(cat.description || "");
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3">
+        <h3 className="font-heading font-bold text-sm mb-2">Nova Categoria do Fórum</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-sm">Nome</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" required />
+          </div>
+          <div>
+            <Label className="text-sm">Descrição (opcional)</Label>
+            <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" />
+          </div>
+        </div>
+        <Button type="submit" size="sm">
+          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
+          Criar Categoria
+        </Button>
+      </form>
+
+      <div className="space-y-2">
+        {categories.map((cat) => (
+          <div key={cat.id} className="border bg-card p-4">
+            {editingId === cat.id ? (
+              <div className="space-y-2">
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nome" className="h-8 text-sm" />
+                <Input value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Descrição" className="h-8 text-sm" />
+                <div className="flex gap-2">
+                  <Button size="sm" onClick={() => handleUpdate(cat.id)}>Salvar</Button>
+                  <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-body font-medium">{cat.name}</p>
+                  {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
+                </div>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => startEdit(cat)} className="text-muted-foreground hover:text-foreground p-1">
+                    <Pencil className="w-4 h-4" strokeWidth={1.5} />
+                  </button>
+                  <button onClick={() => handleDelete(cat.id)} className="text-destructive hover:text-destructive/80 p-1">
+                    <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        {categories.length === 0 && (
+          <p className="text-sm text-muted-foreground">Nenhuma categoria criada ainda.</p>
+        )}
       </div>
     </div>
   );

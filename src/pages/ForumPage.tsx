@@ -9,8 +9,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import {
-  MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X
+  MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter
 } from "lucide-react";
+
+interface ForumCategory {
+  id: string;
+  name: string;
+  description: string | null;
+}
 
 interface ForumTopic {
   id: string;
@@ -21,6 +27,8 @@ interface ForumTopic {
   author_avatar_url: string | null;
   image_url: string | null;
   is_poll: boolean;
+  category_id: string | null;
+  category_name?: string;
   created_at: string;
   reply_count?: number;
 }
@@ -65,6 +73,8 @@ export default function ForumPage() {
   const [replyImage, setReplyImage] = useState<File | null>(null);
   const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
   const [showNewTopic, setShowNewTopic] = useState(false);
+  const [categories, setCategories] = useState<ForumCategory[]>([]);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
 
   // New topic form
   const [newTitle, setNewTitle] = useState("");
@@ -72,6 +82,7 @@ export default function ForumPage() {
   const [newImage, setNewImage] = useState<File | null>(null);
   const [isPoll, setIsPoll] = useState(false);
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [newCategoryId, setNewCategoryId] = useState<string>("");
 
   const uploadImage = async (file: File): Promise<string | null> => {
     const path = `${user!.id}/${Date.now()}_${file.name}`;
@@ -81,10 +92,15 @@ export default function ForumPage() {
     return data.publicUrl;
   };
 
+  const fetchCategories = async () => {
+    const { data } = await supabase.from("forum_categories").select("*").order("sort_order");
+    if (data) setCategories(data as ForumCategory[]);
+  };
+
   const fetchTopics = async () => {
     const { data } = await supabase
       .from("forum_topics")
-      .select("*")
+      .select("*, forum_categories(name)")
       .order("created_at", { ascending: false });
     if (!data) return;
 
@@ -99,7 +115,11 @@ export default function ForumPage() {
       countMap[r.topic_id] = (countMap[r.topic_id] || 0) + 1;
     });
 
-    setTopics(data.map((t: any) => ({ ...t, reply_count: countMap[t.id] || 0 })));
+    setTopics(data.map((t: any) => ({
+      ...t,
+      reply_count: countMap[t.id] || 0,
+      category_name: t.forum_categories?.name || null,
+    })));
   };
 
   const fetchOnlineUsers = async () => {
@@ -126,6 +146,7 @@ export default function ForumPage() {
 
   useEffect(() => {
     fetchTopics();
+    fetchCategories();
     fetchOnlineUsers();
 
     const channel = supabase
@@ -155,6 +176,7 @@ export default function ForumPage() {
       author_avatar_url: profile?.avatar_url || null,
       is_poll: isPoll,
       image_url: imageUrl,
+      category_id: newCategoryId || null,
     } as any).select().single();
 
     if (error) { toast.error("Erro ao criar tópico."); return; }
@@ -173,7 +195,7 @@ export default function ForumPage() {
     }
 
     toast.success("Tópico criado!");
-    setNewTitle(""); setNewContent(""); setNewImage(null); setIsPoll(false); setPollOptions(["", ""]); setShowNewTopic(false);
+    setNewTitle(""); setNewContent(""); setNewImage(null); setIsPoll(false); setPollOptions(["", ""]); setNewCategoryId(""); setShowNewTopic(false);
     fetchTopics();
   };
 
@@ -392,12 +414,27 @@ export default function ForumPage() {
           )}
         </section>
 
-        {/* New Topic Button */}
-        <div className="mb-4">
+        {/* New Topic Button + Category Filter */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           <Button onClick={() => setShowNewTopic(!showNewTopic)} size="sm">
             <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
             Novo Tópico
           </Button>
+          {categories.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="border bg-background px-2 py-1.5 text-sm font-body rounded h-9"
+              >
+                <option value="all">Todas as categorias</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* New Topic Form */}
@@ -414,6 +451,19 @@ export default function ForumPage() {
             </div>
 
             {/* Image attachment */}
+            <div>
+              <Label className="text-sm">Categoria</Label>
+              <select
+                value={newCategoryId}
+                onChange={(e) => setNewCategoryId(e.target.value)}
+                className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10"
+              >
+                <option value="">Sem categoria</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
             <div>
               <Label className="text-sm flex items-center gap-1">
                 <ImagePlus className="w-4 h-4" /> Imagem (opcional)
@@ -477,7 +527,7 @@ export default function ForumPage() {
           <p className="text-sm text-muted-foreground">Nenhum tópico ainda. Seja o primeiro a criar!</p>
         ) : (
           <div className="space-y-3">
-            {topics.map((topic) => {
+            {topics.filter((t) => selectedCategoryFilter === "all" || t.category_id === selectedCategoryFilter).map((topic) => {
               const isExpanded = expandedTopicId === topic.id;
               const { topLevel, childrenMap } = getThreadedReplies(topic.id);
               const topicPoll = pollData[topic.id] || [];
@@ -498,8 +548,13 @@ export default function ForumPage() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-heading font-bold text-sm">{topic.title}</h4>
+                          {topic.category_name && (
+                            <span className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded font-body">
+                              {topic.category_name}
+                            </span>
+                          )}
                           {topic.is_poll && (
                             <span className="text-[10px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded font-body">
                               Enquete
