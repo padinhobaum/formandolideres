@@ -47,6 +47,7 @@ export default function DashboardPage() {
   const [onlineCount, setOnlineCount] = useState(0);
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
