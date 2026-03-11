@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
-import { Megaphone, Download, Users, Pin } from "lucide-react";
+import { Megaphone, Download, Users, Pin, Play, Video } from "lucide-react";
 
 interface Notice {
   id: string;
@@ -21,29 +21,45 @@ interface Material {
   created_at: string;
 }
 
+interface VideoLesson {
+  id: string;
+  title: string;
+  video_url: string;
+  category: string;
+  created_at: string;
+}
+
+function getYouTubeThumbnail(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
+}
+
 export default function DashboardPage() {
   const { profile, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
   const [studentCount, setStudentCount] = useState(0);
+  const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [noticesRes, materialsRes, studentsRes] = await Promise.all([
-      supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
-      supabase.from("materials").select("id, title, category, created_at").order("created_at", { ascending: false }).limit(5),
-      supabase.from("students").select("id", { count: "exact", head: true })]
-      );
+      const [noticesRes, materialsRes, studentsRes, videosRes] = await Promise.all([
+        supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
+        supabase.from("materials").select("id, title, category, created_at").order("created_at", { ascending: false }).limit(5),
+        supabase.from("students").select("id", { count: "exact", head: true }),
+        supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4),
+      ]);
       if (noticesRes.data) setNotices(noticesRes.data);
       if (materialsRes.data) setMaterials(materialsRes.data);
       if (studentsRes.count !== null) setStudentCount(studentsRes.count);
+      if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
     };
     fetchData();
   }, []);
 
   const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 
   return (
     <AppLayout>
@@ -80,53 +96,105 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        {/* Videoaulas Recentes */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-heading font-bold">Videoaulas Recentes</h3>
+            <button onClick={() => navigate("/videoaulas")} className="text-xs text-primary hover:underline font-body">
+              Ver todas
+            </button>
+          </div>
+          {videoLessons.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {videoLessons.map((v) => {
+                const thumbnail = getYouTubeThumbnail(v.video_url);
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => navigate("/videoaulas")}
+                    className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group"
+                  >
+                    <div className="relative aspect-video bg-muted">
+                      {thumbnail ? (
+                        <img
+                          src={thumbnail}
+                          alt={v.title}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <Video className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
+                        </div>
+                      )}
+                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
+                        <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3">
+                      <h4 className="font-heading font-medium text-sm line-clamp-1">{v.title}</h4>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {v.category} · {formatDate(v.created_at)}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
         {/* Pinned / latest notices */}
         <section className="mb-8">
           <h3 className="text-lg font-heading font-bold mb-3">Últimos Avisos</h3>
-          {notices.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
-
-          <div className="space-y-2">
-              {notices.map((n) =>
-            <button
-              key={n.id}
-              onClick={() => navigate("/mural")}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors">
-              
+          {notices.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p>
+          ) : (
+            <div className="space-y-2">
+              {notices.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => navigate("/mural")}
+                  className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors"
+                >
                   <div className="flex items-center gap-2">
                     {n.is_pinned && <Pin className="w-3 h-3 text-primary" strokeWidth={1.5} />}
                     <span className="font-heading font-medium text-sm">{n.title}</span>
                     <span className="ml-auto text-xs text-muted-foreground">{formatDate(n.created_at)}</span>
                   </div>
                 </button>
-            )}
+              ))}
             </div>
-          }
+          )}
         </section>
 
         {/* Latest materials */}
         <section>
           <h3 className="text-lg font-heading font-bold mb-3">Materiais Recentes</h3>
-          {materials.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhum material disponível.</p> :
-
-          <div className="space-y-2">
-              {materials.map((m) =>
-            <button
-              key={m.id}
-              onClick={() => navigate("/materiais")}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors">
-              
+          {materials.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum material disponível.</p>
+          ) : (
+            <div className="space-y-2">
+              {materials.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => navigate("/materiais")}
+                  className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors"
+                >
                   <div className="flex items-center justify-between">
                     <span className="font-body text-sm">{m.title}</span>
                     <span className="text-xs text-muted-foreground">{m.category} · {formatDate(m.created_at)}</span>
                   </div>
                 </button>
-            )}
+              ))}
             </div>
-          }
+          )}
         </section>
       </div>
-    </AppLayout>);
-
+    </AppLayout>
+  );
 }
