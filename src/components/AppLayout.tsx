@@ -160,12 +160,12 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
                 className="h-12 w-auto"
               />
               <a
-                href="https://www.formandolideres.com.br"
+                href="https://www.formandolideres.org"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
               >
-                www.formandolideres.com.br
+                www.formandolideres.org
               </a>
             </div>
             <div className="flex-1" />
