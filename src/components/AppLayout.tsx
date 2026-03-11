@@ -157,7 +157,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
               <img
                 src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png"
                 alt="Formando Líderes"
-                className="h-10 w-auto brightness-0 invert"
+                className="h-10 w-auto"
               />
               <a
                 href="https://www.formandolideres.com.br"
