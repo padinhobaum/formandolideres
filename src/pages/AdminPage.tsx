@@ -565,18 +565,17 @@ function AdminUsers() {
     e.preventDefault();
     if (!email.trim() || !password.trim() || !fullName.trim()) return;
     setCreating(true);
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email: email.trim(), password: password.trim(),
-      options: { data: { full_name: fullName.trim() } },
+
+    const { data, error } = await supabase.functions.invoke("create-user", {
+      body: { email: email.trim(), password: password.trim(), full_name: fullName.trim(), role },
     });
-    if (signUpError || !signUpData.user) {
-      toast.error("Erro ao criar usuário: " + (signUpError?.message || ""));
-      setCreating(false); return;
-    }
-    const { error: roleError } = await supabase.from("user_roles").insert({ user_id: signUpData.user.id, role });
+
     setCreating(false);
-    if (roleError) { toast.error("Usuário criado, mas erro ao atribuir papel."); }
-    else { toast.success("Usuário criado com sucesso."); }
+    if (error || data?.error) {
+      toast.error("Erro ao criar usuário: " + (data?.error || error?.message || ""));
+      return;
+    }
+    toast.success("Usuário criado com sucesso.");
     setEmail(""); setPassword(""); setFullName("");
     fetchUsers();
   };
