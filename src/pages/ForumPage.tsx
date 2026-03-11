@@ -12,6 +12,12 @@ import {
   MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X
 } from "lucide-react";
 
+interface ForumCategory {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 interface ForumTopic {
   id: string;
   title: string;
@@ -21,6 +27,8 @@ interface ForumTopic {
   author_avatar_url: string | null;
   image_url: string | null;
   is_poll: boolean;
+  category_id: string | null;
+  category_name?: string;
   created_at: string;
   reply_count?: number;
 }
