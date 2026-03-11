@@ -93,7 +93,7 @@ export default function DashboardPage() {
               <Users className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
               <span className="font-body text-muted-foreground text-lg">Alunos</span>
             </div>
-            <p className="text-2xl font-heading font-bold">{studentCount}</p>
+            <p className="font-heading font-bold text-primary text-3xl">{studentCount}</p>
           </button>
         </div>
 
