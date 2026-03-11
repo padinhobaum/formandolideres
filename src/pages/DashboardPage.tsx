@@ -74,21 +74,21 @@ export default function DashboardPage() {
 
         {/* Quick stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-          <button onClick={() => navigate("/mural")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors">
+          <button onClick={() => navigate("/mural")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
             <div className="flex items-center gap-2 mb-2">
               <Megaphone className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
               <span className="font-body text-muted-foreground text-lg">Avisos</span>
             </div>
             <p className="font-heading font-bold text-primary text-3xl">{notices.length}</p>
           </button>
-          <button onClick={() => navigate("/materiais")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors">
+          <button onClick={() => navigate("/materiais")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
             <div className="flex items-center gap-2 mb-2 font-sans">
               <Download className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
               <span className="font-body text-muted-foreground text-lg">Materiais</span>
             </div>
             <p className="font-heading font-bold text-primary text-3xl">{materials.length}</p>
           </button>
-          <button onClick={() => navigate("/alunos")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors">
+          <button onClick={() => navigate("/alunos")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
             <div className="flex items-center gap-2 mb-2">
               <Users className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
               <span className="font-body text-muted-foreground text-lg">Alunos</span>
