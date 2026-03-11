@@ -41,6 +41,30 @@ export type Database = {
         }
         Relationships: []
       }
+      forum_categories: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
       forum_replies: {
         Row: {
           author_avatar_url: string | null
@@ -97,6 +121,7 @@ export type Database = {
           author_avatar_url: string | null
           author_id: string
           author_name: string
+          category_id: string | null
           content: string
           created_at: string
           id: string
@@ -109,6 +134,7 @@ export type Database = {
           author_avatar_url?: string | null
           author_id: string
           author_name?: string
+          category_id?: string | null
           content: string
           created_at?: string
           id?: string
@@ -121,6 +147,7 @@ export type Database = {
           author_avatar_url?: string | null
           author_id?: string
           author_name?: string
+          category_id?: string | null
           content?: string
           created_at?: string
           id?: string
@@ -129,7 +156,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "forum_topics_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "forum_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       materials: {
         Row: {
