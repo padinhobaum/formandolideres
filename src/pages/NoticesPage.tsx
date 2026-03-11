@@ -141,7 +141,7 @@ export default function NoticesPage() {
             }
               <div className="flex items-center gap-2 mb-4">
                 {focusedNotice.is_pinned && <Pin className="w-3 h-3 text-primary" strokeWidth={1.5} />}
-                <h2 className="font-heading font-bold text-2xl">{focusedNotice.title}</h2>
+                <h2 className="font-heading font-bold text-2xl text-primary">{focusedNotice.title}</h2>
               </div>
               <p className="font-heading text-base leading-relaxed whitespace-pre-wrap mb-6">
                 {focusedNotice.content}
