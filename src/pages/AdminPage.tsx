@@ -24,6 +24,7 @@ export default function AdminPage() {
     { key: "students", label: "Alunos" },
     { key: "materials", label: "Materiais" },
     { key: "videos", label: "Videoaulas" },
+    { key: "forum-categories", label: "Categorias Fórum" },
     { key: "links", label: "Links Menu" },
     { key: "users", label: "Usuários" },
   ];
