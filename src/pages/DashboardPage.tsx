@@ -160,7 +160,7 @@ export default function DashboardPage() {
             <button
               key={n.id}
               onClick={() => navigate("/mural")}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors">
+              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
               
                   <div className="flex items-center gap-3">
                     {n.image_url &&
