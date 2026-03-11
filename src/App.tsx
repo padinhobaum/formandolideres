@@ -7,7 +7,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import DashboardPage from "@/pages/DashboardPage";
-import StudentsPage from "@/pages/StudentsPage";
+import ForumPage from "@/pages/ForumPage";
 import MaterialsPage from "@/pages/MaterialsPage";
 import VideoLessonsPage from "@/pages/VideoLessonsPage";
 import NoticesPage from "@/pages/NoticesPage";
