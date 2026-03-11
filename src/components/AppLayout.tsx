@@ -135,7 +135,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       <main className="flex-1 pb-20 md:pb-0 overflow-y-auto">
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
-          <img src={logoImg} alt="Formando Líderes" className="h-8 w-auto" />
+          <img src={logoImg} alt="Formando Líderes" className="h-10 w-auto" />
           <div className="flex items-center gap-2">
             <Avatar className="w-9 h-9">
               <AvatarImage src={profile?.avatar_url || undefined} />
