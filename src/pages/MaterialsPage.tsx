@@ -40,7 +40,7 @@ export default function MaterialsPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-3xl">
+      <div className="max-w-5xl">
         <h2 className="font-heading font-bold mb-6 text-accent text-4xl">Biblioteca de Materiais</h2>
 
         <div className="mb-6">

@@ -30,7 +30,7 @@ export default function AdminPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl">
+      <div className="max-w-5xl">
         <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Painel Administrativo</h2>
 
         <div className="flex gap-1 mb-6 border-b overflow-x-auto">

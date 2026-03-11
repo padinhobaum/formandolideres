@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl">
+      <div className="max-w-5xl">
         {/* Welcome with avatar */}
         <div className="flex items-center gap-4 mb-8">
           <div className="relative group">
