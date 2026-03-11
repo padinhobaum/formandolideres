@@ -197,31 +197,72 @@ export default function DashboardPage() {
         </section>
 
         {/* Últimos Avisos */}
-        <section className="mb-8 px-[20px] py-[20px] rounded-xl bg-primary pt-[20px]">
-          <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Últimos Avisos</h3>
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-primary rounded-xl">
+            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Últimos Avisos</h3>
+            <button onClick={() => navigate("/mural")} className="text-xs hover:underline font-body text-primary-foreground">
+              Ver todos
+            </button>
+          </div>
           {notices.length === 0 ?
-          <p className="text-sm text-primary-foreground">Nenhum aviso publicado.</p> :
+          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
 
-          <div className="space-y-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {notices.map((n) =>
-            <button
+            <div
               key={n.id}
-              onClick={() => navigate("/mural")}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
+              className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl flex flex-col">
               
-                  <div className="flex items-center gap-3">
-                    {n.image_url && <img src={n.image_url} alt="" className="w-10 h-10 object-cover rounded flex-shrink-0" loading="lazy" />}
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      {n.is_pinned && <Pin className="w-3 h-3 text-primary flex-shrink-0" strokeWidth={1.5} />}
-                      <span className="font-heading text-sm truncate font-bold">{n.title}</span>
+                  <div className="relative aspect-video bg-muted">
+                    {n.image_url ?
+                    <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" loading="lazy" /> :
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Megaphone className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
                     </div>
-                    <span className="text-xs text-muted-foreground flex-shrink-0">{formatDate(n.created_at)}</span>
+                    }
+                    {n.is_pinned && (
+                      <div className="absolute top-2 right-2 bg-primary/80 rounded-full p-1">
+                        <Pin className="w-3 h-3 text-primary-foreground" strokeWidth={2} />
+                      </div>
+                    )}
                   </div>
-                </button>
+                  <div className="p-3 flex flex-col flex-1">
+                    <h4 className="font-heading font-medium text-sm line-clamp-2">{n.title}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">{n.author_name} · {formatDate(n.created_at)}</p>
+                    <div className="mt-auto pt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        onClick={() => setSelectedNotice(n)}
+                      >
+                        Ler aviso completo
+                      </Button>
+                    </div>
+                  </div>
+                </div>
             )}
             </div>
           }
         </section>
+
+        {/* Modal de Aviso Completo */}
+        <Dialog open={!!selectedNotice} onOpenChange={(open) => !open && setSelectedNotice(null)}>
+          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+            {selectedNotice && (
+              <>
+                <DialogHeader>
+                  <DialogTitle className="font-heading text-xl">{selectedNotice.title}</DialogTitle>
+                  <p className="text-xs text-muted-foreground">{selectedNotice.author_name} · {formatDate(selectedNotice.created_at)}</p>
+                </DialogHeader>
+                {selectedNotice.image_url && (
+                  <img src={selectedNotice.image_url} alt={selectedNotice.title} className="w-full rounded-lg object-cover max-h-64" />
+                )}
+                <div className="text-sm whitespace-pre-wrap leading-relaxed">{selectedNotice.content}</div>
+              </>
+            )}
+          </DialogContent>
+        </Dialog>
 
         {/* Materiais Recentes */}
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">
