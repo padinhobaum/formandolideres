@@ -115,11 +115,12 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
 
         <div className="p-3 border-t border-sidebar-border">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-9 h-9 rounded-full bg-sidebar-primary flex items-center justify-center">
-              <span className="text-xs font-body font-semibold text-sidebar-primary-foreground">
+            <Avatar className="w-9 h-9">
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="text-xs font-body font-semibold bg-sidebar-primary text-sidebar-primary-foreground">
                 {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-              </span>
-            </div>
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate text-sidebar-foreground">{profile?.full_name}</p>
               <p className="text-xs text-sidebar-foreground/60 truncate">
