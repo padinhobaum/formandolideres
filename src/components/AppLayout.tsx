@@ -31,13 +31,6 @@ const navItems: NavItem[] = [
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
 
-function UserInitials({ name }: {name: string;}) {
-  const initials = name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
-  return (
-    <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center">
-      <span className="text-xs font-body font-semibold text-background">{initials}</span>
-    </div>);
-
 }
 
 export default function AppLayout({ children }: {children: ReactNode;}) {
