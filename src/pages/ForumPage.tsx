@@ -82,6 +82,7 @@ export default function ForumPage() {
   const [newImage, setNewImage] = useState<File | null>(null);
   const [isPoll, setIsPoll] = useState(false);
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [newCategoryId, setNewCategoryId] = useState<string>("");
 
   const uploadImage = async (file: File): Promise<string | null> => {
     const path = `${user!.id}/${Date.now()}_${file.name}`;
