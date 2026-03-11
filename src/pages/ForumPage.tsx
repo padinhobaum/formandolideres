@@ -195,7 +195,7 @@ export default function ForumPage() {
     }
 
     toast.success("Tópico criado!");
-    setNewTitle(""); setNewContent(""); setNewImage(null); setIsPoll(false); setPollOptions(["", ""]); setShowNewTopic(false);
+    setNewTitle(""); setNewContent(""); setNewImage(null); setIsPoll(false); setPollOptions(["", ""]); setNewCategoryId(""); setShowNewTopic(false);
     fetchTopics();
   };
 
