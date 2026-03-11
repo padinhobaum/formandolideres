@@ -180,7 +180,7 @@ export default function DashboardPage() {
 
         {/* Latest materials */}
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">
-          <h3 className="font-heading font-bold mb-3 text-2xl">Materiais Recentes</h3>
+          <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Materiais Recentes</h3>
           {materials.length === 0 ?
           <p className="text-sm text-muted-foreground">Nenhum material disponível.</p> :
 
