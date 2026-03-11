@@ -162,10 +162,15 @@ export default function DashboardPage() {
                   onClick={() => navigate("/mural")}
                   className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors"
                 >
-                  <div className="flex items-center gap-2">
-                    {n.is_pinned && <Pin className="w-3 h-3 text-primary" strokeWidth={1.5} />}
-                    <span className="font-heading font-medium text-sm">{n.title}</span>
-                    <span className="ml-auto text-xs text-muted-foreground">{formatDate(n.created_at)}</span>
+                  <div className="flex items-center gap-3">
+                    {n.image_url && (
+                      <img src={n.image_url} alt="" className="w-10 h-10 object-cover rounded flex-shrink-0" loading="lazy" />
+                    )}
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      {n.is_pinned && <Pin className="w-3 h-3 text-primary flex-shrink-0" strokeWidth={1.5} />}
+                      <span className="font-heading font-medium text-sm truncate">{n.title}</span>
+                    </div>
+                    <span className="text-xs text-muted-foreground flex-shrink-0">{formatDate(n.created_at)}</span>
                   </div>
                 </button>
               ))}
