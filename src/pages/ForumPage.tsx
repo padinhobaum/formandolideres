@@ -176,6 +176,7 @@ export default function ForumPage() {
       author_avatar_url: profile?.avatar_url || null,
       is_poll: isPoll,
       image_url: imageUrl,
+      category_id: newCategoryId || null,
     } as any).select().single();
 
     if (error) { toast.error("Erro ao criar tópico."); return; }
