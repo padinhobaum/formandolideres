@@ -3,7 +3,9 @@ import logoImg from "@/assets/logo-formando-lideres.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Users, Download, Megaphone, Shield, LogOut, Video, ExternalLink } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { usePresence } from "@/hooks/usePresence";
 
 interface NavItem {
   label: string;
@@ -22,24 +24,18 @@ interface CustomLink {
 
 const navItems: NavItem[] = [
 { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-{ label: "Alunos", path: "/alunos", icon: Users },
+{ label: "Fórum", path: "/forum", icon: MessageSquare },
 { label: "Materiais", path: "/materiais", icon: Download },
 { label: "Videoaulas", path: "/videoaulas", icon: Video },
 { label: "Mural", path: "/mural", icon: Megaphone },
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
 
-function UserInitials({ name }: {name: string;}) {
-  const initials = name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
-  return (
-    <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center">
-      <span className="text-xs font-body font-semibold text-background">{initials}</span>
-    </div>);
 
-}
 
 export default function AppLayout({ children }: {children: ReactNode;}) {
   const { profile, isAdmin, signOut } = useAuth();
+  usePresence();
   const navigate = useNavigate();
   const location = useLocation();
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
@@ -112,11 +108,12 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
 
         <div className="p-3 border-t border-sidebar-border">
           <div className="flex items-center gap-3 px-3 py-2">
-            <div className="w-9 h-9 rounded-full bg-sidebar-primary flex items-center justify-center">
-              <span className="text-xs font-body font-semibold text-sidebar-primary-foreground">
+            <Avatar className="w-9 h-9">
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="text-xs font-body font-semibold bg-sidebar-primary text-sidebar-primary-foreground">
                 {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-              </span>
-            </div>
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate text-sidebar-foreground">{profile?.full_name}</p>
               <p className="text-xs text-sidebar-foreground/60 truncate">
@@ -140,7 +137,12 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
           <img src={logoImg} alt="Formando Líderes" className="h-8 w-auto" />
           <div className="flex items-center gap-2">
-            <UserInitials name={profile?.full_name || "U"} />
+            <Avatar className="w-9 h-9">
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="text-xs font-body font-semibold bg-foreground text-background">
+                {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <button onClick={handleSignOut}>
               <LogOut className="w-4 h-4 text-destructive" strokeWidth={1.5} />
             </button>

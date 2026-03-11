@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
-import { Megaphone, Download, Users, Pin, Play, Video } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { Megaphone, Download, Pin, Play, Video, Circle, Camera } from "lucide-react";
 
 interface Notice {
   id: string;
@@ -36,41 +39,91 @@ function getYouTubeThumbnail(url: string): string | null {
 }
 
 export default function DashboardPage() {
-  const { profile, isAdmin } = useAuth();
+  const { user, profile, isAdmin, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [studentCount, setStudentCount] = useState(0);
+  const [onlineCount, setOnlineCount] = useState(0);
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
-      const [noticesRes, materialsRes, studentsRes, videosRes] = await Promise.all([
-      supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
-      supabase.from("materials").select("id, title, category, created_at").order("created_at", { ascending: false }).limit(5),
-      supabase.from("students").select("id", { count: "exact", head: true }),
-      supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4)]
-      );
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+      const [noticesRes, materialsRes, presenceRes, videosRes] = await Promise.all([
+        supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
+        supabase.from("materials").select("id, title, category, created_at").order("created_at", { ascending: false }).limit(5),
+        supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
+        supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4),
+      ]);
       if (noticesRes.data) setNotices(noticesRes.data as Notice[]);
       if (materialsRes.data) setMaterials(materialsRes.data);
-      if (studentsRes.count !== null) setStudentCount(studentsRes.count);
+      if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
       if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
     };
     fetchData();
+
+    // Realtime online count
+    const channel = supabase
+      .channel("dashboard-presence")
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, () => {
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo)
+          .then(({ count }) => { if (count !== null) setOnlineCount(count); });
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, []);
 
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setUploadingAvatar(true);
+
+    const path = `${user.id}/${Date.now()}_${file.name}`;
+    const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
+    if (upErr) { toast.error("Erro no upload."); setUploadingAvatar(false); return; }
+
+    const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+    await supabase.from("profiles").update({ avatar_url: urlData.publicUrl } as any).eq("user_id", user.id);
+    await refreshProfile();
+    setUploadingAvatar(false);
+    toast.success("Foto atualizada!");
+  };
+
   const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+
+  const getInitials = (name: string) =>
+    name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
 
   return (
     <AppLayout>
       <div className="max-w-4xl">
-        <h2 className="font-heading font-bold mb-1 text-4xl text-accent">
-          Olá, {profile?.full_name?.split(" ")[0]}
-        </h2>
-        <p className="text-muted-foreground mb-8 text-lg">
-          {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
-        </p>
+        {/* Welcome with avatar */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="relative group">
+            <Avatar className="w-16 h-16 border-2 border-accent">
+              <AvatarImage src={profile?.avatar_url || undefined} />
+              <AvatarFallback className="text-lg bg-primary text-primary-foreground font-heading">
+                {getInitials(profile?.full_name || "U")}
+              </AvatarFallback>
+            </Avatar>
+            <label className="absolute inset-0 flex items-center justify-center bg-foreground/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+              <Camera className="w-5 h-5 text-background" />
+              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+            </label>
+          </div>
+          <div>
+            <h2 className="font-heading font-bold text-4xl text-accent">
+              Olá, {profile?.full_name?.split(" ")[0]}
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
+            </p>
+          </div>
+        </div>
 
         {/* Quick stats */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -82,18 +135,18 @@ export default function DashboardPage() {
             <p className="font-heading font-bold text-primary text-3xl">{notices.length}</p>
           </button>
           <button onClick={() => navigate("/materiais")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-            <div className="flex items-center gap-2 mb-2 font-sans">
+            <div className="flex items-center gap-2 mb-2">
               <Download className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
               <span className="font-body text-muted-foreground text-lg">Materiais</span>
             </div>
             <p className="font-heading font-bold text-primary text-3xl">{materials.length}</p>
           </button>
-          <button onClick={() => navigate("/alunos")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
+          <button onClick={() => navigate("/forum")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
             <div className="flex items-center gap-2 mb-2">
-              <Users className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
-              <span className="font-body text-muted-foreground text-lg">Alunos</span>
+              <Circle className="text-accent w-[20px] h-[20px] fill-accent" />
+              <span className="font-body text-muted-foreground text-lg">Líderes Online</span>
             </div>
-            <p className="font-heading font-bold text-primary text-3xl">{studentCount}</p>
+            <p className="font-heading font-bold text-accent text-3xl">{onlineCount}</p>
           </button>
         </div>
 
@@ -105,31 +158,26 @@ export default function DashboardPage() {
               Ver todas
             </button>
           </div>
-          {videoLessons.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p> :
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {videoLessons.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {videoLessons.map((v) => {
-              const thumbnail = getYouTubeThumbnail(v.video_url);
-              return (
-                <button
-                  key={v.id}
-                  onClick={() => navigate("/videoaulas")}
-                  className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
-                  
+                const thumbnail = getYouTubeThumbnail(v.video_url);
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => navigate("/videoaulas")}
+                    className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl"
+                  >
                     <div className="relative aspect-video bg-muted">
-                      {thumbnail ?
-                    <img
-                      src={thumbnail}
-                      alt={v.title}
-                      className="w-full h-full object-cover"
-                      loading="lazy" /> :
-
-
-                    <div className="w-full h-full flex items-center justify-center">
+                      {thumbnail ? (
+                        <img src={thumbnail} alt={v.title} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
                           <Video className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
                         </div>
-                    }
+                      )}
                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-accent">
                           <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />
@@ -138,34 +186,30 @@ export default function DashboardPage() {
                     </div>
                     <div className="p-3">
                       <h4 className="font-heading font-medium text-sm line-clamp-1">{v.title}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        {v.category} · {formatDate(v.created_at)}
-                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">{v.category} · {formatDate(v.created_at)}</p>
                     </div>
-                  </button>);
-
-            })}
+                  </button>
+                );
+              })}
             </div>
-          }
+          )}
         </section>
 
-        {/* Pinned / latest notices */}
+        {/* Últimos Avisos */}
         <section className="mb-8 px-[20px] py-[20px] rounded-xl bg-primary pt-[20px]">
           <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Últimos Avisos</h3>
-          {notices.length === 0 ?
-          <p className="text-sm text-primary-foreground">Nenhum aviso publicado.</p> :
-
-          <div className="space-y-2">
-              {notices.map((n) =>
-            <button
-              key={n.id}
-              onClick={() => navigate("/mural")}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-              
+          {notices.length === 0 ? (
+            <p className="text-sm text-primary-foreground">Nenhum aviso publicado.</p>
+          ) : (
+            <div className="space-y-2">
+              {notices.map((n) => (
+                <button
+                  key={n.id}
+                  onClick={() => navigate("/mural")}
+                  className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl"
+                >
                   <div className="flex items-center gap-3">
-                    {n.image_url &&
-                <img src={n.image_url} alt="" className="w-10 h-10 object-cover rounded flex-shrink-0" loading="lazy" />
-                }
+                    {n.image_url && <img src={n.image_url} alt="" className="w-10 h-10 object-cover rounded flex-shrink-0" loading="lazy" />}
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                       {n.is_pinned && <Pin className="w-3 h-3 text-primary flex-shrink-0" strokeWidth={1.5} />}
                       <span className="font-heading text-sm truncate font-bold">{n.title}</span>
@@ -173,34 +217,34 @@ export default function DashboardPage() {
                     <span className="text-xs text-muted-foreground flex-shrink-0">{formatDate(n.created_at)}</span>
                   </div>
                 </button>
-            )}
+              ))}
             </div>
-          }
+          )}
         </section>
 
-        {/* Latest materials */}
+        {/* Materiais Recentes */}
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">
           <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Materiais Recentes</h3>
-          {materials.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhum material disponível.</p> :
-
-          <div className="space-y-2">
-              {materials.map((m) =>
-            <button
-              key={m.id}
-              onClick={() => navigate("/materiais")}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-              
+          {materials.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum material disponível.</p>
+          ) : (
+            <div className="space-y-2">
+              {materials.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => navigate("/materiais")}
+                  className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl"
+                >
                   <div className="flex items-center justify-between">
                     <span className="font-body text-sm font-semibold">{m.title}</span>
                     <span className="text-xs text-muted-foreground">{m.category} · {formatDate(m.created_at)}</span>
                   </div>
                 </button>
-            )}
+              ))}
             </div>
-          }
+          )}
         </section>
       </div>
-    </AppLayout>);
-
+    </AppLayout>
+  );
 }

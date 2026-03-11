@@ -7,13 +7,14 @@ type AppRole = "admin" | "leader";
 interface AuthContextType {
   session: Session | null;
   user: User | null;
-  profile: { full_name: string; class_name: string | null } | null;
+  profile: { full_name: string; class_name: string | null; avatar_url: string | null } | null;
   roles: AppRole[];
   isAdmin: boolean;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -21,17 +22,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<{ full_name: string; class_name: string | null } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string; class_name: string | null; avatar_url: string | null } | null>(null);
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchUserData = async (userId: string) => {
     const [profileRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("full_name, class_name").eq("user_id", userId).single(),
+      supabase.from("profiles").select("full_name, class_name, avatar_url").eq("user_id", userId).single(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
-    if (profileRes.data) setProfile(profileRes.data);
+    if (profileRes.data) setProfile(profileRes.data as any);
     if (rolesRes.data) setRoles(rolesRes.data.map((r) => r.role as AppRole));
+  };
+
+  const refreshProfile = async () => {
+    if (user) await fetchUserData(user.id);
   };
 
   useEffect(() => {
@@ -91,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signOut,
         resetPassword,
+        refreshProfile,
       }}
     >
       {children}

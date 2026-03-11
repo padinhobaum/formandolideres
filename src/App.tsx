@@ -7,7 +7,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import LoginPage from "@/pages/LoginPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import DashboardPage from "@/pages/DashboardPage";
-import StudentsPage from "@/pages/StudentsPage";
+import ForumPage from "@/pages/ForumPage";
 import MaterialsPage from "@/pages/MaterialsPage";
 import VideoLessonsPage from "@/pages/VideoLessonsPage";
 import NoticesPage from "@/pages/NoticesPage";
@@ -27,7 +27,8 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/alunos" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
+            <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
+            <Route path="/alunos" element={<Navigate to="/forum" replace />} />
             <Route path="/materiais" element={<ProtectedRoute><MaterialsPage /></ProtectedRoute>} />
             <Route path="/videoaulas" element={<ProtectedRoute><VideoLessonsPage /></ProtectedRoute>} />
             <Route path="/mural" element={<ProtectedRoute><NoticesPage /></ProtectedRoute>} />
