@@ -155,9 +155,9 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12">
             <div className="flex flex-col items-center md:items-start gap-3">
               <img
-                src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png"
+                src="/lovable-uploads/footer-logo.png"
                 alt="Formando Líderes"
-                className="h-10 w-auto"
+                className="h-12 w-auto"
               />
               <a
                 href="https://www.formandolideres.com.br"
