@@ -3,7 +3,9 @@ import logoImg from "@/assets/logo-formando-lideres.png";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { LayoutDashboard, Users, Download, Megaphone, Shield, LogOut, Video, ExternalLink } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { usePresence } from "@/hooks/usePresence";
 
 interface NavItem {
   label: string;
