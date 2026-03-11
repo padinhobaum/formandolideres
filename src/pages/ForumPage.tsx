@@ -548,8 +548,13 @@ export default function ForumPage() {
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-heading font-bold text-sm">{topic.title}</h4>
+                          {topic.category_name && (
+                            <span className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded font-body">
+                              {topic.category_name}
+                            </span>
+                          )}
                           {topic.is_poll && (
                             <span className="text-[10px] bg-accent text-accent-foreground px-1.5 py-0.5 rounded font-body">
                               Enquete
