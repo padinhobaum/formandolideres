@@ -343,16 +343,16 @@ export default function ForumPage() {
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium">
+        <p className="font-medium text-sm">
           {reply.author_name}{" "}
           <span className="text-muted-foreground font-normal">· {formatDate(reply.created_at)}</span>
         </p>
         {reply.parent_reply_id &&
-      <p className="text-[10px] text-muted-foreground italic">
+      <p className="text-muted-foreground italic text-xs">
             respondendo a {replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}
           </p>
       }
-        <p className="text-sm font-body mt-0.5 whitespace-pre-wrap">{reply.content}</p>
+        <p className="font-body mt-0.5 whitespace-pre-wrap text-base">{reply.content}</p>
         {reply.image_url &&
       <img src={reply.image_url} alt="" className="mt-1 max-w-xs max-h-48 rounded-lg object-cover" loading="lazy" />
       }
