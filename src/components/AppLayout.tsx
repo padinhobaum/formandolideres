@@ -163,7 +163,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
                 href="https://www.formandolideres.com.br"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-sidebar-foreground/70 hover:text-sidebar-foreground transition-colors underline underline-offset-2"
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
               >
                 www.formandolideres.com.br
               </a>
