@@ -21,24 +21,24 @@ interface CustomLink {
 }
 
 const navItems: NavItem[] = [
-  { label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Alunos", path: "/alunos", icon: Users },
-  { label: "Materiais", path: "/materiais", icon: Download },
-  { label: "Videoaulas", path: "/videoaulas", icon: Video },
-  { label: "Mural", path: "/mural", icon: Megaphone },
-  { label: "Admin", path: "/admin", icon: Shield, adminOnly: true },
-];
+{ label: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
+{ label: "Alunos", path: "/alunos", icon: Users },
+{ label: "Materiais", path: "/materiais", icon: Download },
+{ label: "Videoaulas", path: "/videoaulas", icon: Video },
+{ label: "Mural", path: "/mural", icon: Megaphone },
+{ label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
-function UserInitials({ name }: { name: string }) {
+
+function UserInitials({ name }: {name: string;}) {
   const initials = name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
   return (
     <div className="w-9 h-9 rounded-full bg-foreground flex items-center justify-center">
       <span className="text-xs font-body font-semibold text-background">{initials}</span>
-    </div>
-  );
+    </div>);
+
 }
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+export default function AppLayout({ children }: {children: ReactNode;}) {
   const { profile, isAdmin, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,39 +75,39 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body rounded transition-colors ${
-                  active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                }`}
-              >
+                active ?
+                "bg-sidebar-accent text-sidebar-accent-foreground font-medium" :
+                "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"}`
+                }>
+                
                 <item.icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                 <span className="text-lg">{item.label}</span>
-              </button>
-            );
+              </button>);
+
           })}
 
           {/* Custom links */}
-          {customLinks.length > 0 && (
-            <>
+          {customLinks.length > 0 &&
+          <>
               <div className="border-t border-sidebar-border my-2" />
-              {customLinks.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.url}
-                  target={isExternal(link.url) ? "_blank" : "_self"}
-                  rel={isExternal(link.url) ? "noopener noreferrer" : undefined}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body rounded transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                >
-                  {link.icon_url ? (
-                    <img src={link.icon_url} alt="" className="w-[20px] h-[20px] object-contain brightness-0 invert" />
-                  ) : (
-                    <ExternalLink className="w-[20px] h-[20px]" strokeWidth={1.5} />
-                  )}
-                  <span className="text-lg truncate">{link.label}</span>
+              {customLinks.map((link) =>
+            <a
+              key={link.id}
+              href={link.url}
+              target={isExternal(link.url) ? "_blank" : "_self"}
+              rel={isExternal(link.url) ? "noopener noreferrer" : undefined}
+              className="w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body rounded transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
+              
+                  {link.icon_url ?
+              <img src={link.icon_url} alt="" className="w-[20px] h-[20px] object-contain brightness-0 invert" /> :
+
+              <ExternalLink className="w-[20px] h-[20px]" strokeWidth={1.5} />
+              }
+                  <span className="truncate text-sm">{link.label}</span>
                 </a>
-              ))}
+            )}
             </>
-          )}
+          }
         </nav>
 
         <div className="p-3 border-t border-sidebar-border">
@@ -126,8 +126,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/60 hover:text-destructive hover:bg-sidebar-accent/50 rounded transition-colors mt-1"
-          >
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/60 hover:text-destructive hover:bg-sidebar-accent/50 rounded transition-colors mt-1">
+            
             <LogOut className="w-4 h-4" strokeWidth={1.5} />
             <span>Sair</span>
           </button>
@@ -158,26 +158,26 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               key={item.path}
               onClick={() => navigate(item.path)}
               className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
-                active ? "text-primary font-medium" : "text-muted-foreground"
-              }`}
-            >
+              active ? "text-primary font-medium" : "text-muted-foreground"}`
+              }>
+              
               <item.icon className="w-5 h-5" strokeWidth={1.5} />
               <span>{item.label}</span>
-            </button>
-          );
+            </button>);
+
         })}
-        {isAdmin && (
-          <button
-            onClick={() => navigate("/admin")}
-            className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
-              location.pathname === "/admin" ? "text-primary font-medium" : "text-muted-foreground"
-            }`}
-          >
+        {isAdmin &&
+        <button
+          onClick={() => navigate("/admin")}
+          className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
+          location.pathname === "/admin" ? "text-primary font-medium" : "text-muted-foreground"}`
+          }>
+          
             <Shield className="w-5 h-5" strokeWidth={1.5} />
             <span>Admin</span>
           </button>
-        )}
+        }
       </nav>
-    </div>
-  );
+    </div>);
+
 }
