@@ -192,7 +192,7 @@ export default function DashboardPage() {
               className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
               
                   <div className="flex items-center justify-between">
-                    <span className="font-body text-sm">{m.title}</span>
+                    <span className="font-body text-sm font-semibold">{m.title}</span>
                     <span className="text-xs text-muted-foreground">{m.category} · {formatDate(m.created_at)}</span>
                   </div>
                 </button>
