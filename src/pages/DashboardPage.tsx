@@ -161,7 +161,7 @@ export default function DashboardPage() {
           {videoLessons.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {videoLessons.map((v) => {
                 const thumbnail = getYouTubeThumbnail(v.video_url);
                 return (
