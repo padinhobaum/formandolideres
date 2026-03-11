@@ -28,10 +28,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUserData = async (userId: string) => {
     const [profileRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("full_name, class_name, avatar_url").eq("user_id", userId).single(),
+      supabase.from("profiles").select("full_name, class_name, avatar_url").eq("user_id", userId).maybeSingle(),
       supabase.from("user_roles").select("role").eq("user_id", userId),
     ]);
-    if (profileRes.data) setProfile(profileRes.data as any);
+    if (profileRes.data) {
+      setProfile(profileRes.data as any);
+    } else {
+      // Fallback to user metadata if profile not yet created
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        setProfile({
+          full_name: authUser.user_metadata?.full_name || authUser.email || "Usuário",
+          class_name: null,
+          avatar_url: null,
+        });
+      }
+    }
     if (rolesRes.data) setRoles(rolesRes.data.map((r) => r.role as AppRole));
   };
 

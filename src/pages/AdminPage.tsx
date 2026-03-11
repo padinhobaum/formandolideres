@@ -556,11 +556,17 @@ function AdminUsers() {
   const [users, setUsers] = useState<any[]>([]);
 
   const fetchUsers = async () => {
-    const { data } = await supabase.from("profiles").select("*, user_roles(role)");
-    if (data) setUsers(data);
+    const { data: profilesData } = await supabase.from("profiles").select("*");
+    if (!profilesData) return;
+    const { data: rolesData } = await supabase.from("user_roles").select("user_id, role");
+    const rolesMap: Record<string, string[]> = {};
+    rolesData?.forEach((r: any) => {
+      if (!rolesMap[r.user_id]) rolesMap[r.user_id] = [];
+      rolesMap[r.user_id].push(r.role);
+    });
+    setUsers(profilesData.map((p: any) => ({ ...p, roles: rolesMap[p.user_id] || [] })));
   };
   useEffect(() => { fetchUsers(); }, []);
-
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || !password.trim() || !fullName.trim()) return;
@@ -603,7 +609,7 @@ function AdminUsers() {
           <div key={u.id} className="border bg-card p-4">
             <p className="text-sm font-body font-medium">{u.full_name}</p>
             <p className="text-xs text-muted-foreground">
-              {(u.user_roles as any[])?.map((r: any) => r.role === "admin" ? "Administrador" : "Líder").join(", ") || "Sem papel"}
+              {(u.roles as string[])?.map((r: string) => r === "admin" ? "Administrador" : "Líder").join(", ") || "Sem papel"}
             </p>
           </div>
         ))}
