@@ -145,7 +145,7 @@ export default function DashboardPage() {
           </button>
           <button onClick={() => navigate("/forum")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
             <div className="flex items-center gap-2 mb-2">
-              <Circle className="text-accent fill-accent w-[15px] h-[15px]" />
+              <Circle className="text-accent fill-accent w-[10px] h-[10px]" />
               <span className="font-body text-muted-foreground text-lg">Líderes Online</span>
             </div>
             <p className="font-heading font-bold text-accent text-3xl">{onlineCount}</p>
