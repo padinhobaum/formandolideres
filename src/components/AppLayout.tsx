@@ -169,7 +169,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
               </a>
             </div>
             <div className="flex-1" />
-            <p className="text-xs text-sidebar-foreground/50 text-center md:text-right mt-2 md:mt-auto">
+            <p className="text-xs text-muted-foreground text-center md:text-right mt-2 md:mt-auto">
               © {new Date().getFullYear()} Formando Líderes – Todos os direitos reservados.
             </p>
           </div>
