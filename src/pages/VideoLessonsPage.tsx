@@ -186,7 +186,7 @@ export default function VideoLessonsPage() {
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-medium text-primary-foreground text-base">{c.user_name}</p>
+                              <p className="text-primary-foreground text-base font-bold">{c.user_name}</p>
                               <p className="text-xs text-muted-foreground">{c.content}</p>
                               <p className="text-[10px] text-muted-foreground mt-0.5">{formatDate(c.created_at)}</p>
                             </div>
