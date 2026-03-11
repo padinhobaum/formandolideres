@@ -151,20 +151,20 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
         <div className="p-4 md:p-8 flex-1">{children}</div>
 
         {/* Footer */}
-        <footer className="border-t bg-card text-foreground py-8 px-6 md:px-10">
+        <footer className="border-t bg-card text-foreground py-8 md:px-10 px-[20px]">
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center md:items-start gap-6 md:gap-12">
             <div className="flex flex-col items-center md:items-start gap-3">
               <img
                 src="/lovable-uploads/footer-logo.png"
                 alt="Formando Líderes"
-                className="h-12 w-auto"
-              />
+                className="h-12 w-auto" />
+              
               <a
                 href="https://www.formandolideres.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-              >
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
+                
                 www.formandolideres.org
               </a>
             </div>
