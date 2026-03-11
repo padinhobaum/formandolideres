@@ -150,8 +150,8 @@ export default function DashboardPage() {
         </section>
 
         {/* Pinned / latest notices */}
-        <section className="mb-8">
-          <h3 className="font-heading font-bold mb-3 text-2xl">Últimos Avisos</h3>
+        <section className="mb-8 px-[20px] py-[20px] rounded-xl bg-primary">
+          <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Últimos Avisos</h3>
           {notices.length === 0 ?
           <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
 
