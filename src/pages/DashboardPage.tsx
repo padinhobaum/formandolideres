@@ -100,7 +100,7 @@ export default function DashboardPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-4xl">
+      <div className="max-w-5xl">
         {/* Welcome with avatar */}
         <div className="flex items-center gap-4 mb-8">
           <div className="relative group">
@@ -126,7 +126,7 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <button onClick={() => navigate("/mural")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
             <div className="flex items-center gap-2 mb-2">
               <Megaphone className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
@@ -161,7 +161,7 @@ export default function DashboardPage() {
           {videoLessons.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
               {videoLessons.map((v) => {
                 const thumbnail = getYouTubeThumbnail(v.video_url);
                 return (

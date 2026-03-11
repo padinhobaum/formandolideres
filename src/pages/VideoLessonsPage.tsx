@@ -102,7 +102,7 @@ export default function VideoLessonsPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-3xl">
+      <div className="max-w-5xl">
         <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Videoaulas</h2>
 
         <div className="mb-6">
