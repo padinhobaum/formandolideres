@@ -55,6 +55,7 @@ export default function AdminPage() {
         {tab === "materials" && <AdminMaterials />}
         {tab === "videos" && <AdminVideos />}
         {tab === "links" && <AdminLinks />}
+        {tab === "forum-categories" && <AdminForumCategories />}
         {tab === "users" && <AdminUsers />}
       </div>
     </AppLayout>
