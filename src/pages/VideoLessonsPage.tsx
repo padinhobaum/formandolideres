@@ -128,7 +128,7 @@ export default function VideoLessonsPage() {
             const videoComments = comments[v.id] || [];
 
             return (
-              <div key={v.id} className="border bg-card rounded overflow-hidden">
+              <div key={v.id} className="border overflow-hidden bg-accent rounded-2xl">
                   {/* Video embed */}
                   {embedUrl ?
                 <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
@@ -154,18 +154,18 @@ export default function VideoLessonsPage() {
 
                   {/* Info */}
                   <div className="p-4">
-                    <h3 className="font-heading font-bold text-lg">{v.title}</h3>
+                    <h3 className="font-heading font-bold text-primary-foreground text-xl">{v.title}</h3>
                     {v.description &&
-                  <p className="text-sm text-muted-foreground mt-1">{v.description}</p>
+                  <p className="mt-1 text-primary-foreground text-base">{v.description}</p>
                   }
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs mt-2 text-primary-foreground">
                       {v.category} · {formatDate(v.created_at)}
                     </p>
 
                     {/* Comments toggle */}
                     <button
                     onClick={() => toggleComments(v.id)}
-                    className="flex items-center gap-1 mt-3 text-xs text-primary hover:underline">
+                    className="flex items-center gap-1 mt-3 text-xs hover:underline text-primary-foreground">
                     
                       <MessageCircle className="w-3.5 h-3.5" strokeWidth={1.5} />
                       Comentários
