@@ -414,12 +414,27 @@ export default function ForumPage() {
           )}
         </section>
 
-        {/* New Topic Button */}
-        <div className="mb-4">
+        {/* New Topic Button + Category Filter */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           <Button onClick={() => setShowNewTopic(!showNewTopic)} size="sm">
             <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
             Novo Tópico
           </Button>
+          {categories.length > 0 && (
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="border bg-background px-2 py-1.5 text-sm font-body rounded h-9"
+              >
+                <option value="all">Todas as categorias</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         {/* New Topic Form */}
