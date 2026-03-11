@@ -146,6 +146,7 @@ export default function ForumPage() {
 
   useEffect(() => {
     fetchTopics();
+    fetchCategories();
     fetchOnlineUsers();
 
     const channel = supabase
