@@ -27,7 +27,8 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
-            <Route path="/alunos" element={<ProtectedRoute><StudentsPage /></ProtectedRoute>} />
+            <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
+            <Route path="/alunos" element={<Navigate to="/forum" replace />} />
             <Route path="/materiais" element={<ProtectedRoute><MaterialsPage /></ProtectedRoute>} />
             <Route path="/videoaulas" element={<ProtectedRoute><VideoLessonsPage /></ProtectedRoute>} />
             <Route path="/mural" element={<ProtectedRoute><NoticesPage /></ProtectedRoute>} />
