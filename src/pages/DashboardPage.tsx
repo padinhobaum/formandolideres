@@ -51,7 +51,7 @@ export default function DashboardPage() {
         supabase.from("students").select("id", { count: "exact", head: true }),
         supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4),
       ]);
-      if (noticesRes.data) setNotices(noticesRes.data);
+      if (noticesRes.data) setNotices(noticesRes.data as Notice[]);
       if (materialsRes.data) setMaterials(materialsRes.data);
       if (studentsRes.count !== null) setStudentCount(studentsRes.count);
       if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
