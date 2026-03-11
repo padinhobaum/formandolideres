@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import {
-  MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle
+  MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X
 } from "lucide-react";
 
 interface ForumTopic {
@@ -19,6 +19,7 @@ interface ForumTopic {
   author_id: string;
   author_name: string;
   author_avatar_url: string | null;
+  image_url: string | null;
   is_poll: boolean;
   created_at: string;
   reply_count?: number;
@@ -31,7 +32,11 @@ interface ForumReply {
   author_id: string;
   author_name: string;
   author_avatar_url: string | null;
+  image_url: string | null;
+  parent_reply_id: string | null;
   created_at: string;
+  like_count: number;
+  liked_by_me: boolean;
 }
 
 interface PollOption {
@@ -57,13 +62,24 @@ export default function ForumPage() {
   const [replies, setReplies] = useState<Record<string, ForumReply[]>>({});
   const [pollData, setPollData] = useState<Record<string, PollOption[]>>({});
   const [replyText, setReplyText] = useState("");
+  const [replyImage, setReplyImage] = useState<File | null>(null);
+  const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
   const [showNewTopic, setShowNewTopic] = useState(false);
 
   // New topic form
   const [newTitle, setNewTitle] = useState("");
   const [newContent, setNewContent] = useState("");
+  const [newImage, setNewImage] = useState<File | null>(null);
   const [isPoll, setIsPoll] = useState(false);
   const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const path = `${user!.id}/${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage.from("forum_images").upload(path, file);
+    if (error) { toast.error("Erro ao enviar imagem."); return null; }
+    const { data } = supabase.storage.from("forum_images").getPublicUrl(path);
+    return data.publicUrl;
+  };
 
   const fetchTopics = async () => {
     const { data } = await supabase
@@ -72,7 +88,6 @@ export default function ForumPage() {
       .order("created_at", { ascending: false });
     if (!data) return;
 
-    // Get reply counts
     const topicIds = data.map((t: any) => t.id);
     const { data: repliesData } = await supabase
       .from("forum_replies")
@@ -113,7 +128,6 @@ export default function ForumPage() {
     fetchTopics();
     fetchOnlineUsers();
 
-    // Realtime presence updates
     const channel = supabase
       .channel("presence-changes")
       .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, () => {
@@ -128,6 +142,11 @@ export default function ForumPage() {
     e.preventDefault();
     if (!newTitle.trim() || !newContent.trim() || !user) return;
 
+    let imageUrl: string | null = null;
+    if (newImage) {
+      imageUrl = await uploadImage(newImage);
+    }
+
     const { data: topicData, error } = await supabase.from("forum_topics").insert({
       title: newTitle.trim(),
       content: newContent.trim(),
@@ -135,11 +154,11 @@ export default function ForumPage() {
       author_name: profile?.full_name || "",
       author_avatar_url: profile?.avatar_url || null,
       is_poll: isPoll,
+      image_url: imageUrl,
     } as any).select().single();
 
     if (error) { toast.error("Erro ao criar tópico."); return; }
 
-    // Create poll options if poll
     if (isPoll && topicData) {
       const validOptions = pollOptions.filter((o) => o.trim());
       if (validOptions.length >= 2) {
@@ -154,8 +173,36 @@ export default function ForumPage() {
     }
 
     toast.success("Tópico criado!");
-    setNewTitle(""); setNewContent(""); setIsPoll(false); setPollOptions(["", ""]); setShowNewTopic(false);
+    setNewTitle(""); setNewContent(""); setNewImage(null); setIsPoll(false); setPollOptions(["", ""]); setShowNewTopic(false);
     fetchTopics();
+  };
+
+  const fetchRepliesWithLikes = async (topicId: string) => {
+    const { data: repliesData } = await supabase
+      .from("forum_replies")
+      .select("*")
+      .eq("topic_id", topicId)
+      .order("created_at");
+
+    if (!repliesData) return;
+
+    const replyIds = repliesData.map((r: any) => r.id);
+    let likesData: any[] = [];
+    if (replyIds.length > 0) {
+      const { data } = await supabase
+        .from("reply_likes")
+        .select("reply_id, user_id")
+        .in("reply_id", replyIds);
+      likesData = data || [];
+    }
+
+    const enriched: ForumReply[] = repliesData.map((r: any) => ({
+      ...r,
+      like_count: likesData.filter((l) => l.reply_id === r.id).length,
+      liked_by_me: likesData.some((l) => l.reply_id === r.id && l.user_id === user?.id),
+    }));
+
+    setReplies((prev) => ({ ...prev, [topicId]: enriched }));
   };
 
   const handleExpandTopic = async (topicId: string) => {
@@ -164,16 +211,12 @@ export default function ForumPage() {
       return;
     }
     setExpandedTopicId(topicId);
+    setReplyingTo(null);
+    setReplyText("");
+    setReplyImage(null);
 
-    // Fetch replies
-    const { data: repliesData } = await supabase
-      .from("forum_replies")
-      .select("*")
-      .eq("topic_id", topicId)
-      .order("created_at");
-    if (repliesData) setReplies((prev) => ({ ...prev, [topicId]: repliesData as ForumReply[] }));
+    await fetchRepliesWithLikes(topicId);
 
-    // Fetch poll data if poll
     const topic = topics.find((t) => t.id === topicId);
     if (topic?.is_poll) {
       const { data: options } = await supabase
@@ -201,17 +244,37 @@ export default function ForumPage() {
 
   const handleReply = async (topicId: string) => {
     if (!replyText.trim() || !user) return;
+
+    let imageUrl: string | null = null;
+    if (replyImage) {
+      imageUrl = await uploadImage(replyImage);
+    }
+
     const { error } = await supabase.from("forum_replies").insert({
       topic_id: topicId,
       content: replyText.trim(),
       author_id: user.id,
       author_name: profile?.full_name || "",
       author_avatar_url: profile?.avatar_url || null,
+      image_url: imageUrl,
+      parent_reply_id: replyingTo?.id || null,
     } as any);
     if (error) { toast.error("Erro ao responder."); return; }
     setReplyText("");
-    handleExpandTopic(topicId);
+    setReplyImage(null);
+    setReplyingTo(null);
+    await fetchRepliesWithLikes(topicId);
     fetchTopics();
+  };
+
+  const handleToggleLike = async (replyId: string, topicId: string, alreadyLiked: boolean) => {
+    if (!user) return;
+    if (alreadyLiked) {
+      await supabase.from("reply_likes").delete().eq("reply_id", replyId).eq("user_id", user.id);
+    } else {
+      await supabase.from("reply_likes").insert({ reply_id: replyId, user_id: user.id } as any);
+    }
+    await fetchRepliesWithLikes(topicId);
   };
 
   const handleVote = async (optionId: string, topicId: string, alreadyVoted: boolean) => {
@@ -236,6 +299,62 @@ export default function ForumPage() {
 
   const getInitials = (name: string) =>
     name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+
+  // Group replies: top-level and nested
+  const getThreadedReplies = (topicId: string) => {
+    const all = replies[topicId] || [];
+    const topLevel = all.filter((r) => !r.parent_reply_id);
+    const childrenMap: Record<string, ForumReply[]> = {};
+    all.filter((r) => r.parent_reply_id).forEach((r) => {
+      if (!childrenMap[r.parent_reply_id!]) childrenMap[r.parent_reply_id!] = [];
+      childrenMap[r.parent_reply_id!].push(r);
+    });
+    return { topLevel, childrenMap };
+  };
+
+  const renderReply = (reply: ForumReply, topicId: string, isChild = false) => (
+    <div key={reply.id} className={`flex gap-2 ${isChild ? "pl-8" : "pl-2"} border-l-2 border-muted`}>
+      <Avatar className="w-6 h-6 flex-shrink-0 mt-0.5">
+        <AvatarImage src={reply.author_avatar_url || undefined} />
+        <AvatarFallback className="text-[8px] bg-muted text-muted-foreground">
+          {getInitials(reply.author_name)}
+        </AvatarFallback>
+      </Avatar>
+      <div className="flex-1 min-w-0">
+        <p className="text-xs font-medium">
+          {reply.author_name}{" "}
+          <span className="text-muted-foreground font-normal">· {formatDate(reply.created_at)}</span>
+        </p>
+        {reply.parent_reply_id && (
+          <p className="text-[10px] text-muted-foreground italic">
+            respondendo a {replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}
+          </p>
+        )}
+        <p className="text-sm font-body mt-0.5 whitespace-pre-wrap">{reply.content}</p>
+        {reply.image_url && (
+          <img src={reply.image_url} alt="" className="mt-1 max-w-xs max-h-48 rounded-lg object-cover" loading="lazy" />
+        )}
+        <div className="flex items-center gap-3 mt-1">
+          <button
+            onClick={() => handleToggleLike(reply.id, topicId, reply.liked_by_me)}
+            className={`flex items-center gap-1 text-xs transition-colors ${
+              reply.liked_by_me ? "text-destructive" : "text-muted-foreground hover:text-destructive"
+            }`}
+          >
+            <Heart className={`w-3 h-3 ${reply.liked_by_me ? "fill-current" : ""}`} />
+            {reply.like_count > 0 && <span>{reply.like_count}</span>}
+          </button>
+          <button
+            onClick={() => setReplyingTo({ id: reply.id, name: reply.author_name })}
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Reply className="w-3 h-3" />
+            <span>Responder</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <AppLayout>
@@ -293,6 +412,28 @@ export default function ForumPage() {
               <Label className="text-sm">Conteúdo</Label>
               <Textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} className="mt-1" required />
             </div>
+
+            {/* Image attachment */}
+            <div>
+              <Label className="text-sm flex items-center gap-1">
+                <ImagePlus className="w-4 h-4" /> Imagem (opcional)
+              </Label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setNewImage(e.target.files?.[0] || null)}
+                className="mt-1"
+              />
+              {newImage && (
+                <div className="mt-2 relative inline-block">
+                  <img src={URL.createObjectURL(newImage)} alt="Preview" className="max-h-32 rounded-lg" />
+                  <button type="button" onClick={() => setNewImage(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              )}
+            </div>
+
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={isPoll} onChange={(e) => setIsPoll(e.target.checked)} />
               <BarChart3 className="w-4 h-4" strokeWidth={1.5} />
@@ -338,7 +479,7 @@ export default function ForumPage() {
           <div className="space-y-3">
             {topics.map((topic) => {
               const isExpanded = expandedTopicId === topic.id;
-              const topicReplies = replies[topic.id] || [];
+              const { topLevel, childrenMap } = getThreadedReplies(topic.id);
               const topicPoll = pollData[topic.id] || [];
               const canDelete = topic.author_id === user?.id;
               const totalVotes = topicPoll.reduce((sum, o) => sum + o.vote_count, 0);
@@ -382,6 +523,9 @@ export default function ForumPage() {
                     <div className="border-t px-4 pb-4">
                       {/* Topic content */}
                       <p className="text-sm font-body whitespace-pre-wrap py-3">{topic.content}</p>
+                      {topic.image_url && (
+                        <img src={topic.image_url} alt="" className="mb-3 max-w-full max-h-72 rounded-lg object-cover" loading="lazy" />
+                      )}
 
                       {/* Poll */}
                       {topic.is_poll && topicPoll.length > 0 && (
@@ -411,38 +555,53 @@ export default function ForumPage() {
                         </div>
                       )}
 
-                      {/* Replies */}
-                      {topicReplies.length > 0 && (
-                        <div className="space-y-2 mb-3">
-                          {topicReplies.map((reply) => (
-                            <div key={reply.id} className="flex gap-2 pl-2 border-l-2 border-muted">
-                              <Avatar className="w-6 h-6 flex-shrink-0 mt-0.5">
-                                <AvatarImage src={reply.author_avatar_url || undefined} />
-                                <AvatarFallback className="text-[8px] bg-muted text-muted-foreground">
-                                  {getInitials(reply.author_name)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div>
-                                <p className="text-xs font-medium">{reply.author_name} <span className="text-muted-foreground font-normal">· {formatDate(reply.created_at)}</span></p>
-                                <p className="text-sm font-body mt-0.5">{reply.content}</p>
-                              </div>
+                      {/* Threaded Replies */}
+                      {topLevel.length > 0 && (
+                        <div className="space-y-3 mb-3">
+                          {topLevel.map((reply) => (
+                            <div key={reply.id}>
+                              {renderReply(reply, topic.id)}
+                              {childrenMap[reply.id]?.map((child) => renderReply(child, topic.id, true))}
                             </div>
                           ))}
                         </div>
                       )}
 
+                      {/* Replying-to indicator */}
+                      {replyingTo && (
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground bg-secondary/50 rounded px-2 py-1 mb-1">
+                          <Reply className="w-3 h-3" />
+                          <span>Respondendo a <strong>{replyingTo.name}</strong></span>
+                          <button onClick={() => setReplyingTo(null)} className="ml-auto"><X className="w-3 h-3" /></button>
+                        </div>
+                      )}
+
                       {/* Reply input */}
-                      <div className="flex gap-2 mt-3">
-                        <Input
-                          placeholder="Escreva uma resposta..."
-                          value={expandedTopicId === topic.id ? replyText : ""}
-                          onChange={(e) => setReplyText(e.target.value)}
-                          className="h-9 text-sm"
-                          onKeyDown={(e) => { if (e.key === "Enter") handleReply(topic.id); }}
-                        />
-                        <Button size="sm" onClick={() => handleReply(topic.id)} className="h-9 px-3">
-                          <Send className="w-4 h-4" />
-                        </Button>
+                      <div className="space-y-2 mt-3">
+                        {replyImage && (
+                          <div className="relative inline-block">
+                            <img src={URL.createObjectURL(replyImage)} alt="Preview" className="max-h-24 rounded-lg" />
+                            <button onClick={() => setReplyImage(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                        <div className="flex gap-2">
+                          <label className="flex-shrink-0 cursor-pointer flex items-center justify-center h-9 w-9 rounded-md border border-input hover:bg-secondary transition-colors">
+                            <ImagePlus className="w-4 h-4 text-muted-foreground" />
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => setReplyImage(e.target.files?.[0] || null)} />
+                          </label>
+                          <Input
+                            placeholder={replyingTo ? `Respondendo a ${replyingTo.name}...` : "Escreva uma resposta..."}
+                            value={expandedTopicId === topic.id ? replyText : ""}
+                            onChange={(e) => setReplyText(e.target.value)}
+                            className="h-9 text-sm"
+                            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) handleReply(topic.id); }}
+                          />
+                          <Button size="sm" onClick={() => handleReply(topic.id)} className="h-9 px-3">
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
 
                       {canDelete && (
