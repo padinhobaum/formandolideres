@@ -226,7 +226,7 @@ export default function DashboardPage() {
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">
           <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Materiais Recentes</h3>
           {materials.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhum material disponível.</p> :
+          <p className="text-sm text-primary-foreground">Nenhum material disponível.</p> :
 
           <div className="space-y-2">
               {materials.map((m) =>
