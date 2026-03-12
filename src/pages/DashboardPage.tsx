@@ -111,7 +111,7 @@ export default function DashboardPage() {
     <AppLayout>
       <div className="w-full">
         {/* Welcome with avatar */}
-        <div className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-8 flex-wrap">
           <div className="relative group">
             <Avatar className="w-16 h-16 border-2 border-accent">
               <AvatarImage src={profile?.avatar_url || undefined} />
@@ -132,9 +132,10 @@ export default function DashboardPage() {
               {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
             </p>
           </div>
+          <div className="flex-1" />
           <Button
             onClick={() => navigate("/lider-ai")}
-            className="mt-3 rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg"
+            className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg"
           >
             <Sparkles className="w-4 h-4" />
             Pergunte à LíderAI
