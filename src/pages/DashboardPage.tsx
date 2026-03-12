@@ -206,7 +206,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <div className="p-3">
-                      <h4 className="font-heading font-medium text-sm line-clamp-1">{v.title}</h4>
+                      <h4 className="font-heading font-medium line-clamp-1 text-accent text-base">{v.title}</h4>
                       <p className="text-xs text-muted-foreground mt-1">{v.category} · {formatDate(v.created_at)}</p>
                     </div>
                   </button>);
