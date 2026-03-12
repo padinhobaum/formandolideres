@@ -378,9 +378,16 @@ export default function ForumPage() {
           onClick={() => setReplyingTo({ id: reply.id, name: reply.author_name })}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
           
-            <Reply className="w-3 h-3" />
+           <Reply className="w-3 h-3" />
             <span>Responder</span>
           </button>
+          {(reply.author_id === user?.id || isAdmin) && (
+            <button
+              onClick={() => handleDeleteReply(reply.id, topicId)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors">
+              <Trash2 className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </div>
     </div>;
