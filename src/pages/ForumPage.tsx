@@ -389,8 +389,9 @@ export default function ForumPage() {
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm">
-          {reply.author_name}{" "}
+        <p className="font-medium text-sm flex items-center gap-1.5">
+          {reply.author_name}
+          <SalaBadge sala={authorProfiles[reply.author_id]} />
           <span className="text-muted-foreground font-normal">· {formatDate(reply.created_at)}</span>
         </p>
         {reply.parent_reply_id &&
