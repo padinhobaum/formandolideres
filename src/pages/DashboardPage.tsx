@@ -6,8 +6,9 @@ import AppLayout from "@/components/AppLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Download, Pin, Play, Video, Circle, Camera } from "lucide-react";
+import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink } from "lucide-react";
 
 interface Notice {
   id: string;
@@ -17,6 +18,7 @@ interface Notice {
   is_pinned: boolean;
   created_at: string;
   image_url: string | null;
+  cta_buttons: any[];
 }
 
 interface Material {
@@ -53,40 +55,45 @@ export default function DashboardPage() {
     const fetchData = async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       const [noticesRes, materialsRes, presenceRes, videosRes] = await Promise.all([
-      supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
-      supabase.from("materials").select("id, title, category, created_at").order("created_at", { ascending: false }).limit(5),
-      supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
-      supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4)]
-      );
-      if (noticesRes.data) setNotices(noticesRes.data as Notice[]);
+        supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
+        supabase.from("materials").select("id, title, category, created_at").order("created_at", { ascending: false }).limit(5),
+        supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
+        supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4),
+      ]);
+      if (noticesRes.data) setNotices(noticesRes.data.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [] })));
       if (materialsRes.data) setMaterials(materialsRes.data);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
       if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
     };
     fetchData();
 
-    // Realtime online count
-    const channel = supabase.
-    channel("dashboard-presence").
-    on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, () => {
-      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo).
-      then(({ count }) => {if (count !== null) setOnlineCount(count);});
-    }).
-    subscribe();
+    const channel = supabase
+      .channel("dashboard-presence")
+      .on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, () => {
+        const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo)
+          .then(({ count }) => { if (count !== null) setOnlineCount(count); });
+      })
+      .subscribe();
 
-    return () => {supabase.removeChannel(channel);};
+    return () => { supabase.removeChannel(channel); };
   }, []);
+
+  // Track notice read when modal opens
+  const handleOpenNotice = async (notice: Notice) => {
+    setSelectedNotice(notice);
+    if (user) {
+      await supabase.from("notice_reads").upsert({ notice_id: notice.id, user_id: user.id } as any, { onConflict: "notice_id,user_id" });
+    }
+  };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     setUploadingAvatar(true);
-
     const path = `${user.id}/${Date.now()}_${file.name}`;
     const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
-    if (upErr) {toast.error("Erro no upload.");setUploadingAvatar(false);return;}
-
+    if (upErr) { toast.error("Erro no upload."); setUploadingAvatar(false); return; }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
     await supabase.from("profiles").update({ avatar_url: urlData.publicUrl } as any).eq("user_id", user.id);
     await refreshProfile();
@@ -95,14 +102,14 @@ export default function DashboardPage() {
   };
 
   const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
 
   const getInitials = (name: string) =>
-  name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
+    name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
 
   return (
     <AppLayout>
-      <div className="max-w-5xl">
+      <div className="w-full">
         {/* Welcome with avatar */}
         <div className="flex items-center gap-4 mb-8">
           <div className="relative group">
@@ -136,13 +143,13 @@ export default function DashboardPage() {
             </div>
             <p className="font-heading font-bold text-primary text-3xl">{notices.length}</p>
           </button>
-          <button onClick={() => navigate("/materiais")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
+          <div className="border bg-card p-4 text-left rounded-xl">
             <div className="flex items-center gap-2 mb-2">
-              <Download className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
-              <span className="font-body text-muted-foreground text-lg">Materiais</span>
+              <GraduationCap className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
+              <span className="font-body text-muted-foreground text-lg">Sala do Líder</span>
             </div>
-            <p className="font-heading font-bold text-primary text-3xl">{materials.length}</p>
-          </button>
+            <p className="font-heading font-bold text-primary text-2xl">{profile?.class_name || "Não definida"}</p>
+          </div>
           <button onClick={() => navigate("/forum")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
             <div className="flex items-center gap-2 mb-2">
               <Circle className="text-accent fill-accent w-[10px] h-[10px]" />
@@ -160,26 +167,26 @@ export default function DashboardPage() {
               Ver todas
             </button>
           </div>
-          {videoLessons.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p> :
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {videoLessons.map((v) => {
-              const thumbnail = getYouTubeThumbnail(v.video_url);
-              return (
-                <button
-                  key={v.id}
-                  onClick={() => navigate("/videoaulas")}
-                  className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
-                  
+          {videoLessons.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {videoLessons.slice(0, 3).map((v) => {
+                const thumbnail = getYouTubeThumbnail(v.video_url);
+                return (
+                  <button
+                    key={v.id}
+                    onClick={() => navigate("/videoaulas")}
+                    className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl"
+                  >
                     <div className="relative aspect-video bg-muted">
-                      {thumbnail ?
-                    <img src={thumbnail} alt={v.title} className="w-full h-full object-cover" loading="lazy" /> :
-
-                    <div className="w-full h-full flex items-center justify-center">
+                      {thumbnail ? (
+                        <img src={thumbnail} alt={v.title} className="w-full h-full object-cover" loading="lazy" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
                           <Video className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
                         </div>
-                    }
+                      )}
                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-accent">
                           <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />
@@ -190,11 +197,11 @@ export default function DashboardPage() {
                       <h4 className="font-heading font-medium text-sm line-clamp-1">{v.title}</h4>
                       <p className="text-xs text-muted-foreground mt-1">{v.category} · {formatDate(v.created_at)}</p>
                     </div>
-                  </button>);
-
-            })}
+                  </button>
+                );
+              })}
             </div>
-          }
+          )}
         </section>
 
         {/* Últimos Avisos */}
@@ -205,89 +212,104 @@ export default function DashboardPage() {
               Ver todos
             </button>
           </div>
-          {notices.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-              {notices.map((n) =>
-            <div
-              key={n.id}
-              className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl flex flex-col">
-              
+          {notices.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {notices.map((n) => (
+                <div
+                  key={n.id}
+                  className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl flex flex-col"
+                >
                   <div className="relative aspect-video bg-muted">
-                    {n.image_url ?
-                <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" loading="lazy" /> :
-                <div className="w-full h-full flex items-center justify-center">
-                      <Megaphone className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
-                    </div>
-                }
-                    {n.is_pinned &&
-                <div className="absolute top-2 right-2 bg-primary/80 rounded-full p-1">
+                    {n.image_url ? (
+                      <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" loading="lazy" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Megaphone className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
+                      </div>
+                    )}
+                    {n.is_pinned && (
+                      <div className="absolute top-2 right-2 bg-primary/80 rounded-full p-1">
                         <Pin className="w-3 h-3 text-primary-foreground" strokeWidth={2} />
                       </div>
-                }
+                    )}
                   </div>
                   <div className="p-3 flex flex-col flex-1">
                     <h4 className="font-heading line-clamp-2 font-bold text-primary text-base">{n.title}</h4>
                     <p className="text-xs text-muted-foreground mt-1">{n.author_name} · {formatDate(n.created_at)}</p>
                     <div className="mt-auto pt-2">
                       <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs"
-                    onClick={() => setSelectedNotice(n)}>
-                    
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        onClick={() => handleOpenNotice(n)}
+                      >
                         Ler aviso completo
                       </Button>
                     </div>
                   </div>
                 </div>
-            )}
+              ))}
             </div>
-          }
+          )}
         </section>
 
         {/* Modal de Aviso Completo */}
         <Dialog open={!!selectedNotice} onOpenChange={(open) => !open && setSelectedNotice(null)}>
           <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-            {selectedNotice &&
-            <>
+            {selectedNotice && (
+              <>
                 <DialogHeader>
                   <DialogTitle className="font-heading text-xl">{selectedNotice.title}</DialogTitle>
                   <p className="text-xs text-muted-foreground">{selectedNotice.author_name} · {formatDate(selectedNotice.created_at)}</p>
                 </DialogHeader>
-                {selectedNotice.image_url &&
-              <img src={selectedNotice.image_url} alt={selectedNotice.title} className="w-full rounded-lg object-cover max-h-64" />
-              }
-                <div className="text-sm whitespace-pre-wrap leading-relaxed">{selectedNotice.content}</div>
+                {selectedNotice.image_url && (
+                  <img src={selectedNotice.image_url} alt={selectedNotice.title} className="w-full rounded-lg object-cover max-h-64" />
+                )}
+                <div className="text-sm whitespace-pre-wrap leading-relaxed">
+                  <RichText content={selectedNotice.content} />
+                </div>
+                {selectedNotice.cta_buttons?.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {selectedNotice.cta_buttons.map((cta: any, i: number) => (
+                      <a key={i} href={cta.url} target={cta.newTab ? "_blank" : "_self"} rel={cta.newTab ? "noopener noreferrer" : undefined}>
+                        <Button size="sm" className="gap-1.5">
+                          {cta.text}
+                          {cta.newTab && <ExternalLink className="w-3 h-3" strokeWidth={1.5} />}
+                        </Button>
+                      </a>
+                    ))}
+                  </div>
+                )}
               </>
-            }
+            )}
           </DialogContent>
         </Dialog>
 
         {/* Materiais Recentes */}
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">
           <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Materiais Recentes</h3>
-          {materials.length === 0 ?
-          <p className="text-sm text-primary-foreground">Nenhum material disponível.</p> :
-
-          <div className="space-y-2">
-              {materials.map((m) =>
-            <button
-              key={m.id}
-              onClick={() => navigate("/materiais")}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-              
+          {materials.length === 0 ? (
+            <p className="text-sm text-primary-foreground">Nenhum material disponível.</p>
+          ) : (
+            <div className="space-y-2">
+              {materials.map((m) => (
+                <button
+                  key={m.id}
+                  onClick={() => navigate("/materiais")}
+                  className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl"
+                >
                   <div className="flex items-center justify-between">
                     <span className="font-body text-sm font-semibold">{m.title}</span>
                     <span className="text-xs text-muted-foreground">{m.category} · {formatDate(m.created_at)}</span>
                   </div>
                 </button>
-            )}
+              ))}
             </div>
-          }
+          )}
         </section>
       </div>
-    </AppLayout>);
-
+    </AppLayout>
+  );
 }

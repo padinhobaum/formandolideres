@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Trash2, Plus, GripVertical, ExternalLink, Image as ImageIcon, Pencil } from "lucide-react";
+import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import RichTextEditor from "@/components/RichTextEditor";
 
-type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories";
+type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists";
 
 interface CtaButton {
   text: string;
@@ -24,6 +25,7 @@ export default function AdminPage() {
     { key: "students", label: "Alunos" },
     { key: "materials", label: "Materiais" },
     { key: "videos", label: "Videoaulas" },
+    { key: "playlists", label: "Playlists" },
     { key: "forum-categories", label: "Categorias Fórum" },
     { key: "links", label: "Links Menu" },
     { key: "users", label: "Usuários" },
@@ -31,7 +33,7 @@ export default function AdminPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-5xl">
+      <div className="w-full">
         <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Painel Administrativo</h2>
 
         <div className="flex gap-1 mb-6 border-b overflow-x-auto">
@@ -54,6 +56,7 @@ export default function AdminPage() {
         {tab === "students" && <AdminStudents />}
         {tab === "materials" && <AdminMaterials />}
         {tab === "videos" && <AdminVideos />}
+        {tab === "playlists" && <AdminPlaylists />}
         {tab === "links" && <AdminLinks />}
         {tab === "forum-categories" && <AdminForumCategories />}
         {tab === "users" && <AdminUsers />}
@@ -72,6 +75,8 @@ function AdminNotices() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [ctaButtons, setCtaButtons] = useState<CtaButton[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [viewingReads, setViewingReads] = useState<string | null>(null);
+  const [noticeReads, setNoticeReads] = useState<any[]>([]);
 
   const fetchNotices = async () => {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
@@ -132,9 +137,21 @@ function AdminNotices() {
     fetchNotices();
   };
 
+  const fetchReads = async (noticeId: string) => {
+    if (viewingReads === noticeId) { setViewingReads(null); return; }
+    setViewingReads(noticeId);
+    const { data } = await supabase.from("notice_reads").select("*").eq("notice_id", noticeId);
+    if (!data || data.length === 0) { setNoticeReads([]); return; }
+    const userIds = (data as any[]).map((r: any) => r.user_id);
+    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").in("user_id", userIds);
+    const profileMap: Record<string, string> = {};
+    profiles?.forEach((p: any) => { profileMap[p.user_id] = p.full_name; });
+    setNoticeReads((data as any[]).map((r: any) => ({ ...r, full_name: profileMap[r.user_id] || "Usuário" })));
+  };
+
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3">
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
         <h3 className="font-heading font-bold text-sm mb-2">Novo Aviso</h3>
         <div>
           <Label className="text-sm">Título</Label>
@@ -142,46 +159,25 @@ function AdminNotices() {
         </div>
         <div>
           <Label className="text-sm">Conteúdo</Label>
-          <textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[100px] resize-y"
-            required
-          />
+          <RichTextEditor value={content} onChange={setContent} placeholder="Escreva o conteúdo do aviso..." />
         </div>
         <div>
           <Label className="text-sm flex items-center gap-1">
             <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem (opcional)
           </Label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-            className="mt-1 block w-full text-sm font-body"
-          />
+          <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
           Fixar aviso
         </label>
 
-        {/* CTA Buttons */}
         <div className="space-y-2">
           <Label className="text-sm">Botões de Ação (CTA)</Label>
           {ctaButtons.map((cta, i) => (
             <div key={i} className="flex flex-wrap items-center gap-2 border bg-background p-2 rounded">
-              <Input
-                placeholder="Texto do botão"
-                value={cta.text}
-                onChange={(e) => updateCta(i, "text", e.target.value)}
-                className="flex-1 min-w-[120px] h-8 text-xs"
-              />
-              <Input
-                placeholder="https://..."
-                value={cta.url}
-                onChange={(e) => updateCta(i, "url", e.target.value)}
-                className="flex-1 min-w-[150px] h-8 text-xs"
-              />
+              <Input placeholder="Texto do botão" value={cta.text} onChange={(e) => updateCta(i, "text", e.target.value)} className="flex-1 min-w-[120px] h-8 text-xs" />
+              <Input placeholder="https://..." value={cta.url} onChange={(e) => updateCta(i, "url", e.target.value)} className="flex-1 min-w-[150px] h-8 text-xs" />
               <label className="flex items-center gap-1 text-xs whitespace-nowrap">
                 <input type="checkbox" checked={cta.newTab} onChange={(e) => updateCta(i, "newTab", e.target.checked)} />
                 Nova aba
@@ -206,19 +202,40 @@ function AdminNotices() {
 
       <div className="space-y-2">
         {notices.map((n) => (
-          <div key={n.id} className="border bg-card p-4 flex items-start justify-between">
-            <div className="flex items-start gap-3">
-              {n.image_url && (
-                <img src={n.image_url} alt="" className="w-12 h-12 object-cover rounded flex-shrink-0" />
-              )}
-              <div>
-                <p className="text-sm font-heading font-medium">{n.title}</p>
-                <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("pt-BR")}</p>
+          <div key={n.id} className="border bg-card p-4 rounded-xl">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-3">
+                {n.image_url && <img src={n.image_url} alt="" className="w-12 h-12 object-cover rounded flex-shrink-0" />}
+                <div>
+                  <p className="text-sm font-heading font-medium">{n.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("pt-BR")}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => fetchReads(n.id)} className="text-muted-foreground hover:text-foreground p-1" title="Ver quem leu">
+                  <Eye className="w-4 h-4" strokeWidth={1.5} />
+                </button>
+                <button onClick={() => handleDelete(n.id)} className="text-destructive hover:text-destructive/80 p-1">
+                  <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                </button>
               </div>
             </div>
-            <button onClick={() => handleDelete(n.id)} className="text-destructive hover:text-destructive/80 p-1">
-              <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-            </button>
+            {viewingReads === n.id && (
+              <div className="mt-3 border-t pt-2">
+                <p className="text-xs font-medium mb-1">Lido por ({noticeReads.length}):</p>
+                {noticeReads.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Ninguém leu este aviso ainda.</p>
+                ) : (
+                  <div className="space-y-1">
+                    {noticeReads.map((r: any) => (
+                      <p key={r.id} className="text-xs text-muted-foreground">
+                        {r.full_name} — {new Date(r.read_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -244,7 +261,6 @@ function AdminLinks() {
     e.preventDefault();
     if (!label.trim() || !url.trim()) return;
     setUploading(true);
-
     let iconUrl: string | null = null;
     if (iconFile) {
       const path = `${Date.now()}_${iconFile.name}`;
@@ -254,16 +270,8 @@ function AdminLinks() {
         iconUrl = urlData.publicUrl;
       }
     }
-
     const maxOrder = links.length > 0 ? Math.max(...links.map((l) => l.sort_order)) + 1 : 0;
-
-    const { error } = await supabase.from("custom_links").insert({
-      label: label.trim(),
-      url: url.trim(),
-      icon_url: iconUrl,
-      sort_order: maxOrder,
-    } as any);
-
+    const { error } = await supabase.from("custom_links").insert({ label: label.trim(), url: url.trim(), icon_url: iconUrl, sort_order: maxOrder } as any);
     setUploading(false);
     if (error) { toast.error("Erro ao criar link."); return; }
     toast.success("Link adicionado.");
@@ -282,8 +290,7 @@ function AdminLinks() {
     const idx = links.findIndex((l) => l.id === id);
     if ((direction === "up" && idx === 0) || (direction === "down" && idx === links.length - 1)) return;
     const swapIdx = direction === "up" ? idx - 1 : idx + 1;
-    const a = links[idx];
-    const b = links[swapIdx];
+    const a = links[idx]; const b = links[swapIdx];
     await Promise.all([
       supabase.from("custom_links").update({ sort_order: b.sort_order } as any).eq("id", a.id),
       supabase.from("custom_links").update({ sort_order: a.sort_order } as any).eq("id", b.id),
@@ -293,60 +300,31 @@ function AdminLinks() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3">
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
         <h3 className="font-heading font-bold text-sm mb-2">Novo Link do Menu</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <Label className="text-sm">Nome do botão</Label>
-            <Input value={label} onChange={(e) => setLabel(e.target.value)} className="mt-1" required />
-          </div>
-          <div>
-            <Label className="text-sm">URL</Label>
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} className="mt-1" placeholder="https://..." required />
-          </div>
+          <div><Label className="text-sm">Nome do botão</Label><Input value={label} onChange={(e) => setLabel(e.target.value)} className="mt-1" required /></div>
+          <div><Label className="text-sm">URL</Label><Input value={url} onChange={(e) => setUrl(e.target.value)} className="mt-1" placeholder="https://..." required /></div>
         </div>
         <div>
           <Label className="text-sm">Ícone (imagem, opcional)</Label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setIconFile(e.target.files?.[0] || null)}
-            className="mt-1 block w-full text-sm font-body"
-          />
+          <input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
         </div>
-        <Button type="submit" size="sm" disabled={uploading}>
-          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
-          {uploading ? "Salvando..." : "Adicionar"}
-        </Button>
+        <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Salvando..." : "Adicionar"}</Button>
       </form>
-
       <div className="space-y-2">
         {links.map((l, idx) => (
-          <div key={l.id} className="border bg-card p-4 flex items-center gap-3">
+          <div key={l.id} className="border bg-card p-4 flex items-center gap-3 rounded-xl">
             <div className="flex flex-col gap-0.5">
-              <button
-                onClick={() => moveLink(l.id, "up")}
-                disabled={idx === 0}
-                className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs"
-              >▲</button>
-              <button
-                onClick={() => moveLink(l.id, "down")}
-                disabled={idx === links.length - 1}
-                className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs"
-              >▼</button>
+              <button onClick={() => moveLink(l.id, "up")} disabled={idx === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs">▲</button>
+              <button onClick={() => moveLink(l.id, "down")} disabled={idx === links.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs">▼</button>
             </div>
-            {l.icon_url ? (
-              <img src={l.icon_url} alt="" className="w-5 h-5 object-contain flex-shrink-0" />
-            ) : (
-              <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />
-            )}
+            {l.icon_url ? <img src={l.icon_url} alt="" className="w-5 h-5 object-contain flex-shrink-0" /> : <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-body font-medium truncate">{l.label}</p>
               <p className="text-xs text-muted-foreground truncate">{l.url}</p>
             </div>
-            <button onClick={() => handleDelete(l.id)} className="text-destructive hover:text-destructive/80 p-1">
-              <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-            </button>
+            <button onClick={() => handleDelete(l.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
           </div>
         ))}
       </div>
@@ -373,11 +351,8 @@ function AdminStudents() {
     e.preventDefault();
     if (!fullName.trim() || !className.trim()) return;
     const { error } = await supabase.from("students").insert({
-      full_name: fullName.trim(),
-      call_number: callNumber ? parseInt(callNumber) : null,
-      class_name: className.trim(),
-      guardian_contact: guardianContact.trim() || null,
-      notes: notes.trim() || null,
+      full_name: fullName.trim(), call_number: callNumber ? parseInt(callNumber) : null,
+      class_name: className.trim(), guardian_contact: guardianContact.trim() || null, notes: notes.trim() || null,
     });
     if (error) { toast.error("Erro ao cadastrar aluno."); return; }
     toast.success("Aluno cadastrado.");
@@ -394,7 +369,7 @@ function AdminStudents() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3">
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
         <h3 className="font-heading font-bold text-sm mb-2">Cadastrar Aluno</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Nome completo</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1" required /></div>
@@ -410,7 +385,7 @@ function AdminStudents() {
       </form>
       <div className="space-y-2">
         {students.map((s) => (
-          <div key={s.id} className="border bg-card p-4 flex items-center justify-between">
+          <div key={s.id} className="border bg-card p-4 flex items-center justify-between rounded-xl">
             <div><p className="text-sm font-body font-medium">{s.full_name}</p><p className="text-xs text-muted-foreground">{s.class_name} · Nº {s.call_number ?? "—"}</p></div>
             <button onClick={() => handleDelete(s.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
           </div>
@@ -465,21 +440,18 @@ function AdminMaterials() {
 
   return (
     <div>
-      <form onSubmit={handleUpload} className="border bg-card p-5 mb-6 space-y-3">
+      <form onSubmit={handleUpload} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
         <h3 className="font-heading font-bold text-sm mb-2">Upload de Material</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Categoria</Label><Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" /></div>
         </div>
-        <div>
-          <Label className="text-sm">Arquivo</Label>
-          <input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" required />
-        </div>
+        <div><Label className="text-sm">Arquivo</Label><input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" required /></div>
         <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Enviando..." : "Publicar"}</Button>
       </form>
       <div className="space-y-2">
         {materials.map((m) => (
-          <div key={m.id} className="border bg-card p-4 flex items-center justify-between">
+          <div key={m.id} className="border bg-card p-4 flex items-center justify-between rounded-xl">
             <div><p className="text-sm font-body font-medium">{m.title}</p><p className="text-xs text-muted-foreground">{m.category} · {m.file_name}</p></div>
             <button onClick={() => handleDelete(m.id, m.file_url)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
           </div>
@@ -526,7 +498,7 @@ function AdminVideos() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3">
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
         <h3 className="font-heading font-bold text-sm mb-2">Nova Videoaula</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
@@ -538,11 +510,115 @@ function AdminVideos() {
       </form>
       <div className="space-y-2">
         {videos.map((v) => (
-          <div key={v.id} className="border bg-card p-4 flex items-center justify-between">
+          <div key={v.id} className="border bg-card p-4 flex items-center justify-between rounded-xl">
             <div><p className="text-sm font-body font-medium">{v.title}</p><p className="text-xs text-muted-foreground">{v.category} · {new Date(v.created_at).toLocaleDateString("pt-BR")}</p></div>
             <button onClick={() => handleDelete(v.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
           </div>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/* ───── Playlists ───── */
+function AdminPlaylists() {
+  const { user } = useAuth();
+  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [playlistVideos, setPlaylistVideos] = useState<Record<string, any[]>>({});
+  const [selectedVideoId, setSelectedVideoId] = useState("");
+
+  const fetchPlaylists = async () => {
+    const { data } = await supabase.from("playlists").select("*").order("sort_order");
+    if (data) setPlaylists(data as any[]);
+  };
+
+  const fetchVideos = async () => {
+    const { data } = await supabase.from("video_lessons").select("id, title").order("title");
+    if (data) setVideos(data);
+  };
+
+  useEffect(() => { fetchPlaylists(); fetchVideos(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim()) return;
+    const maxOrder = playlists.length > 0 ? Math.max(...playlists.map((p: any) => p.sort_order)) + 1 : 0;
+    const { error } = await supabase.from("playlists").insert({ title: title.trim(), created_by: user!.id, sort_order: maxOrder } as any);
+    if (error) { toast.error("Erro ao criar playlist."); return; }
+    toast.success("Playlist criada.");
+    setTitle("");
+    fetchPlaylists();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("playlists").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir."); return; }
+    toast.success("Playlist excluída.");
+    fetchPlaylists();
+  };
+
+  const toggleExpand = async (id: string) => {
+    if (expandedId === id) { setExpandedId(null); return; }
+    setExpandedId(id);
+    const { data } = await supabase.from("playlist_videos").select("*, video_lessons(title)").eq("playlist_id", id).order("sort_order");
+    setPlaylistVideos((prev) => ({ ...prev, [id]: (data as any[]) || [] }));
+  };
+
+  const addVideoToPlaylist = async (playlistId: string) => {
+    if (!selectedVideoId) return;
+    const existing = playlistVideos[playlistId] || [];
+    const maxOrder = existing.length > 0 ? Math.max(...existing.map((v: any) => v.sort_order)) + 1 : 0;
+    const { error } = await supabase.from("playlist_videos").insert({ playlist_id: playlistId, video_id: selectedVideoId, sort_order: maxOrder } as any);
+    if (error) { toast.error("Erro ao adicionar vídeo."); return; }
+    setSelectedVideoId("");
+    toggleExpand(playlistId);
+  };
+
+  const removeVideoFromPlaylist = async (pvId: string, playlistId: string) => {
+    await supabase.from("playlist_videos").delete().eq("id", pvId);
+    toggleExpand(playlistId);
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
+        <h3 className="font-heading font-bold text-sm mb-2">Nova Playlist</h3>
+        <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
+        <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Criar</Button>
+      </form>
+      <div className="space-y-2">
+        {playlists.map((p: any) => (
+          <div key={p.id} className="border bg-card rounded-xl overflow-hidden">
+            <div className="p-4 flex items-center justify-between">
+              <button onClick={() => toggleExpand(p.id)} className="flex items-center gap-2 text-sm font-body font-medium">
+                {expandedId === p.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                {p.title}
+              </button>
+              <button onClick={() => handleDelete(p.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+            </div>
+            {expandedId === p.id && (
+              <div className="border-t p-4 space-y-2">
+                {(playlistVideos[p.id] || []).map((pv: any) => (
+                  <div key={pv.id} className="flex items-center justify-between text-sm bg-muted/30 p-2 rounded">
+                    <span>{pv.video_lessons?.title || "Vídeo"}</span>
+                    <button onClick={() => removeVideoFromPlaylist(pv.id, p.id)} className="text-destructive"><Trash2 className="w-3 h-3" /></button>
+                  </div>
+                ))}
+                <div className="flex gap-2">
+                  <select value={selectedVideoId} onChange={(e) => setSelectedVideoId(e.target.value)} className="flex-1 border bg-background px-2 py-1.5 text-sm rounded">
+                    <option value="">Selecionar vídeo...</option>
+                    {videos.map((v) => <option key={v.id} value={v.id}>{v.title}</option>)}
+                  </select>
+                  <Button size="sm" onClick={() => addVideoToPlaylist(p.id)}><Plus className="w-3 h-3" /></Button>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+        {playlists.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma playlist criada.</p>}
       </div>
     </div>
   );
@@ -553,6 +629,7 @@ function AdminUsers() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [className, setClassName] = useState("");
   const [role, setRole] = useState<"admin" | "leader">("leader");
   const [creating, setCreating] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
@@ -569,13 +646,14 @@ function AdminUsers() {
     setUsers(profilesData.map((p: any) => ({ ...p, roles: rolesMap[p.user_id] || [] })));
   };
   useEffect(() => { fetchUsers(); }, []);
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim() || !fullName.trim()) return;
+    if (!email.trim() || !password.trim() || !fullName.trim() || !className.trim()) return;
     setCreating(true);
 
     const { data, error } = await supabase.functions.invoke("create-user", {
-      body: { email: email.trim(), password: password.trim(), full_name: fullName.trim(), role },
+      body: { email: email.trim(), password: password.trim(), full_name: fullName.trim(), role, class_name: className.trim() },
     });
 
     setCreating(false);
@@ -584,18 +662,19 @@ function AdminUsers() {
       return;
     }
     toast.success("Usuário criado com sucesso.");
-    setEmail(""); setPassword(""); setFullName("");
+    setEmail(""); setPassword(""); setFullName(""); setClassName("");
     fetchUsers();
   };
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3">
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
         <h3 className="font-heading font-bold text-sm mb-2">Cadastrar Usuário</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Nome completo</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">E-mail</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Senha</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1" required minLength={6} /></div>
+          <div><Label className="text-sm">Sala do Líder</Label><Input value={className} onChange={(e) => setClassName(e.target.value)} className="mt-1" required placeholder="Ex: 3º Ano A" /></div>
           <div>
             <Label className="text-sm">Papel</Label>
             <select value={role} onChange={(e) => setRole(e.target.value as "admin" | "leader")} className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10">
@@ -608,9 +687,10 @@ function AdminUsers() {
       </form>
       <div className="space-y-2">
         {users.map((u) => (
-          <div key={u.id} className="border bg-card p-4">
+          <div key={u.id} className="border bg-card p-4 rounded-xl">
             <p className="text-sm font-body font-medium">{u.full_name}</p>
             <p className="text-xs text-muted-foreground">
+              {u.class_name && <span>{u.class_name} · </span>}
               {(u.roles as string[])?.map((r: string) => r === "admin" ? "Administrador" : "Líder").join(", ") || "Sem papel"}
             </p>
           </div>
@@ -639,11 +719,7 @@ function AdminForumCategories() {
     e.preventDefault();
     if (!name.trim()) return;
     const maxOrder = categories.length > 0 ? Math.max(...categories.map((c) => c.sort_order)) + 1 : 0;
-    const { error } = await supabase.from("forum_categories").insert({
-      name: name.trim(),
-      description: description.trim() || null,
-      sort_order: maxOrder,
-    } as any);
+    const { error } = await supabase.from("forum_categories").insert({ name: name.trim(), description: description.trim() || null, sort_order: maxOrder } as any);
     if (error) { toast.error("Erro ao criar categoria."); return; }
     toast.success("Categoria criada.");
     setName(""); setDescription("");
@@ -652,10 +728,7 @@ function AdminForumCategories() {
 
   const handleUpdate = async (id: string) => {
     if (!editName.trim()) return;
-    const { error } = await supabase.from("forum_categories").update({
-      name: editName.trim(),
-      description: editDescription.trim() || null,
-    } as any).eq("id", id);
+    const { error } = await supabase.from("forum_categories").update({ name: editName.trim(), description: editDescription.trim() || null } as any).eq("id", id);
     if (error) { toast.error("Erro ao atualizar."); return; }
     toast.success("Categoria atualizada.");
     setEditingId(null);
@@ -669,35 +742,21 @@ function AdminForumCategories() {
     fetchCategories();
   };
 
-  const startEdit = (cat: any) => {
-    setEditingId(cat.id);
-    setEditName(cat.name);
-    setEditDescription(cat.description || "");
-  };
+  const startEdit = (cat: any) => { setEditingId(cat.id); setEditName(cat.name); setEditDescription(cat.description || ""); };
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3">
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
         <h3 className="font-heading font-bold text-sm mb-2">Nova Categoria do Fórum</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <Label className="text-sm">Nome</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" required />
-          </div>
-          <div>
-            <Label className="text-sm">Descrição (opcional)</Label>
-            <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" />
-          </div>
+          <div><Label className="text-sm">Nome</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" required /></div>
+          <div><Label className="text-sm">Descrição (opcional)</Label><Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" /></div>
         </div>
-        <Button type="submit" size="sm">
-          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
-          Criar Categoria
-        </Button>
+        <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Criar Categoria</Button>
       </form>
-
       <div className="space-y-2">
         {categories.map((cat) => (
-          <div key={cat.id} className="border bg-card p-4">
+          <div key={cat.id} className="border bg-card p-4 rounded-xl">
             {editingId === cat.id ? (
               <div className="space-y-2">
                 <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nome" className="h-8 text-sm" />
@@ -714,20 +773,14 @@ function AdminForumCategories() {
                   {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
                 </div>
                 <div className="flex items-center gap-1">
-                  <button onClick={() => startEdit(cat)} className="text-muted-foreground hover:text-foreground p-1">
-                    <Pencil className="w-4 h-4" strokeWidth={1.5} />
-                  </button>
-                  <button onClick={() => handleDelete(cat.id)} className="text-destructive hover:text-destructive/80 p-1">
-                    <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-                  </button>
+                  <button onClick={() => startEdit(cat)} className="text-muted-foreground hover:text-foreground p-1"><Pencil className="w-4 h-4" strokeWidth={1.5} /></button>
+                  <button onClick={() => handleDelete(cat.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
                 </div>
               </div>
             )}
           </div>
         ))}
-        {categories.length === 0 && (
-          <p className="text-sm text-muted-foreground">Nenhuma categoria criada ainda.</p>
-        )}
+        {categories.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma categoria criada ainda.</p>}
       </div>
     </div>
   );

@@ -23,10 +23,11 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/dashboard" element={<Navigate to="/home" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
-            <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+            <Route path="/home" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
             <Route path="/alunos" element={<Navigate to="/forum" replace />} />
             <Route path="/materiais" element={<ProtectedRoute><MaterialsPage /></ProtectedRoute>} />
@@ -42,4 +43,3 @@ const App = () => (
 );
 
 export default App;
-

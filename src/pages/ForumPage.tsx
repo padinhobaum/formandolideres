@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import {
   MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter } from
 "lucide-react";
+import RichTextEditor, { RichText } from "@/components/RichTextEditor";
 
 interface ForumCategory {
   id: string;
@@ -63,7 +64,7 @@ interface OnlineUser {
 }
 
 export default function ForumPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
@@ -316,6 +317,13 @@ export default function ForumPage() {
     fetchTopics();
   };
 
+  const handleDeleteReply = async (replyId: string, topicId: string) => {
+    const { error } = await supabase.from("forum_replies").delete().eq("id", replyId);
+    if (error) { toast.error("Erro ao excluir resposta."); return; }
+    toast.success("Resposta excluída.");
+    await fetchRepliesWithLikes(topicId);
+  };
+
   const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
@@ -352,7 +360,7 @@ export default function ForumPage() {
             respondendo a {replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}
           </p>
       }
-        <p className="font-body mt-0.5 whitespace-pre-wrap text-base">{reply.content}</p>
+        <span className="font-body mt-0.5 whitespace-pre-wrap text-base"><RichText content={reply.content} /></span>
         {reply.image_url &&
       <img src={reply.image_url} alt="" className="mt-1 max-w-xs max-h-48 rounded-lg object-cover" loading="lazy" />
       }
@@ -370,9 +378,16 @@ export default function ForumPage() {
           onClick={() => setReplyingTo({ id: reply.id, name: reply.author_name })}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
           
-            <Reply className="w-3 h-3" />
+           <Reply className="w-3 h-3" />
             <span>Responder</span>
           </button>
+          {(reply.author_id === user?.id || isAdmin) && (
+            <button
+              onClick={() => handleDeleteReply(reply.id, topicId)}
+              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors">
+              <Trash2 className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </div>
     </div>;
@@ -380,7 +395,7 @@ export default function ForumPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-3xl">
+      <div className="w-full max-w-4xl">
         <h2 className="font-heading font-bold mb-1 text-4xl text-accent">Fórum de Líderes</h2>
         <p className="text-muted-foreground mb-6 text-lg">Discussões, perguntas e enquetes</p>
 
@@ -447,7 +462,7 @@ export default function ForumPage() {
             </div>
             <div>
               <Label className="text-sm">Conteúdo</Label>
-              <Textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} className="mt-1" required />
+              <RichTextEditor value={newContent} onChange={setNewContent} placeholder="Escreva o conteúdo..." />
             </div>
 
             {/* Image attachment */}
@@ -531,7 +546,7 @@ export default function ForumPage() {
             const isExpanded = expandedTopicId === topic.id;
             const { topLevel, childrenMap } = getThreadedReplies(topic.id);
             const topicPoll = pollData[topic.id] || [];
-            const canDelete = topic.author_id === user?.id;
+            const canDelete = topic.author_id === user?.id || isAdmin;
             const totalVotes = topicPoll.reduce((sum, o) => sum + o.vote_count, 0);
 
             return (
@@ -577,7 +592,7 @@ export default function ForumPage() {
                   {isExpanded &&
                 <div className="border-t px-4 pb-4">
                       {/* Topic content */}
-                      <p className="font-body whitespace-pre-wrap py-3 text-base">{topic.content}</p>
+                      <div className="font-body whitespace-pre-wrap py-3 text-base"><RichText content={topic.content} /></div>
                       {topic.image_url &&
                   <img src={topic.image_url} alt="" className="mb-3 max-w-full max-h-72 rounded-lg object-cover" loading="lazy" />
                   }
