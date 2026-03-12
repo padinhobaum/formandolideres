@@ -381,7 +381,7 @@ export default function ForumPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-3xl">
+      <div className="w-full max-w-4xl">
         <h2 className="font-heading font-bold mb-1 text-4xl text-accent">Fórum de Líderes</h2>
         <p className="text-muted-foreground mb-6 text-lg">Discussões, perguntas e enquetes</p>
 
