@@ -63,6 +63,7 @@ interface OnlineUser {
   full_name: string;
   avatar_url: string | null;
   role?: string;
+  class_name?: string | null;
 }
 
 export default function ForumPage() {
