@@ -469,6 +469,7 @@ export default function ForumPage() {
                           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
                         </div>
                         <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
+                        <SalaBadge sala={u.class_name} />
                       </div>
                     ))}
                   </div>
