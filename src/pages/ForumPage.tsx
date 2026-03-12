@@ -12,6 +12,7 @@ import {
   MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter } from
 "lucide-react";
 import RichTextEditor, { RichText } from "@/components/RichTextEditor";
+import SalaBadge from "@/components/SalaBadge";
 
 interface ForumCategory {
   id: string;
@@ -62,6 +63,7 @@ interface OnlineUser {
   full_name: string;
   avatar_url: string | null;
   role?: string;
+  class_name?: string | null;
 }
 
 export default function ForumPage() {
@@ -70,6 +72,7 @@ export default function ForumPage() {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
   const [replies, setReplies] = useState<Record<string, ForumReply[]>>({});
+  const [authorProfiles, setAuthorProfiles] = useState<Record<string, string | null>>({});
   const [pollData, setPollData] = useState<Record<string, PollOption[]>>({});
   const [replyText, setReplyText] = useState("");
   const [replyImage, setReplyImage] = useState<File | null>(null);
@@ -117,11 +120,25 @@ export default function ForumPage() {
       countMap[r.topic_id] = (countMap[r.topic_id] || 0) + 1;
     });
 
-    setTopics(data.map((t: any) => ({
+    const topicsData = data.map((t: any) => ({
       ...t,
       reply_count: countMap[t.id] || 0,
       category_name: t.forum_categories?.name || null
-    })));
+    }));
+    setTopics(topicsData);
+
+    // Fetch class_name for all topic authors
+    const authorIds = [...new Set(topicsData.map((t: any) => t.author_id))];
+    if (authorIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, class_name").in("user_id", authorIds);
+      if (profs) {
+        setAuthorProfiles((prev) => {
+          const next = { ...prev };
+          profs.forEach((p: any) => { next[p.user_id] = p.class_name; });
+          return next;
+        });
+      }
+    }
   };
 
   const fetchOnlineUsers = async () => {
@@ -139,7 +156,7 @@ export default function ForumPage() {
 
     const userIds = presenceData.map((p: any) => p.user_id);
     const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", userIds),
+      supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").in("user_id", userIds),
       supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
     ]);
 
@@ -235,6 +252,19 @@ export default function ForumPage() {
     }));
 
     setReplies((prev) => ({ ...prev, [topicId]: enriched }));
+
+    // Fetch class_name for reply authors
+    const replyAuthorIds = [...new Set(repliesData.map((r: any) => r.author_id))];
+    if (replyAuthorIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, class_name").in("user_id", replyAuthorIds);
+      if (profs) {
+        setAuthorProfiles((prev) => {
+          const next = { ...prev };
+          profs.forEach((p: any) => { next[p.user_id] = p.class_name; });
+          return next;
+        });
+      }
+    }
   };
 
   const handleExpandTopic = async (topicId: string) => {
@@ -360,8 +390,9 @@ export default function ForumPage() {
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm">
-          {reply.author_name}{" "}
+        <p className="font-medium text-sm flex items-center gap-1.5">
+          {reply.author_name}
+          <SalaBadge sala={authorProfiles[reply.author_id]} />
           <span className="text-muted-foreground font-normal">· {formatDate(reply.created_at)}</span>
         </p>
         {reply.parent_reply_id &&
@@ -438,6 +469,7 @@ export default function ForumPage() {
                           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
                         </div>
                         <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
+                        <SalaBadge sala={u.class_name} />
                       </div>
                     ))}
                   </div>
@@ -601,8 +633,10 @@ export default function ForumPage() {
                             </span>
                         }
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {topic.author_name} · {formatDate(topic.created_at)}
+                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                          {topic.author_name}
+                          <SalaBadge sala={authorProfiles[topic.author_id]} />
+                          <span>· {formatDate(topic.created_at)}</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
