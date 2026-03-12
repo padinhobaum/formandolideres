@@ -578,7 +578,7 @@ export default function ForumPage() {
                   {isExpanded &&
                 <div className="border-t px-4 pb-4">
                       {/* Topic content */}
-                      <p className="font-body whitespace-pre-wrap py-3 text-base">{topic.content}</p>
+                      <div className="font-body whitespace-pre-wrap py-3 text-base"><RichText content={topic.content} /></div>
                       {topic.image_url &&
                   <img src={topic.image_url} alt="" className="mb-3 max-w-full max-h-72 rounded-lg object-cover" loading="lazy" />
                   }
