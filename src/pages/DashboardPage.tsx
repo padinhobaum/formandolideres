@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink } from "lucide-react";
+import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles } from "lucide-react";
 
 interface Notice {
   id: string;
@@ -132,6 +132,13 @@ export default function DashboardPage() {
               {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
             </p>
           </div>
+          <Button
+            onClick={() => navigate("/lider-ai")}
+            className="mt-3 rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg"
+          >
+            <Sparkles className="w-4 h-4" />
+            Pergunte à LíderAI
+          </Button>
         </div>
 
         {/* Quick stats */}

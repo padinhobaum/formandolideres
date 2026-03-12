@@ -61,6 +61,7 @@ interface OnlineUser {
   user_id: string;
   full_name: string;
   avatar_url: string | null;
+  role?: string;
 }
 
 export default function ForumPage() {
@@ -137,12 +138,20 @@ export default function ForumPage() {
     }
 
     const userIds = presenceData.map((p: any) => p.user_id);
-    const { data: profiles } = await supabase.
-    from("profiles").
-    select("user_id, full_name, avatar_url").
-    in("user_id", userIds);
+    const [profilesRes, rolesRes] = await Promise.all([
+      supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", userIds),
+      supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
+    ]);
 
-    if (profiles) setOnlineUsers(profiles as OnlineUser[]);
+    const rolesMap: Record<string, string> = {};
+    rolesRes.data?.forEach((r: any) => { rolesMap[r.user_id] = r.role; });
+
+    if (profilesRes.data) {
+      setOnlineUsers(profilesRes.data.map((p: any) => ({
+        ...p,
+        role: rolesMap[p.user_id] || "leader",
+      })));
+    }
   };
 
   useEffect(() => {
@@ -399,34 +408,50 @@ export default function ForumPage() {
         <h2 className="font-heading font-bold mb-1 text-4xl text-accent">Fórum de Líderes</h2>
         <p className="text-muted-foreground mb-6 text-lg">Discussões, perguntas e enquetes</p>
 
-        {/* Online Leaders */}
-        <section className="mb-6 border bg-card rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <Circle className="w-3 h-3 text-accent fill-accent" />
-            <h3 className="font-heading font-bold text-sm">
-              Líderes Online ({onlineUsers.length})
-            </h3>
-          </div>
-          {onlineUsers.length === 0 ?
-          <p className="text-xs text-muted-foreground">Nenhum líder online no momento.</p> :
+        {/* Online Users */}
+        <section className="mb-6 border bg-card rounded-xl p-4 space-y-4">
+          {(() => {
+            const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
+            const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
 
-          <div className="flex flex-wrap gap-3">
-              {onlineUsers.map((u) =>
-            <div key={u.user_id} className="flex items-center gap-2">
-                  <div className="relative">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={u.avatar_url || undefined} />
-                      <AvatarFallback className="text-[10px] bg-primary text-primary-foreground">
-                        {getInitials(u.full_name)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
-                  </div>
-                  <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
+            const renderGroup = (users: OnlineUser[], label: string) => (
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <Circle className="w-3 h-3 text-accent fill-accent" />
+                  <h3 className="font-heading font-bold text-sm">
+                    {label} ({users.length})
+                  </h3>
                 </div>
-            )}
-            </div>
-          }
+                {users.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Nenhum online no momento.</p>
+                ) : (
+                  <div className="flex flex-wrap gap-3">
+                    {users.map((u) => (
+                      <div key={u.user_id} className="flex items-center gap-2">
+                        <div className="relative">
+                          <Avatar className="w-8 h-8">
+                            <AvatarImage src={u.avatar_url || undefined} />
+                            <AvatarFallback className="text-[10px] bg-primary text-primary-foreground">
+                              {getInitials(u.full_name)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
+                        </div>
+                        <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+
+            return (
+              <>
+                {renderGroup(adminsOnline, "Administradores Online")}
+                {renderGroup(leadersOnline, "Líderes Online")}
+              </>
+            );
+          })()}
         </section>
 
         {/* New Topic Button + Category Filter */}
