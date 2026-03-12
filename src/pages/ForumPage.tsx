@@ -251,6 +251,19 @@ export default function ForumPage() {
     }));
 
     setReplies((prev) => ({ ...prev, [topicId]: enriched }));
+
+    // Fetch class_name for reply authors
+    const replyAuthorIds = [...new Set(repliesData.map((r: any) => r.author_id))];
+    if (replyAuthorIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, class_name").in("user_id", replyAuthorIds);
+      if (profs) {
+        setAuthorProfiles((prev) => {
+          const next = { ...prev };
+          profs.forEach((p: any) => { next[p.user_id] = p.class_name; });
+          return next;
+        });
+      }
+    }
   };
 
   const handleExpandTopic = async (topicId: string) => {
