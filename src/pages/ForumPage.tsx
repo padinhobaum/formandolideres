@@ -630,8 +630,10 @@ export default function ForumPage() {
                             </span>
                         }
                         </div>
-                        <p className="text-xs text-muted-foreground mt-0.5">
-                          {topic.author_name} · {formatDate(topic.created_at)}
+                        <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                          {topic.author_name}
+                          <SalaBadge sala={authorProfiles[topic.author_id]} />
+                          <span>· {formatDate(topic.created_at)}</span>
                         </p>
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
