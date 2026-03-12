@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import {
   MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter } from
 "lucide-react";
+import RichTextEditor, { RichText } from "@/components/RichTextEditor";
 
 interface ForumCategory {
   id: string;
