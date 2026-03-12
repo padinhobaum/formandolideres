@@ -189,7 +189,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around py-2 z-30">
-        {visibleItems.slice(0, 4).map((item) => {
+        {visibleItems.filter(i => !i.adminOnly).slice(0, 5).map((item) => {
           const active = location.pathname === item.path;
           return (
             <button
