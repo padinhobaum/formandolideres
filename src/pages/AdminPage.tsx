@@ -631,6 +631,7 @@ function AdminUsers() {
   const [fullName, setFullName] = useState("");
   const [className, setClassName] = useState("");
   const [role, setRole] = useState<"admin" | "leader">("leader");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [creating, setCreating] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
 
