@@ -156,7 +156,7 @@ export default function ForumPage() {
 
     const userIds = presenceData.map((p: any) => p.user_id);
     const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", userIds),
+      supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").in("user_id", userIds),
       supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
     ]);
 
