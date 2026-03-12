@@ -24,16 +24,16 @@ interface CustomLink {
 }
 
 const navItems: NavItem[] = [
-  { label: "Home", path: "/home", icon: Home },
-  { label: "Fórum", path: "/forum", icon: MessageSquare },
-  { label: "Materiais", path: "/materiais", icon: Download },
-  { label: "Videoaulas", path: "/videoaulas", icon: Video },
-  { label: "Mural", path: "/mural", icon: Megaphone },
-  { label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
-  { label: "Admin", path: "/admin", icon: Shield, adminOnly: true },
-];
+{ label: "Home", path: "/home", icon: Home },
+{ label: "Fórum", path: "/forum", icon: MessageSquare },
+{ label: "Materiais", path: "/materiais", icon: Download },
+{ label: "Videoaulas", path: "/videoaulas", icon: Video },
+{ label: "Mural", path: "/mural", icon: Megaphone },
+{ label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
+{ label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
-export default function AppLayout({ children }: { children: ReactNode }) {
+
+export default function AppLayout({ children }: {children: ReactNode;}) {
   const { profile, isAdmin, signOut } = useAuth();
   usePresence();
   const navigate = useNavigate();
@@ -71,47 +71,47 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 key={item.path}
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body rounded transition-colors ${
-                  active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
-                }`}
-              >
+                active ?
+                "bg-sidebar-accent text-sidebar-accent-foreground font-medium" :
+                "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"}`
+                }>
+                
                 <item.icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                 <span className="text-lg">{item.label}</span>
-                {item.badge && (
-                  <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary text-primary-foreground leading-none">
+                {item.badge &&
+                <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded text-primary-foreground leading-none bg-accent">
                     {item.badge}
                   </span>
-                )}
-              </button>
-            );
+                }
+              </button>);
+
           })}
 
           {/* Notifications */}
           <NotificationPopover variant="sidebar" />
 
           {/* Custom links */}
-          {customLinks.length > 0 && (
-            <>
+          {customLinks.length > 0 &&
+          <>
               <div className="border-t border-sidebar-border my-2" />
-              {customLinks.map((link) => (
-                <a
-                  key={link.id}
-                  href={link.url}
-                  target={isExternal(link.url) ? "_blank" : "_self"}
-                  rel={isExternal(link.url) ? "noopener noreferrer" : undefined}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body transition-colors text-sidebar-foreground/70 hover:text-sidebar-foreground bg-secondary-foreground rounded-xl"
-                >
-                  {link.icon_url ? (
-                    <img src={link.icon_url} alt="" className="w-[20px] h-[20px] object-contain brightness-0 invert" />
-                  ) : (
-                    <ExternalLink className="w-[20px] h-[20px]" strokeWidth={1.5} />
-                  )}
+              {customLinks.map((link) =>
+            <a
+              key={link.id}
+              href={link.url}
+              target={isExternal(link.url) ? "_blank" : "_self"}
+              rel={isExternal(link.url) ? "noopener noreferrer" : undefined}
+              className="w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body transition-colors text-sidebar-foreground/70 hover:text-sidebar-foreground bg-secondary-foreground rounded-xl">
+              
+                  {link.icon_url ?
+              <img src={link.icon_url} alt="" className="w-[20px] h-[20px] object-contain brightness-0 invert" /> :
+
+              <ExternalLink className="w-[20px] h-[20px]" strokeWidth={1.5} />
+              }
                   <span className="truncate text-base">{link.label}</span>
                 </a>
-              ))}
+            )}
             </>
-          )}
+          }
         </nav>
 
         <div className="p-3 border-t border-sidebar-border">
@@ -131,8 +131,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
           </div>
           <button
             onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/60 hover:text-destructive hover:bg-sidebar-accent/50 rounded transition-colors mt-1"
-          >
+            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/60 hover:text-destructive hover:bg-sidebar-accent/50 rounded transition-colors mt-1">
+            
             <LogOut className="w-4 h-4" strokeWidth={1.5} />
             <span>Sair</span>
           </button>
@@ -166,8 +166,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               <img
                 src="/lovable-uploads/footer-logo.png"
                 alt="Formando Líderes"
-                className="h-12 w-auto"
-              />
+                className="h-12 w-auto" />
+              
             </div>
             <div className="flex-1" />
             <div className="flex flex-col items-center md:items-end gap-1">
@@ -175,8 +175,8 @@ export default function AppLayout({ children }: { children: ReactNode }) {
                 href="https://www.formandolideres.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-              >
+                className="text-sm text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2">
+                
                 www.formandolideres.org
               </a>
               <p className="text-xs text-muted-foreground text-center md:text-right mt-1">
@@ -189,33 +189,33 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around py-2 z-30">
-        {visibleItems.filter(i => !i.adminOnly).slice(0, 5).map((item) => {
+        {visibleItems.filter((i) => !i.adminOnly).slice(0, 5).map((item) => {
           const active = location.pathname === item.path;
           return (
             <button
               key={item.path}
               onClick={() => navigate(item.path)}
               className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
-                active ? "text-primary font-medium" : "text-muted-foreground"
-              }`}
-            >
+              active ? "text-primary font-medium" : "text-muted-foreground"}`
+              }>
+              
               <item.icon className="w-5 h-5" strokeWidth={1.5} />
               <span>{item.label}</span>
-            </button>
-          );
+            </button>);
+
         })}
-        {isAdmin && (
-          <button
-            onClick={() => navigate("/admin")}
-            className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
-              location.pathname === "/admin" ? "text-primary font-medium" : "text-muted-foreground"
-            }`}
-          >
+        {isAdmin &&
+        <button
+          onClick={() => navigate("/admin")}
+          className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
+          location.pathname === "/admin" ? "text-primary font-medium" : "text-muted-foreground"}`
+          }>
+          
             <Shield className="w-5 h-5" strokeWidth={1.5} />
             <span>Admin</span>
           </button>
-        )}
+        }
       </nav>
-    </div>
-  );
+    </div>);
+
 }
