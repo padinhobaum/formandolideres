@@ -317,6 +317,13 @@ export default function ForumPage() {
     fetchTopics();
   };
 
+  const handleDeleteReply = async (replyId: string, topicId: string) => {
+    const { error } = await supabase.from("forum_replies").delete().eq("id", replyId);
+    if (error) { toast.error("Erro ao excluir resposta."); return; }
+    toast.success("Resposta excluída.");
+    await fetchRepliesWithLikes(topicId);
+  };
+
   const formatDate = (d: string) =>
   new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
