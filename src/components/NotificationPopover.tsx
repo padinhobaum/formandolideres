@@ -1,0 +1,161 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { Bell } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+
+interface NotificationItem {
+  id: string;
+  type: "notice" | "topic" | "video" | "material";
+  title: string;
+  created_at: string;
+}
+
+export default function NotificationPopover({ variant = "sidebar" }: { variant?: "sidebar" | "header" }) {
+  const { user } = useAuth();
+  const [items, setItems] = useState<NotificationItem[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [open, setOpen] = useState(false);
+  const [lastReadAt, setLastReadAt] = useState<string | null>(null);
+
+  const fetchLastRead = async () => {
+    if (!user) return null;
+    const { data } = await supabase
+      .from("notification_last_read")
+      .select("last_read_at")
+      .eq("user_id", user.id)
+      .maybeSingle();
+    const lr = (data as any)?.last_read_at || null;
+    setLastReadAt(lr);
+    return lr;
+  };
+
+  const fetchNotifications = async () => {
+    if (!user) return;
+    const lr = await fetchLastRead();
+
+    const [notices, topics, videos, materials] = await Promise.all([
+      supabase.from("notices").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
+      supabase.from("forum_topics").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
+      supabase.from("video_lessons").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
+      supabase.from("materials").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
+    ]);
+
+    const all: NotificationItem[] = [
+      ...(notices.data || []).map((n: any) => ({ ...n, type: "notice" as const })),
+      ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const })),
+      ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const })),
+      ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const })),
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 20);
+
+    setItems(all);
+
+    if (lr) {
+      setUnreadCount(all.filter((i) => new Date(i.created_at) > new Date(lr)).length);
+    } else {
+      setUnreadCount(all.length);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [user]);
+
+  const handleOpenChange = async (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (!isOpen && user && unreadCount > 0) {
+      // Mark as read
+      const now = new Date().toISOString();
+      await supabase.from("notification_last_read").upsert({ user_id: user.id, last_read_at: now } as any, { onConflict: "user_id" });
+      setUnreadCount(0);
+      setLastReadAt(now);
+    }
+  };
+
+  const typeLabel: Record<string, string> = {
+    notice: "Aviso",
+    topic: "Fórum",
+    video: "Videoaula",
+    material: "Material",
+  };
+
+  const typeColor: Record<string, string> = {
+    notice: "bg-primary",
+    topic: "bg-accent",
+    video: "bg-destructive",
+    material: "bg-secondary-foreground",
+  };
+
+  const formatDate = (d: string) =>
+    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+
+  const isUnread = (created_at: string) => !lastReadAt || new Date(created_at) > new Date(lastReadAt);
+
+  if (variant === "header") {
+    return (
+      <Popover open={open} onOpenChange={handleOpenChange}>
+        <PopoverTrigger asChild>
+          <button className="relative p-1">
+            <Bell className="w-5 h-5 text-muted-foreground" strokeWidth={1.5} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0" align="end">
+          <div className="p-3 border-b font-heading font-bold text-sm">Notificações</div>
+          <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} />
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  return (
+    <Popover open={open} onOpenChange={handleOpenChange}>
+      <PopoverTrigger asChild>
+        <button className="w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body rounded transition-colors text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
+          <Bell className="w-[20px] h-[20px]" strokeWidth={1.5} />
+          <span className="text-lg">Notificações</span>
+          {unreadCount > 0 && (
+            <span className="ml-auto bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {unreadCount > 9 ? "9+" : unreadCount}
+            </span>
+          )}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0" side="right" align="start">
+        <div className="p-3 border-b font-heading font-bold text-sm">Notificações</div>
+        <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} />
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread }: {
+  items: NotificationItem[];
+  typeLabel: Record<string, string>;
+  typeColor: Record<string, string>;
+  formatDate: (d: string) => string;
+  isUnread: (d: string) => boolean;
+}) {
+  if (items.length === 0) {
+    return <p className="p-4 text-sm text-muted-foreground text-center">Nenhuma notificação.</p>;
+  }
+  return (
+    <div className="divide-y">
+      {items.map((item) => (
+        <div key={`${item.type}-${item.id}`} className={`p-3 text-sm ${isUnread(item.created_at) ? "bg-secondary/50" : ""}`}>
+          <div className="flex items-center gap-2 mb-0.5">
+            <span className={`text-[10px] text-primary-foreground px-1.5 py-0.5 rounded font-body ${typeColor[item.type]}`}>
+              {typeLabel[item.type]}
+            </span>
+            <span className="text-[10px] text-muted-foreground">{formatDate(item.created_at)}</span>
+          </div>
+          <p className="font-body text-sm line-clamp-2">{item.title}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
