@@ -631,6 +631,7 @@ function AdminUsers() {
   const [fullName, setFullName] = useState("");
   const [className, setClassName] = useState("");
   const [role, setRole] = useState<"admin" | "leader">("leader");
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [creating, setCreating] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
 
@@ -652,8 +653,18 @@ function AdminUsers() {
     if (!email.trim() || !password.trim() || !fullName.trim() || !className.trim()) return;
     setCreating(true);
 
+    let avatarUrl: string | null = null;
+    if (avatarFile) {
+      const path = `new-user/${Date.now()}_${avatarFile.name}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+      if (!upErr) {
+        const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+        avatarUrl = urlData.publicUrl;
+      }
+    }
+
     const { data, error } = await supabase.functions.invoke("create-user", {
-      body: { email: email.trim(), password: password.trim(), full_name: fullName.trim(), role, class_name: className.trim() },
+      body: { email: email.trim(), password: password.trim(), full_name: fullName.trim(), role, class_name: className.trim(), avatar_url: avatarUrl },
     });
 
     setCreating(false);
@@ -662,7 +673,7 @@ function AdminUsers() {
       return;
     }
     toast.success("Usuário criado com sucesso.");
-    setEmail(""); setPassword(""); setFullName(""); setClassName("");
+    setEmail(""); setPassword(""); setFullName(""); setClassName(""); setAvatarFile(null);
     fetchUsers();
   };
 
@@ -682,6 +693,10 @@ function AdminUsers() {
               <option value="admin">Administrador</option>
             </select>
           </div>
+        </div>
+        <div>
+          <Label className="text-sm flex items-center gap-1"><ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Foto de perfil (opcional)</Label>
+          <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
         </div>
         <Button type="submit" size="sm" disabled={creating}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{creating ? "Criando..." : "Cadastrar"}</Button>
       </form>
