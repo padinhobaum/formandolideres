@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink } from "lucide-react";
+import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePresence } from "@/hooks/usePresence";
 import NotificationPopover from "@/components/NotificationPopover";
@@ -12,6 +12,7 @@ interface NavItem {
   path: string;
   icon: typeof Home;
   adminOnly?: boolean;
+  badge?: string;
 }
 
 interface CustomLink {
@@ -28,6 +29,7 @@ const navItems: NavItem[] = [
   { label: "Materiais", path: "/materiais", icon: Download },
   { label: "Videoaulas", path: "/videoaulas", icon: Video },
   { label: "Mural", path: "/mural", icon: Megaphone },
+  { label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
   { label: "Admin", path: "/admin", icon: Shield, adminOnly: true },
 ];
 
@@ -76,6 +78,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               >
                 <item.icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                 <span className="text-lg">{item.label}</span>
+                {item.badge && (
+                  <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary text-primary-foreground leading-none">
+                    {item.badge}
+                  </span>
+                )}
               </button>
             );
           })}
@@ -182,7 +189,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around py-2 z-30">
-        {visibleItems.slice(0, 4).map((item) => {
+        {visibleItems.filter(i => !i.adminOnly).slice(0, 5).map((item) => {
           const active = location.pathname === item.path;
           return (
             <button
