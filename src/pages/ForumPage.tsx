@@ -71,6 +71,7 @@ export default function ForumPage() {
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
   const [replies, setReplies] = useState<Record<string, ForumReply[]>>({});
+  const [authorProfiles, setAuthorProfiles] = useState<Record<string, string | null>>({});
   const [pollData, setPollData] = useState<Record<string, PollOption[]>>({});
   const [replyText, setReplyText] = useState("");
   const [replyImage, setReplyImage] = useState<File | null>(null);
