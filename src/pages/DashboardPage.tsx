@@ -132,6 +132,13 @@ export default function DashboardPage() {
               {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
             </p>
           </div>
+          <Button
+            onClick={() => navigate("/lider-ai")}
+            className="mt-3 rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg"
+          >
+            <Sparkles className="w-4 h-4" />
+            Pergunte à LíderAI
+          </Button>
         </div>
 
         {/* Quick stats */}
