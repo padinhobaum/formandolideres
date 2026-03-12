@@ -448,7 +448,7 @@ export default function ForumPage() {
             </div>
             <div>
               <Label className="text-sm">Conteúdo</Label>
-              <Textarea value={newContent} onChange={(e) => setNewContent(e.target.value)} className="mt-1" required />
+              <RichTextEditor value={newContent} onChange={setNewContent} placeholder="Escreva o conteúdo..." />
             </div>
 
             {/* Image attachment */}
