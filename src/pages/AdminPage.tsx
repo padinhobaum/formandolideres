@@ -653,8 +653,18 @@ function AdminUsers() {
     if (!email.trim() || !password.trim() || !fullName.trim() || !className.trim()) return;
     setCreating(true);
 
+    let avatarUrl: string | null = null;
+    if (avatarFile) {
+      const path = `new-user/${Date.now()}_${avatarFile.name}`;
+      const { error: upErr } = await supabase.storage.from("avatars").upload(path, avatarFile, { upsert: true });
+      if (!upErr) {
+        const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
+        avatarUrl = urlData.publicUrl;
+      }
+    }
+
     const { data, error } = await supabase.functions.invoke("create-user", {
-      body: { email: email.trim(), password: password.trim(), full_name: fullName.trim(), role, class_name: className.trim() },
+      body: { email: email.trim(), password: password.trim(), full_name: fullName.trim(), role, class_name: className.trim(), avatar_url: avatarUrl },
     });
 
     setCreating(false);
@@ -663,7 +673,7 @@ function AdminUsers() {
       return;
     }
     toast.success("Usuário criado com sucesso.");
-    setEmail(""); setPassword(""); setFullName(""); setClassName("");
+    setEmail(""); setPassword(""); setFullName(""); setClassName(""); setAvatarFile(null);
     fetchUsers();
   };
 
