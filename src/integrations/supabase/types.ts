@@ -199,6 +199,35 @@ export type Database = {
         }
         Relationships: []
       }
+      notice_reads: {
+        Row: {
+          id: string
+          notice_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          notice_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          notice_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notice_reads_notice_id_fkey"
+            columns: ["notice_id"]
+            isOneToOne: false
+            referencedRelation: "notices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notices: {
         Row: {
           author_id: string
@@ -235,6 +264,81 @@ export type Database = {
           is_pinned?: boolean
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      notification_last_read: {
+        Row: {
+          last_read_at: string
+          user_id: string
+        }
+        Insert: {
+          last_read_at?: string
+          user_id: string
+        }
+        Update: {
+          last_read_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      playlist_videos: {
+        Row: {
+          id: string
+          playlist_id: string
+          sort_order: number
+          video_id: string
+        }
+        Insert: {
+          id?: string
+          playlist_id: string
+          sort_order?: number
+          video_id: string
+        }
+        Update: {
+          id?: string
+          playlist_id?: string
+          sort_order?: number
+          video_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "playlist_videos_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "playlists"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "playlist_videos_video_id_fkey"
+            columns: ["video_id"]
+            isOneToOne: false
+            referencedRelation: "video_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      playlists: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          sort_order?: number
+          title?: string
         }
         Relationships: []
       }
