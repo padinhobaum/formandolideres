@@ -56,9 +56,12 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "User created but role assignment failed: " + roleError.message }), { status: 500, headers: corsHeaders });
     }
 
-    // Update profile with class_name if provided
-    if (class_name) {
-      await adminClient.from("profiles").update({ class_name }).eq("user_id", newUser.user.id);
+    // Update profile with class_name and avatar_url if provided
+    const profileUpdate: Record<string, string> = {};
+    if (class_name) profileUpdate.class_name = class_name;
+    if (avatar_url) profileUpdate.avatar_url = avatar_url;
+    if (Object.keys(profileUpdate).length > 0) {
+      await adminClient.from("profiles").update(profileUpdate).eq("user_id", newUser.user.id);
     }
 
     return new Response(JSON.stringify({ success: true, user_id: newUser.user.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });

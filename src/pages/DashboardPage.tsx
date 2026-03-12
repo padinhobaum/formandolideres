@@ -95,7 +95,11 @@ export default function DashboardPage() {
     const { error: upErr } = await supabase.storage.from("avatars").upload(path, file, { upsert: true });
     if (upErr) { toast.error("Erro no upload."); setUploadingAvatar(false); return; }
     const { data: urlData } = supabase.storage.from("avatars").getPublicUrl(path);
-    await supabase.from("profiles").update({ avatar_url: urlData.publicUrl } as any).eq("user_id", user.id);
+    await supabase.from("profiles").upsert({
+      user_id: user.id,
+      full_name: profile?.full_name || user.user_metadata?.full_name || user.email || "Usuário",
+      avatar_url: urlData.publicUrl,
+    } as any, { onConflict: "user_id" });
     await refreshProfile();
     setUploadingAvatar(false);
     toast.success("Foto atualizada!");
