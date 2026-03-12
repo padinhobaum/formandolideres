@@ -119,11 +119,25 @@ export default function ForumPage() {
       countMap[r.topic_id] = (countMap[r.topic_id] || 0) + 1;
     });
 
-    setTopics(data.map((t: any) => ({
+    const topicsData = data.map((t: any) => ({
       ...t,
       reply_count: countMap[t.id] || 0,
       category_name: t.forum_categories?.name || null
-    })));
+    }));
+    setTopics(topicsData);
+
+    // Fetch class_name for all topic authors
+    const authorIds = [...new Set(topicsData.map((t: any) => t.author_id))];
+    if (authorIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, class_name").in("user_id", authorIds);
+      if (profs) {
+        setAuthorProfiles((prev) => {
+          const next = { ...prev };
+          profs.forEach((p: any) => { next[p.user_id] = p.class_name; });
+          return next;
+        });
+      }
+    }
   };
 
   const fetchOnlineUsers = async () => {
