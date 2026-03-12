@@ -353,7 +353,7 @@ export default function ForumPage() {
             respondendo a {replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}
           </p>
       }
-        <p className="font-body mt-0.5 whitespace-pre-wrap text-base">{reply.content}</p>
+        <span className="font-body mt-0.5 whitespace-pre-wrap text-base"><RichText content={reply.content} /></span>
         {reply.image_url &&
       <img src={reply.image_url} alt="" className="mt-1 max-w-xs max-h-48 rounded-lg object-cover" loading="lazy" />
       }
