@@ -546,7 +546,7 @@ export default function ForumPage() {
             const isExpanded = expandedTopicId === topic.id;
             const { topLevel, childrenMap } = getThreadedReplies(topic.id);
             const topicPoll = pollData[topic.id] || [];
-            const canDelete = topic.author_id === user?.id;
+            const canDelete = topic.author_id === user?.id || isAdmin;
             const totalVotes = topicPoll.reduce((sum, o) => sum + o.vote_count, 0);
 
             return (
