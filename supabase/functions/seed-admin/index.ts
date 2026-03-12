@@ -28,6 +28,8 @@ Deno.serve(async (req) => {
       if (!roleCheck || roleCheck.length === 0) {
         await adminClient.from("user_roles").insert({ user_id: existing.id, role: "admin" });
       }
+      // Ensure class_name is set
+      await adminClient.from("profiles").update({ class_name: "Administrador" }).eq("user_id", existing.id);
       return new Response(JSON.stringify({ message: "Admin already exists", user_id: existing.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 

@@ -78,6 +78,11 @@ export default function AppLayout({ children }: { children: ReactNode }) {
               >
                 <item.icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                 <span className="text-lg">{item.label}</span>
+                {item.badge && (
+                  <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded bg-primary text-primary-foreground leading-none">
+                    {item.badge}
+                  </span>
+                )}
               </button>
             );
           })}
