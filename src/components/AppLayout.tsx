@@ -29,6 +29,7 @@ const navItems: NavItem[] = [
   { label: "Materiais", path: "/materiais", icon: Download },
   { label: "Videoaulas", path: "/videoaulas", icon: Video },
   { label: "Mural", path: "/mural", icon: Megaphone },
+  { label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
   { label: "Admin", path: "/admin", icon: Shield, adminOnly: true },
 ];
 
