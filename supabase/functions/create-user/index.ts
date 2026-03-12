@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: corsHeaders });
     }
 
-    const { email, password, full_name, role, class_name } = await req.json();
+    const { email, password, full_name, role, class_name, avatar_url } = await req.json();
 
     const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
