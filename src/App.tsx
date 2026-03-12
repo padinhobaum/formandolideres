@@ -12,6 +12,7 @@ import MaterialsPage from "@/pages/MaterialsPage";
 import VideoLessonsPage from "@/pages/VideoLessonsPage";
 import NoticesPage from "@/pages/NoticesPage";
 import AdminPage from "@/pages/AdminPage";
+import LiderAIPage from "@/pages/LiderAIPage";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
