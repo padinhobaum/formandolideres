@@ -12,6 +12,7 @@ interface NavItem {
   path: string;
   icon: typeof Home;
   adminOnly?: boolean;
+  badge?: string;
 }
 
 interface CustomLink {
