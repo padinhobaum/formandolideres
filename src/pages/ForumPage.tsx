@@ -138,12 +138,20 @@ export default function ForumPage() {
     }
 
     const userIds = presenceData.map((p: any) => p.user_id);
-    const { data: profiles } = await supabase.
-    from("profiles").
-    select("user_id, full_name, avatar_url").
-    in("user_id", userIds);
+    const [profilesRes, rolesRes] = await Promise.all([
+      supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", userIds),
+      supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
+    ]);
 
-    if (profiles) setOnlineUsers(profiles as OnlineUser[]);
+    const rolesMap: Record<string, string> = {};
+    rolesRes.data?.forEach((r: any) => { rolesMap[r.user_id] = r.role; });
+
+    if (profilesRes.data) {
+      setOnlineUsers(profilesRes.data.map((p: any) => ({
+        ...p,
+        role: rolesMap[p.user_id] || "leader",
+      })));
+    }
   };
 
   useEffect(() => {
