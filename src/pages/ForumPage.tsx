@@ -64,7 +64,7 @@ interface OnlineUser {
 }
 
 export default function ForumPage() {
-  const { user, profile } = useAuth();
+  const { user, profile, isAdmin } = useAuth();
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
