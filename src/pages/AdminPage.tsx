@@ -77,12 +77,21 @@ function AdminNotices() {
   const [uploading, setUploading] = useState(false);
   const [viewingReads, setViewingReads] = useState<string | null>(null);
   const [noticeReads, setNoticeReads] = useState<any[]>([]);
+  const [sendType, setSendType] = useState<"global" | "specific">("global");
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
   const fetchNotices = async () => {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
     if (data) setNotices(data);
   };
-  useEffect(() => { fetchNotices(); }, []);
+
+  const fetchAllUsers = async () => {
+    const { data } = await supabase.from("profiles").select("user_id, full_name, class_name");
+    if (data) setAllUsers(data);
+  };
+
+  useEffect(() => { fetchNotices(); fetchAllUsers(); }, []);
 
   const addCta = () => {
     if (ctaButtons.length >= 3) return;
@@ -121,12 +130,13 @@ function AdminNotices() {
       is_pinned: pinned,
       image_url: imageUrl,
       cta_buttons: validCtas,
+      target_user_ids: sendType === "specific" && selectedUserIds.length > 0 ? selectedUserIds : null,
     } as any);
 
     setUploading(false);
     if (error) { toast.error("Erro ao criar aviso."); return; }
-    toast.success("Aviso criado.");
-    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]);
+    toast.success(sendType === "specific" ? `Aviso enviado para ${selectedUserIds.length} usuário(s).` : "Aviso global criado.");
+    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]);
     fetchNotices();
   };
 
