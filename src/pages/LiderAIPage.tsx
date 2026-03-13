@@ -117,7 +117,7 @@ export default function LiderAIPage() {
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-12rem)] md:h-[calc(100vh-6rem)] max-w-4xl mx-auto">
         {/* Sticky Header */}
-        <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-gradient-to-r from-primary/80 to-accent/80 backdrop-blur-sm">
+        <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3 mb-4 rounded-xl bg-gradient-to-r from-primary/80 to-accent/80 backdrop-blur-sm">
           <Sparkles className="w-5 h-5 text-primary-foreground" />
           <h1 className="font-heading font-bold text-lg text-primary-foreground">LíderAI</h1>
         </div>

@@ -25,11 +25,11 @@ interface CustomLink {
 
 const navItems: NavItem[] = [
 { label: "Home", path: "/home", icon: Home },
-{ label: "Fórum", path: "/forum", icon: MessageSquare },
-{ label: "Materiais", path: "/materiais", icon: Download },
-{ label: "Videoaulas", path: "/videoaulas", icon: Video },
 { label: "Mural", path: "/mural", icon: Megaphone },
+{ label: "Fórum", path: "/forum", icon: MessageSquare },
 { label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
+{ label: "Videoaulas", path: "/videoaulas", icon: Video },
+{ label: "Materiais", path: "/materiais", icon: Download },
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
 

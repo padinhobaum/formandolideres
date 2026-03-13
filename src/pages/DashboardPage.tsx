@@ -150,28 +150,32 @@ export default function DashboardPage() {
         </div>
 
         {/* Quick stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          <button onClick={() => navigate("/mural")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-            <div className="flex items-center gap-2 mb-2">
-              <Megaphone className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
-              <span className="font-body text-muted-foreground text-lg">Avisos</span>
-            </div>
-            <p className="font-heading font-bold text-primary text-3xl">{notices.length}</p>
-          </button>
-          <div className="border bg-card p-4 text-left rounded-xl">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
+          {/* Sala do Líder - full width on mobile */}
+          <div className="border bg-card p-4 text-left rounded-xl col-span-1">
             <div className="flex items-center gap-2 mb-2">
               <GraduationCap className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
               <span className="font-body text-muted-foreground text-lg">Sala do Líder</span>
             </div>
             <p className="font-heading font-bold text-primary text-2xl">{profile?.class_name || "Não definida"}</p>
           </div>
-          <button onClick={() => navigate("/forum")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-            <div className="flex items-center gap-2 mb-2">
-              <Circle className="text-accent fill-accent w-[10px] h-[10px]" />
-              <span className="font-body text-muted-foreground text-lg">Líderes Online</span>
-            </div>
-            <p className="font-heading font-bold text-accent text-3xl">{onlineCount}</p>
-          </button>
+          {/* Avisos + Online side by side on mobile */}
+          <div className="grid grid-cols-2 lg:contents gap-4">
+            <button onClick={() => navigate("/mural")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Megaphone className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
+                <span className="font-body text-muted-foreground text-lg">Avisos</span>
+              </div>
+              <p className="font-heading font-bold text-primary text-3xl">{notices.length}</p>
+            </button>
+            <button onClick={() => navigate("/forum")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
+              <div className="flex items-center gap-2 mb-2">
+                <Circle className="text-accent fill-accent w-[10px] h-[10px]" />
+                <span className="font-body text-muted-foreground text-lg">Online</span>
+              </div>
+              <p className="font-heading font-bold text-accent text-3xl">{onlineCount}</p>
+            </button>
+          </div>
         </div>
 
         {/* Últimos Avisos */}
