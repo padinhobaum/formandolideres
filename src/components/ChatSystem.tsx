@@ -228,6 +228,8 @@ export default function ChatSystem() {
     u.full_name.toLowerCase().includes(searchUser.toLowerCase())
   );
 
+  if (!user) return null;
+
   if (!open) {
     return (
       <button
