@@ -35,14 +35,20 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     const lr = await fetchLastRead();
 
     const [notices, topics, videos, materials] = await Promise.all([
-      supabase.from("notices").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
+      supabase.from("notices").select("id, title, created_at, target_user_ids").order("created_at", { ascending: false }).limit(10),
       supabase.from("forum_topics").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
       supabase.from("video_lessons").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
       supabase.from("materials").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
     ]);
 
+    // Filter notices: only show global or targeted to this user
+    const filteredNotices = (notices.data || []).filter((n: any) => {
+      if (!n.target_user_ids || n.target_user_ids.length === 0) return true; // global
+      return n.target_user_ids.includes(user.id); // targeted to this user
+    });
+
     const all: NotificationItem[] = [
-      ...(notices.data || []).map((n: any) => ({ ...n, type: "notice" as const })),
+      ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const })),
       ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const })),
       ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const })),
       ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const })),
@@ -64,7 +70,6 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
   const handleOpenChange = async (isOpen: boolean) => {
     setOpen(isOpen);
     if (!isOpen && user && unreadCount > 0) {
-      // Mark as read
       const now = new Date().toISOString();
       await supabase.from("notification_last_read").upsert({ user_id: user.id, last_read_at: now } as any, { onConflict: "user_id" });
       setUnreadCount(0);
