@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       email,
       password,
       email_confirm: true,
-      user_metadata: { full_name },
+      user_metadata: { full_name, class_name, avatar_url },
     });
 
     if (createError || !newUser.user) {
@@ -56,13 +56,15 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "User created but role assignment failed: " + roleError.message }), { status: 500, headers: corsHeaders });
     }
 
-    // Update profile with class_name and avatar_url if provided
-    const profileUpdate: Record<string, string> = {};
-    if (class_name) profileUpdate.class_name = class_name;
-    if (avatar_url) profileUpdate.avatar_url = avatar_url;
-    if (Object.keys(profileUpdate).length > 0) {
-      await adminClient.from("profiles").update(profileUpdate).eq("user_id", newUser.user.id);
-    }
+    // Upsert profile with class_name and avatar_url (trigger may have already created it)
+    const profileData: Record<string, string> = {
+      user_id: newUser.user.id,
+      full_name: full_name || email,
+    };
+    if (class_name) profileData.class_name = class_name;
+    if (avatar_url) profileData.avatar_url = avatar_url;
+
+    await adminClient.from("profiles").upsert(profileData, { onConflict: "user_id" });
 
     return new Response(JSON.stringify({ success: true, user_id: newUser.user.id }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
   } catch (err) {

@@ -77,12 +77,21 @@ function AdminNotices() {
   const [uploading, setUploading] = useState(false);
   const [viewingReads, setViewingReads] = useState<string | null>(null);
   const [noticeReads, setNoticeReads] = useState<any[]>([]);
+  const [sendType, setSendType] = useState<"global" | "specific">("global");
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
   const fetchNotices = async () => {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
     if (data) setNotices(data);
   };
-  useEffect(() => { fetchNotices(); }, []);
+
+  const fetchAllUsers = async () => {
+    const { data } = await supabase.from("profiles").select("user_id, full_name, class_name");
+    if (data) setAllUsers(data);
+  };
+
+  useEffect(() => { fetchNotices(); fetchAllUsers(); }, []);
 
   const addCta = () => {
     if (ctaButtons.length >= 3) return;
@@ -121,12 +130,13 @@ function AdminNotices() {
       is_pinned: pinned,
       image_url: imageUrl,
       cta_buttons: validCtas,
+      target_user_ids: sendType === "specific" && selectedUserIds.length > 0 ? selectedUserIds : null,
     } as any);
 
     setUploading(false);
     if (error) { toast.error("Erro ao criar aviso."); return; }
-    toast.success("Aviso criado.");
-    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]);
+    toast.success(sendType === "specific" ? `Aviso enviado para ${selectedUserIds.length} usuário(s).` : "Aviso global criado.");
+    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]);
     fetchNotices();
   };
 
@@ -171,6 +181,39 @@ function AdminNotices() {
           <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
           Fixar aviso
         </label>
+
+        {/* Send type selector */}
+        <div className="space-y-2">
+          <Label className="text-sm">Tipo de envio</Label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" name="sendType" checked={sendType === "global"} onChange={() => setSendType("global")} />
+              Envio global (todos)
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" name="sendType" checked={sendType === "specific"} onChange={() => setSendType("specific")} />
+              Usuários específicos
+            </label>
+          </div>
+          {sendType === "specific" && (
+            <div className="border bg-background rounded p-3 max-h-48 overflow-y-auto space-y-1">
+              {allUsers.map((u: any) => (
+                <label key={u.user_id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-secondary/50 p-1 rounded">
+                  <input
+                    type="checkbox"
+                    checked={selectedUserIds.includes(u.user_id)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedUserIds([...selectedUserIds, u.user_id]);
+                      else setSelectedUserIds(selectedUserIds.filter((id) => id !== u.user_id));
+                    }}
+                  />
+                  {u.full_name} {u.class_name && <span className="text-muted-foreground text-xs">({u.class_name})</span>}
+                </label>
+              ))}
+              {allUsers.length === 0 && <p className="text-xs text-muted-foreground">Nenhum usuário encontrado.</p>}
+            </div>
+          )}
+        </div>
 
         <div className="space-y-2">
           <Label className="text-sm">Botões de Ação (CTA)</Label>
