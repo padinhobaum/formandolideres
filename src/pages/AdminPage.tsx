@@ -182,6 +182,39 @@ function AdminNotices() {
           Fixar aviso
         </label>
 
+        {/* Send type selector */}
+        <div className="space-y-2">
+          <Label className="text-sm">Tipo de envio</Label>
+          <div className="flex gap-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" name="sendType" checked={sendType === "global"} onChange={() => setSendType("global")} />
+              Envio global (todos)
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="radio" name="sendType" checked={sendType === "specific"} onChange={() => setSendType("specific")} />
+              Usuários específicos
+            </label>
+          </div>
+          {sendType === "specific" && (
+            <div className="border bg-background rounded p-3 max-h-48 overflow-y-auto space-y-1">
+              {allUsers.map((u: any) => (
+                <label key={u.user_id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-secondary/50 p-1 rounded">
+                  <input
+                    type="checkbox"
+                    checked={selectedUserIds.includes(u.user_id)}
+                    onChange={(e) => {
+                      if (e.target.checked) setSelectedUserIds([...selectedUserIds, u.user_id]);
+                      else setSelectedUserIds(selectedUserIds.filter((id) => id !== u.user_id));
+                    }}
+                  />
+                  {u.full_name} {u.class_name && <span className="text-muted-foreground text-xs">({u.class_name})</span>}
+                </label>
+              ))}
+              {allUsers.length === 0 && <p className="text-xs text-muted-foreground">Nenhum usuário encontrado.</p>}
+            </div>
+          )}
+        </div>
+
         <div className="space-y-2">
           <Label className="text-sm">Botões de Ação (CTA)</Label>
           {ctaButtons.map((cta, i) => (
