@@ -14,7 +14,6 @@ import NoticesPage from "@/pages/NoticesPage";
 import AdminPage from "@/pages/AdminPage";
 import LiderAIPage from "@/pages/LiderAIPage";
 import NotFound from "@/pages/NotFound";
-import ChatSystem from "@/components/ChatSystem";
 
 const queryClient = new QueryClient();
 
@@ -39,7 +38,6 @@ const App = () => (
             <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
-          <ChatSystem />
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
