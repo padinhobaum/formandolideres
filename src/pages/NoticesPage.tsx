@@ -24,6 +24,7 @@ interface Notice {
 }
 
 export default function NoticesPage() {
+  const { user } = useAuth();
   const [notices, setNotices] = useState<Notice[]>([]);
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
@@ -34,13 +35,16 @@ export default function NoticesPage() {
         .select("*")
         .order("is_pinned", { ascending: false })
         .order("created_at", { ascending: false });
-      if (data) setNotices(data.map((d: any) => ({
-        ...d,
-        cta_buttons: Array.isArray(d.cta_buttons) ? d.cta_buttons : [],
-      })));
+      if (data) {
+        const filtered = data.filter((n: any) => !n.target_user_ids || (user && n.target_user_ids.includes(user.id)));
+        setNotices(filtered.map((d: any) => ({
+          ...d,
+          cta_buttons: Array.isArray(d.cta_buttons) ? d.cta_buttons : [],
+        })));
+      }
     };
     fetch();
-  }, []);
+  }, [user]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === "Escape") setFocusedId(null);
