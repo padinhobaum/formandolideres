@@ -60,7 +60,10 @@ export default function DashboardPage() {
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
       supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4)]
       );
-      if (noticesRes.data) setNotices(noticesRes.data.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [] })));
+      if (noticesRes.data) {
+        const filtered = noticesRes.data.filter((n: any) => !n.target_user_ids || (user && n.target_user_ids.includes(user.id)));
+        setNotices(filtered.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [] })));
+      }
       if (materialsRes.data) setMaterials(materialsRes.data);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
       if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
