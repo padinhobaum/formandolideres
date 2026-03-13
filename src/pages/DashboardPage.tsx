@@ -171,6 +171,43 @@ export default function DashboardPage() {
           </button>
         </div>
 
+        {/* Últimos Avisos */}
+        <section className="mb-8">
+          <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-primary rounded-xl">
+            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Últimos Avisos</h3>
+            <button onClick={() => navigate("/mural")} className="text-xs hover:underline font-body text-primary-foreground">
+              Ver todos
+            </button>
+          </div>
+          {notices.length === 0 ?
+          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 px-[20px] py-[20px] bg-primary rounded-2xl">
+              {notices.map((n) =>
+            <div key={n.id} className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl flex flex-col">
+                  <div className="relative aspect-video bg-muted">
+                    {n.image_url ?
+                <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" loading="lazy" /> :
+                <div className="w-full h-full flex items-center justify-center">
+                        <Megaphone className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
+                      </div>}
+                    {n.is_pinned &&
+                <div className="absolute top-2 right-2 bg-primary/80 rounded-full p-1">
+                        <Pin className="w-3 h-3 text-primary-foreground" strokeWidth={2} />
+                      </div>}
+                  </div>
+                  <div className="p-3 flex flex-col flex-1">
+                    <h4 className="font-heading line-clamp-2 font-bold text-primary text-base">{n.title}</h4>
+                    <p className="text-xs text-muted-foreground mt-1">{n.author_name} · {formatDate(n.created_at)}</p>
+                    <div className="mt-auto pt-2">
+                      <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenNotice(n)}>
+                        Ler aviso completo
+                      </Button>
+                    </div>
+                  </div>
+                </div>)}
+            </div>}
+        </section>
+
         {/* Videoaulas Recentes */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-accent rounded-xl">
@@ -181,24 +218,17 @@ export default function DashboardPage() {
           </div>
           {videoLessons.length === 0 ?
           <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p> :
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 px-[20px] py-[20px] rounded-2xl bg-accent">
               {videoLessons.slice(0, 3).map((v) => {
               const thumbnail = getYouTubeThumbnail(v.video_url);
               return (
-                <button
-                  key={v.id}
-                  onClick={() => navigate("/videoaulas")}
-                  className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
-                  
+                <button key={v.id} onClick={() => navigate("/videoaulas")} className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
                     <div className="relative aspect-video bg-muted">
                       {thumbnail ?
                     <img src={thumbnail} alt={v.title} className="w-full h-full object-cover" loading="lazy" /> :
-
                     <div className="w-full h-full flex items-center justify-center">
                           <Video className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
-                        </div>
-                    }
+                        </div>}
                       <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
                         <div className="w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-accent">
                           <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />
@@ -210,61 +240,8 @@ export default function DashboardPage() {
                       <p className="text-xs text-muted-foreground mt-1">{v.category} · {formatDate(v.created_at)}</p>
                     </div>
                   </button>);
-
             })}
-            </div>
-          }
-        </section>
-
-        {/* Últimos Avisos */}
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-primary rounded-xl">
-            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Últimos Avisos</h3>
-            <button onClick={() => navigate("/mural")} className="text-xs hover:underline font-body text-primary-foreground">
-              Ver todos
-            </button>
-          </div>
-          {notices.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 px-[20px] py-[20px] bg-primary rounded-2xl">
-              {notices.map((n) =>
-            <div
-              key={n.id}
-              className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl flex flex-col">
-              
-                  <div className="relative aspect-video bg-muted">
-                    {n.image_url ?
-                <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" loading="lazy" /> :
-
-                <div className="w-full h-full flex items-center justify-center">
-                        <Megaphone className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
-                      </div>
-                }
-                    {n.is_pinned &&
-                <div className="absolute top-2 right-2 bg-primary/80 rounded-full p-1">
-                        <Pin className="w-3 h-3 text-primary-foreground" strokeWidth={2} />
-                      </div>
-                }
-                  </div>
-                  <div className="p-3 flex flex-col flex-1">
-                    <h4 className="font-heading line-clamp-2 font-bold text-primary text-base">{n.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">{n.author_name} · {formatDate(n.created_at)}</p>
-                    <div className="mt-auto pt-2">
-                      <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full text-xs"
-                    onClick={() => handleOpenNotice(n)}>
-                    
-                        Ler aviso completo
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-            )}
-            </div>
-          }
+            </div>}
         </section>
 
         {/* Modal de Aviso Completo */}
