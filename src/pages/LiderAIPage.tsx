@@ -6,15 +6,15 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Sparkles, Bot, User, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = {role: "user" | "assistant";content: string;};
 
 const SUGGESTIONS = [
-  "Como posso melhorar a comunicação com minha turma?",
-  "Dicas para resolver conflitos entre alunos",
-  "Como motivar colegas desmotivados?",
-  "Como organizar uma reunião de turma eficiente?",
-  "Qual o papel do líder de classe?",
-];
+"Como posso melhorar a comunicação com minha turma?",
+"Dicas para resolver conflitos entre alunos",
+"Como motivar colegas desmotivados?",
+"Como organizar uma reunião de turma eficiente?",
+"Qual o papel do líder de classe?"];
+
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lider-ai-chat`;
 
@@ -22,20 +22,20 @@ async function streamChat({
   messages,
   onDelta,
   onDone,
-  onError,
-}: {
-  messages: Msg[];
-  onDelta: (t: string) => void;
-  onDone: () => void;
-  onError: (msg: string) => void;
-}) {
+  onError
+
+
+
+
+
+}: {messages: Msg[];onDelta: (t: string) => void;onDone: () => void;onError: (msg: string) => void;}) {
   const resp = await fetch(CHAT_URL, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`
     },
-    body: JSON.stringify({ messages }),
+    body: JSON.stringify({ messages })
   });
 
   if (!resp.ok) {
@@ -44,7 +44,7 @@ async function streamChat({
     return;
   }
 
-  if (!resp.body) { onError("Sem resposta"); return; }
+  if (!resp.body) {onError("Sem resposta");return;}
 
   const reader = resp.body.getReader();
   const decoder = new TextDecoder();
@@ -62,12 +62,12 @@ async function streamChat({
       if (line.endsWith("\r")) line = line.slice(0, -1);
       if (!line.startsWith("data: ")) continue;
       const json = line.slice(6).trim();
-      if (json === "[DONE]") { onDone(); return; }
+      if (json === "[DONE]") {onDone();return;}
       try {
         const p = JSON.parse(json);
         const c = p.choices?.[0]?.delta?.content;
         if (c) onDelta(c);
-      } catch { /* partial */ }
+      } catch {/* partial */}
     }
   }
   onDone();
@@ -97,7 +97,7 @@ export default function LiderAIPage() {
       setMessages((prev) => {
         const last = prev[prev.length - 1];
         if (last?.role === "assistant") {
-          return prev.map((m, i) => (i === prev.length - 1 ? { ...m, content: assistantSoFar } : m));
+          return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantSoFar } : m);
         }
         return [...prev, { role: "assistant", content: assistantSoFar }];
       });
@@ -107,7 +107,7 @@ export default function LiderAIPage() {
       messages: allMsgs,
       onDelta: upsert,
       onDone: () => setLoading(false),
-      onError: (msg) => { toast.error(msg); setLoading(false); },
+      onError: (msg) => {toast.error(msg);setLoading(false);}
     });
   };
 
@@ -124,8 +124,8 @@ export default function LiderAIPage() {
 
         {/* Chat area */}
         <div className="flex-1 min-h-0 relative">
-          {isEmpty ? (
-            <div className="flex flex-col items-center justify-center h-full gap-6 px-4">
+          {isEmpty ?
+          <div className="flex flex-col items-center justify-center h-full gap-6 px-4 py-0 my-[20px]">
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/40 via-accent/30 to-primary/40 blur-2xl scale-150 animate-pulse" />
                 <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
@@ -141,45 +141,45 @@ export default function LiderAIPage() {
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
-                {SUGGESTIONS.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => send(s)}
-                    className="px-4 py-2 rounded-full text-sm border border-border/60 bg-card/80 backdrop-blur-sm hover:bg-accent/20 hover:border-primary/40 transition-all text-foreground/80 hover:text-foreground shadow-sm"
-                  >
+                {SUGGESTIONS.map((s) =>
+              <button
+                key={s}
+                onClick={() => send(s)}
+                className="px-4 py-2 rounded-full text-sm border border-border/60 bg-card/80 backdrop-blur-sm hover:bg-accent/20 hover:border-primary/40 transition-all text-foreground/80 hover:text-foreground shadow-sm">
+                
                     {s}
                   </button>
-                ))}
+              )}
               </div>
-            </div>
-          ) : (
-            <ScrollArea className="h-full pr-2" ref={scrollRef as any}>
+            </div> :
+
+          <ScrollArea className="h-full pr-2" ref={scrollRef as any}>
               <div className="space-y-4 py-4">
-                {messages.map((m, i) => (
-                  <div key={i} className={`flex gap-3 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-                    {m.role === "assistant" && (
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md">
+                {messages.map((m, i) =>
+              <div key={i} className={`flex gap-3 ${m.role === "user" ? "justify-end" : "justify-start"}`}>
+                    {m.role === "assistant" &&
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0 shadow-md">
                         <Bot className="w-4 h-4 text-primary-foreground" />
                       </div>
-                    )}
+                }
                     <div
-                      className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
-                        m.role === "user"
-                          ? "bg-primary text-primary-foreground rounded-br-md"
-                          : "bg-card border border-border/60 backdrop-blur-sm rounded-bl-md shadow-sm"
-                      }`}
-                    >
+                  className={`max-w-[80%] rounded-2xl px-4 py-3 text-sm whitespace-pre-wrap ${
+                  m.role === "user" ?
+                  "bg-primary text-primary-foreground rounded-br-md" :
+                  "bg-card border border-border/60 backdrop-blur-sm rounded-bl-md shadow-sm"}`
+                  }>
+                  
                       {m.content}
                     </div>
-                    {m.role === "user" && (
-                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                    {m.role === "user" &&
+                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                         <User className="w-4 h-4 text-muted-foreground" />
                       </div>
-                    )}
+                }
                   </div>
-                ))}
-                {loading && messages[messages.length - 1]?.role !== "assistant" && (
-                  <div className="flex gap-3">
+              )}
+                {loading && messages[messages.length - 1]?.role !== "assistant" &&
+              <div className="flex gap-3">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
                       <Bot className="w-4 h-4 text-primary-foreground" />
                     </div>
@@ -187,36 +187,36 @@ export default function LiderAIPage() {
                       <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />
                     </div>
                   </div>
-                )}
+              }
               </div>
             </ScrollArea>
-          )}
+          }
         </div>
 
-        {!isEmpty && !loading && (
-          <div className="flex flex-wrap gap-2 py-2 justify-center">
-            {SUGGESTIONS.slice(0, 3).map((s) => (
-              <button
-                key={s}
-                onClick={() => send(s)}
-                className="px-3 py-1.5 rounded-full text-xs border border-border/50 bg-card/60 hover:bg-accent/20 transition-all text-muted-foreground hover:text-foreground"
-              >
+        {!isEmpty && !loading &&
+        <div className="flex flex-wrap gap-2 py-2 justify-center">
+            {SUGGESTIONS.slice(0, 3).map((s) =>
+          <button
+            key={s}
+            onClick={() => send(s)}
+            className="px-3 py-1.5 rounded-full text-xs border border-border/50 bg-card/60 hover:bg-accent/20 transition-all text-muted-foreground hover:text-foreground">
+            
                 {s}
               </button>
-            ))}
+          )}
           </div>
-        )}
+        }
 
         {/* Input */}
-        <div className="pt-2 pb-1 border-t">
-          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2">
+        <div className="pt-2 pb-1 border-t py-[2px] my-0">
+          <form onSubmit={(e) => {e.preventDefault();send(input);}} className="gap-2 flex items-start justify-start py-[10px] bg-[#f6f8f9]">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Faça sua pergunta sobre liderança..."
               disabled={loading}
-              className="flex-1 rounded-full bg-card/80 backdrop-blur-sm border-border/60"
-            />
+              className="flex-1 rounded-full bg-card/80 backdrop-blur-sm border-border/60" />
+            
             <Button type="submit" size="icon" disabled={loading || !input.trim()} className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90">
               <Send className="w-4 h-4" />
             </Button>
@@ -226,6 +226,6 @@ export default function LiderAIPage() {
           </p>
         </div>
       </div>
-    </AppLayout>
-  );
+    </AppLayout>);
+
 }
