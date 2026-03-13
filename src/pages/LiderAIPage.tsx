@@ -116,11 +116,16 @@ export default function LiderAIPage() {
   return (
     <AppLayout>
       <div className="flex flex-col h-[calc(100vh-12rem)] md:h-[calc(100vh-6rem)] max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-3 px-4 py-3 mb-2 rounded-xl bg-gradient-to-r from-primary/80 to-accent/80 backdrop-blur-sm">
+          <Sparkles className="w-5 h-5 text-primary-foreground" />
+          <h1 className="font-heading font-bold text-lg text-primary-foreground">LíderAI</h1>
+        </div>
+
         {/* Chat area */}
         <div className="flex-1 min-h-0 relative">
           {isEmpty ? (
             <div className="flex flex-col items-center justify-center h-full gap-6 px-4">
-              {/* AI Glow effect */}
               <div className="relative">
                 <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/40 via-accent/30 to-primary/40 blur-2xl scale-150 animate-pulse" />
                 <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
@@ -128,15 +133,13 @@ export default function LiderAIPage() {
                 </div>
               </div>
               <div className="text-center space-y-2">
-                <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
                   Olá, o que você deseja perguntar para LíderAI?
-                </h1>
+                </h2>
                 <p className="text-muted-foreground text-sm max-w-md">
                   Seu assistente de liderança de sala de aula, pronto para ajudar.
                 </p>
               </div>
-
-              {/* Suggestion chips */}
               <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
                 {SUGGESTIONS.map((s) => (
                   <button
@@ -190,7 +193,6 @@ export default function LiderAIPage() {
           )}
         </div>
 
-        {/* Suggestions when conversation started */}
         {!isEmpty && !loading && (
           <div className="flex flex-wrap gap-2 py-2 justify-center">
             {SUGGESTIONS.slice(0, 3).map((s) => (
@@ -207,10 +209,7 @@ export default function LiderAIPage() {
 
         {/* Input */}
         <div className="pt-2 pb-1 border-t">
-          <form
-            onSubmit={(e) => { e.preventDefault(); send(input); }}
-            className="flex gap-2"
-          >
+          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="flex gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
