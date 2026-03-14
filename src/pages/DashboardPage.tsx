@@ -21,11 +21,12 @@ interface Notice {
   cta_buttons: any[];
 }
 
-interface Material {
+interface ForumTopic {
   id: string;
   title: string;
-  category: string;
-  created_at: string;
+  author_name: string;
+  updated_at: string;
+  category_id: string | null;
 }
 
 interface VideoLesson {
