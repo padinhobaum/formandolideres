@@ -111,6 +111,7 @@ export default function ForumPage() {
     const { data } = await supabase.
     from("forum_topics").
     select("*, forum_categories(name)").
+    order("is_pinned", { ascending: false }).
     order("created_at", { ascending: false });
     if (!data) return;
 
