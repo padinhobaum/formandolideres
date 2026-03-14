@@ -111,7 +111,7 @@ export default function VideoLessonsPage() {
       parent_comment_id: replyingTo?.id || null
     } as any).select().single();
     if (error) { toast.error("Erro ao comentar."); return; }
-    setComments((prev) => ({ ...prev, [videoId]: [...(prev[videoId] || []), data as VideoComment] }));
+    setComments((prev) => ({ ...prev, [videoId]: [...(prev[videoId] || []), { ...(data as VideoComment), avatar_url: profile?.avatar_url || null }] }));
     setNewComment("");
     setReplyingTo(null);
   };
