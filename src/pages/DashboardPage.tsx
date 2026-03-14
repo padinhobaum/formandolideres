@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, MessageSquare } from "lucide-react";
+import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles } from "lucide-react";
 
 interface Notice {
   id: string;
@@ -25,6 +25,7 @@ interface ForumTopic {
   id: string;
   title: string;
   author_name: string;
+  author_avatar_url: string | null;
   updated_at: string;
   category_id: string | null;
 }
@@ -57,7 +58,7 @@ export default function DashboardPage() {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       const [noticesRes, forumRes, presenceRes, videosRes] = await Promise.all([
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
-      supabase.from("forum_topics").select("id, title, author_name, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
+      supabase.from("forum_topics").select("id, title, author_name, author_avatar_url, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
       supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4)]
       );
@@ -302,7 +303,12 @@ export default function DashboardPage() {
               onClick={() => navigate(`/forum?topic=${t.id}`)}
               className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
               <div className="flex items-center gap-3">
-                <MessageSquare className="w-5 h-5 text-accent flex-shrink-0" strokeWidth={1.5} />
+                <Avatar className="w-8 h-8 flex-shrink-0">
+                  <AvatarImage src={t.author_avatar_url || undefined} />
+                  <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
+                    {t.author_name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex-1 min-w-0">
                   <span className="font-body text-sm font-semibold line-clamp-1">{t.title}</span>
                   <p className="text-xs text-muted-foreground">{t.author_name} · {formatDate(t.updated_at)}</p>
