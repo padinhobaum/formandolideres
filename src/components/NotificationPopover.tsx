@@ -7,17 +7,21 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 interface NotificationItem {
   id: string;
-  type: "notice" | "topic" | "video" | "material";
+  type: "notice" | "topic" | "video" | "material" | "forum_reply" | "video_reply";
   title: string;
   created_at: string;
+  route?: string;
 }
 
 function getNotificationRoute(item: NotificationItem): string {
+  if (item.route) return item.route;
   switch (item.type) {
     case "notice": return "/mural";
     case "topic": return `/forum?topic=${item.id}`;
     case "video": return "/videoaulas";
     case "material": return "/materiais";
+    case "forum_reply": return item.route || "/forum";
+    case "video_reply": return item.route || "/videoaulas";
     default: return "/home";
   }
 }
