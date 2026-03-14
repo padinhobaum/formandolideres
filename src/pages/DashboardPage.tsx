@@ -63,7 +63,7 @@ export default function DashboardPage() {
       supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4)]
       );
       if (noticesRes.data) {
-        const filtered = noticesRes.data.filter((n: any) => !n.target_user_ids || (user && n.target_user_ids.includes(user.id)));
+        const filtered = noticesRes.data.filter((n: any) => !n.target_user_ids || user && n.target_user_ids.includes(user.id));
         setNotices(filtered.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [] })));
       }
       if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
@@ -310,7 +310,7 @@ export default function DashboardPage() {
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <span className="font-body text-sm font-semibold line-clamp-1">{t.title}</span>
+                  <span className="font-body font-semibold line-clamp-1 text-accent text-base">{t.title}</span>
                   <p className="text-xs text-muted-foreground">{t.author_name} · {formatDate(t.updated_at)}</p>
                 </div>
               </div>
