@@ -198,8 +198,9 @@ export default function DashboardPage() {
                         <Megaphone className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
                       </div>}
                     {n.is_pinned &&
-                <div className="absolute top-2 right-2 bg-primary/80 rounded-full p-1">
+                <div className="absolute top-2 right-2 flex items-center gap-1 bg-primary/90 rounded-full px-2 py-1">
                         <Pin className="w-3 h-3 text-primary-foreground" strokeWidth={2} />
+                        <span className="text-[10px] font-bold text-primary-foreground">Aviso Fixado</span>
                       </div>}
                   </div>
                   <div className="p-3 flex flex-col flex-1">
