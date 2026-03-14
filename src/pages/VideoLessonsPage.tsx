@@ -135,11 +135,12 @@ export default function VideoLessonsPage() {
 
   const renderComment = (c: VideoComment, videoId: string, isChild = false) => (
     <div key={c.id} className={`flex gap-2 items-start ${isChild ? "pl-6 border-l-2 border-muted ml-2" : ""}`}>
-      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-        <span className="text-[10px] font-bold text-secondary-foreground">
+      <Avatar className="w-7 h-7 flex-shrink-0">
+        <AvatarImage src={c.avatar_url || undefined} />
+        <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
           {c.user_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-        </span>
-      </div>
+        </AvatarFallback>
+      </Avatar>
       <div className="flex-1 min-w-0">
         <p className="text-primary-foreground text-base font-bold">{c.user_name}</p>
         {c.parent_comment_id && (
