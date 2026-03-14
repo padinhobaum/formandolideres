@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
 import { Play, MessageCircle, Send, Trash2, ChevronDown, ChevronUp, ListVideo, Reply } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -23,6 +24,7 @@ interface VideoComment {
   content: string;
   created_at: string;
   parent_comment_id: string | null;
+  avatar_url?: string | null;
 }
 
 interface Playlist {
@@ -88,7 +90,14 @@ export default function VideoLessonsPage() {
     setReplyingTo(null);
     if (!comments[videoId]) {
       const { data } = await supabase.from("video_comments").select("*").eq("video_id", videoId).order("created_at", { ascending: true });
-      if (data) setComments((prev) => ({ ...prev, [videoId]: data as VideoComment[] }));
+      if (data) {
+        // Fetch avatar URLs for comment authors
+        const userIds = [...new Set(data.map((c: any) => c.user_id))];
+        const { data: profiles } = await supabase.from("profiles").select("user_id, avatar_url").in("user_id", userIds);
+        const avatarMap: Record<string, string | null> = {};
+        profiles?.forEach((p: any) => { avatarMap[p.user_id] = p.avatar_url; });
+        setComments((prev) => ({ ...prev, [videoId]: (data as VideoComment[]).map(c => ({ ...c, avatar_url: avatarMap[c.user_id] || null })) }));
+      }
     }
   };
 
@@ -102,7 +111,7 @@ export default function VideoLessonsPage() {
       parent_comment_id: replyingTo?.id || null
     } as any).select().single();
     if (error) { toast.error("Erro ao comentar."); return; }
-    setComments((prev) => ({ ...prev, [videoId]: [...(prev[videoId] || []), data as VideoComment] }));
+    setComments((prev) => ({ ...prev, [videoId]: [...(prev[videoId] || []), { ...(data as VideoComment), avatar_url: profile?.avatar_url || null }] }));
     setNewComment("");
     setReplyingTo(null);
   };
@@ -126,11 +135,12 @@ export default function VideoLessonsPage() {
 
   const renderComment = (c: VideoComment, videoId: string, isChild = false) => (
     <div key={c.id} className={`flex gap-2 items-start ${isChild ? "pl-6 border-l-2 border-muted ml-2" : ""}`}>
-      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-        <span className="text-[10px] font-bold text-secondary-foreground">
+      <Avatar className="w-7 h-7 flex-shrink-0">
+        <AvatarImage src={c.avatar_url || undefined} />
+        <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
           {c.user_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-        </span>
-      </div>
+        </AvatarFallback>
+      </Avatar>
       <div className="flex-1 min-w-0">
         <p className="text-primary-foreground text-base font-bold">{c.user_name}</p>
         {c.parent_comment_id && (

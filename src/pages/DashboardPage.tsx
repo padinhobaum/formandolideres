@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles } from "lucide-react";
+import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, MessageSquare } from "lucide-react";
 
 interface Notice {
   id: string;
@@ -21,11 +21,12 @@ interface Notice {
   cta_buttons: any[];
 }
 
-interface Material {
+interface ForumTopic {
   id: string;
   title: string;
-  category: string;
-  created_at: string;
+  author_name: string;
+  updated_at: string;
+  category_id: string | null;
 }
 
 interface VideoLesson {
@@ -45,7 +46,7 @@ export default function DashboardPage() {
   const { user, profile, isAdmin, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [materials, setMaterials] = useState<Material[]>([]);
+  const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -54,9 +55,9 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const [noticesRes, materialsRes, presenceRes, videosRes] = await Promise.all([
+      const [noticesRes, forumRes, presenceRes, videosRes] = await Promise.all([
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
-      supabase.from("materials").select("id, title, category, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("forum_topics").select("id, title, author_name, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
       supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4)]
       );
@@ -64,7 +65,7 @@ export default function DashboardPage() {
         const filtered = noticesRes.data.filter((n: any) => !n.target_user_ids || (user && n.target_user_ids.includes(user.id)));
         setNotices(filtered.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [] })));
       }
-      if (materialsRes.data) setMaterials(materialsRes.data);
+      if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
       if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
     };
@@ -284,24 +285,30 @@ export default function DashboardPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Materiais Recentes */}
+        {/* Tópicos Recentes do Fórum */}
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">
-          <h3 className="font-heading font-bold mb-3 text-2xl text-primary-foreground">Materiais Recentes</h3>
-          {materials.length === 0 ?
-          <p className="text-sm text-primary-foreground">Nenhum material disponível.</p> :
-
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Tópicos Recentes do Fórum</h3>
+            <button onClick={() => navigate("/forum")} className="text-xs hover:underline font-body text-primary-foreground">
+              Ver todos
+            </button>
+          </div>
+          {forumTopics.length === 0 ?
+          <p className="text-sm text-primary-foreground">Nenhum tópico disponível.</p> :
           <div className="space-y-2">
-              {materials.map((m) =>
+              {forumTopics.map((t) =>
             <button
-              key={m.id}
-              onClick={() => navigate("/materiais")}
+              key={t.id}
+              onClick={() => navigate(`/forum?topic=${t.id}`)}
               className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-              
-                  <div className="flex items-center justify-between">
-                    <span className="font-body text-sm font-semibold">{m.title}</span>
-                    <span className="text-xs text-muted-foreground">{m.category} · {formatDate(m.created_at)}</span>
-                  </div>
-                </button>
+              <div className="flex items-center gap-3">
+                <MessageSquare className="w-5 h-5 text-accent flex-shrink-0" strokeWidth={1.5} />
+                <div className="flex-1 min-w-0">
+                  <span className="font-body text-sm font-semibold line-clamp-1">{t.title}</span>
+                  <p className="text-xs text-muted-foreground">{t.author_name} · {formatDate(t.updated_at)}</p>
+                </div>
+              </div>
+            </button>
             )}
             </div>
           }
