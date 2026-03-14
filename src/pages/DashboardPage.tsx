@@ -46,7 +46,7 @@ export default function DashboardPage() {
   const { user, profile, isAdmin, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [notices, setNotices] = useState<Notice[]>([]);
-  const [materials, setMaterials] = useState<Material[]>([]);
+  const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
