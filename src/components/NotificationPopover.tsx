@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bell } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface NotificationItem {
   id: string;
@@ -147,6 +148,15 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     navigate(getNotificationRoute(item));
   };
 
+  const handleClearAll = async () => {
+    if (!user) return;
+    const now = new Date().toISOString();
+    await supabase.from("notification_last_read").upsert({ user_id: user.id, last_read_at: now } as any, { onConflict: "user_id" });
+    setUnreadCount(0);
+    setLastReadAt(now);
+    setItems([]);
+  };
+
   const typeLabel: Record<string, string> = {
     notice: "Aviso",
     topic: "Fórum",
@@ -184,10 +194,10 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0" align="end">
-          <div className="p-3 border-b font-heading font-bold text-sm">Notificações</div>
-          <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} onItemClick={handleItemClick} />
-        </PopoverContent>
-      </Popover>
+        <NotificationHeader unreadCount={unreadCount} onClearAll={handleClearAll} />
+        <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} onItemClick={handleItemClick} />
+      </PopoverContent>
+    </Popover>
     );
   }
 
@@ -205,7 +215,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0" side="right" align="start">
-        <div className="p-3 border-b font-heading font-bold text-sm">Notificações</div>
+        <NotificationHeader unreadCount={unreadCount} onClearAll={handleClearAll} />
         <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} onItemClick={handleItemClick} />
       </PopoverContent>
     </Popover>
@@ -240,6 +250,36 @@ function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread, o
           <p className="font-body text-sm line-clamp-2">{item.title}</p>
         </button>
       ))}
+    </div>
+  );
+}
+
+function NotificationHeader({ unreadCount, onClearAll }: { unreadCount: number; onClearAll: () => void }) {
+  return (
+    <div className="p-3 border-b flex items-center justify-between">
+      <span className="font-heading font-bold text-sm">Notificações</span>
+      {unreadCount > 0 && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+              <CheckCheck className="w-3.5 h-3.5" />
+              Limpar tudo
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Limpar notificações?</AlertDialogTitle>
+              <AlertDialogDescription>
+                Todas as notificações serão marcadas como lidas e a lista será limpa.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+              <AlertDialogAction onClick={onClearAll}>Confirmar</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      )}
     </div>
   );
 }
