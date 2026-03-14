@@ -90,7 +90,14 @@ export default function VideoLessonsPage() {
     setReplyingTo(null);
     if (!comments[videoId]) {
       const { data } = await supabase.from("video_comments").select("*").eq("video_id", videoId).order("created_at", { ascending: true });
-      if (data) setComments((prev) => ({ ...prev, [videoId]: data as VideoComment[] }));
+      if (data) {
+        // Fetch avatar URLs for comment authors
+        const userIds = [...new Set(data.map((c: any) => c.user_id))];
+        const { data: profiles } = await supabase.from("profiles").select("user_id, avatar_url").in("user_id", userIds);
+        const avatarMap: Record<string, string | null> = {};
+        profiles?.forEach((p: any) => { avatarMap[p.user_id] = p.avatar_url; });
+        setComments((prev) => ({ ...prev, [videoId]: (data as VideoComment[]).map(c => ({ ...c, avatar_url: avatarMap[c.user_id] || null })) }));
+      }
     }
   };
 
