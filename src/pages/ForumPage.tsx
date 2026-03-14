@@ -766,14 +766,22 @@ export default function ForumPage() {
                         </div>
                       </div>
 
-                      {canDelete &&
-                  <button
-                    onClick={() => handleDeleteTopic(topic.id)}
-                    className="text-xs text-destructive hover:underline mt-2 flex items-center gap-1">
-                    
-                          <Trash2 className="w-3 h-3" /> Excluir tópico
-                        </button>
-                  }
+                      <div className="flex items-center gap-3 mt-2">
+                        {isAdmin &&
+                    <button
+                      onClick={() => handleTogglePin(topic.id, topic.is_pinned)}
+                      className="text-xs text-primary hover:underline flex items-center gap-1">
+                      <Pin className="w-3 h-3" /> {topic.is_pinned ? "Desafixar tópico" : "Fixar tópico"}
+                    </button>
+                    }
+                        {canDelete &&
+                    <button
+                      onClick={() => handleDeleteTopic(topic.id)}
+                      className="text-xs text-destructive hover:underline flex items-center gap-1">
+                      <Trash2 className="w-3 h-3" /> Excluir tópico
+                    </button>
+                    }
+                      </div>
                     </div>
                 }
                 </div>);
