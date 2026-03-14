@@ -23,6 +23,7 @@ interface VideoComment {
   content: string;
   created_at: string;
   parent_comment_id: string | null;
+  avatar_url?: string | null;
 }
 
 interface Playlist {
