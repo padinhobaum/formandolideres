@@ -289,7 +289,7 @@ export default function DashboardPage() {
         {/* Tópicos Recentes do Fórum */}
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Tópicos Recentes do Fórum</h3>
+            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Tópicos Recentes</h3>
             <button onClick={() => navigate("/forum")} className="text-xs hover:underline font-body text-primary-foreground">
               Ver todos
             </button>
