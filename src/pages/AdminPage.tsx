@@ -61,6 +61,7 @@ export default function AdminPage() {
         {tab === "links" && <AdminLinks />}
         {tab === "forum-categories" && <AdminForumCategories />}
         {tab === "users" && <AdminUsers />}
+        {tab === "password" && <AdminChangePassword />}
       </div>
     </AppLayout>
   );
