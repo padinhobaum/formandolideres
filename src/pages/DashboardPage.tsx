@@ -303,7 +303,12 @@ export default function DashboardPage() {
               onClick={() => navigate(`/forum?topic=${t.id}`)}
               className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
               <div className="flex items-center gap-3">
-                <MessageSquare className="w-5 h-5 text-accent flex-shrink-0" strokeWidth={1.5} />
+                <Avatar className="w-8 h-8 flex-shrink-0">
+                  <AvatarImage src={t.author_avatar_url || undefined} />
+                  <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
+                    {t.author_name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex-1 min-w-0">
                   <span className="font-body text-sm font-semibold line-clamp-1">{t.title}</span>
                   <p className="text-xs text-muted-foreground">{t.author_name} · {formatDate(t.updated_at)}</p>
