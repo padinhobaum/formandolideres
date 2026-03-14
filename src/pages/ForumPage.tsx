@@ -376,6 +376,13 @@ export default function ForumPage() {
     fetchTopics();
   };
 
+  const handleTogglePin = async (topicId: string, currentlyPinned: boolean) => {
+    const { error } = await supabase.from("forum_topics").update({ is_pinned: !currentlyPinned } as any).eq("id", topicId);
+    if (error) { toast.error("Erro ao fixar/desafixar."); return; }
+    toast.success(currentlyPinned ? "Tópico desafixado." : "Tópico fixado!");
+    fetchTopics();
+  };
+
   const handleDeleteReply = async (replyId: string, topicId: string) => {
     const { error } = await supabase.from("forum_replies").delete().eq("id", replyId);
     if (error) { toast.error("Erro ao excluir resposta."); return; }
