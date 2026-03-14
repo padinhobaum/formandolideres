@@ -30,16 +30,16 @@ export default function NoticesPage() {
 
   useEffect(() => {
     const fetch = async () => {
-      const { data } = await supabase
-        .from("notices")
-        .select("*")
-        .order("is_pinned", { ascending: false })
-        .order("created_at", { ascending: false });
+      const { data } = await supabase.
+      from("notices").
+      select("*").
+      order("is_pinned", { ascending: false }).
+      order("created_at", { ascending: false });
       if (data) {
-        const filtered = data.filter((n: any) => !n.target_user_ids || (user && n.target_user_ids.includes(user.id)));
+        const filtered = data.filter((n: any) => !n.target_user_ids || user && n.target_user_ids.includes(user.id));
         setNotices(filtered.map((d: any) => ({
           ...d,
-          cta_buttons: Array.isArray(d.cta_buttons) ? d.cta_buttons : [],
+          cta_buttons: Array.isArray(d.cta_buttons) ? d.cta_buttons : []
         })));
       }
     };
@@ -58,7 +58,7 @@ export default function NoticesPage() {
   }, [focusedId, handleKeyDown]);
 
   const formatDate = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+  new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
 
   const focusedNotice = notices.find((n) => n.id === focusedId);
 
@@ -66,16 +66,16 @@ export default function NoticesPage() {
     if (!ctas || ctas.length === 0) return null;
     return (
       <div className="flex flex-wrap gap-2 mt-4">
-        {ctas.map((cta, i) => (
-          <a key={i} href={cta.url} target={cta.newTab ? "_blank" : "_self"} rel={cta.newTab ? "noopener noreferrer" : undefined} onClick={(e) => e.stopPropagation()}>
+        {ctas.map((cta, i) =>
+        <a key={i} href={cta.url} target={cta.newTab ? "_blank" : "_self"} rel={cta.newTab ? "noopener noreferrer" : undefined} onClick={(e) => e.stopPropagation()}>
             <Button size="sm" className="gap-1.5">
               {cta.text}
               {cta.newTab && <ExternalLink className="w-3 h-3" strokeWidth={1.5} />}
             </Button>
           </a>
-        ))}
-      </div>
-    );
+        )}
+      </div>);
+
   };
 
   return (
@@ -83,18 +83,18 @@ export default function NoticesPage() {
       <div className="w-full">
         <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Mural de Avisos</h2>
 
-        {notices.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {notices.map((n) => (
-              <div
-                key={n.id}
-                className={`border bg-card rounded-xl overflow-hidden flex flex-col ${n.is_pinned ? "ring-2 ring-primary/30" : ""}`}
-              >
-                {n.image_url && (
-                  <img src={n.image_url} alt="" className="w-full aspect-video object-cover" loading="lazy" />
-                )}
+        {notices.length === 0 ?
+        <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {notices.map((n) =>
+          <div
+            key={n.id}
+            className={`border bg-card rounded-xl overflow-hidden flex flex-col ${n.is_pinned ? "ring-2 ring-primary/30" : ""}`}>
+            
+                {n.image_url &&
+            <img src={n.image_url} alt="" className="w-full aspect-video object-cover" loading="lazy" />
+            }
                 <div className="p-4 flex flex-col flex-1">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
@@ -114,18 +114,18 @@ export default function NoticesPage() {
                   </p>
                 </div>
               </div>
-            ))}
+          )}
           </div>
-        )}
+        }
       </div>
 
       {/* Focus Mode Overlay */}
-      {focusedNotice && (
-        <>
+      {focusedNotice &&
+      <>
           <div className="focus-overlay" onClick={() => setFocusedId(null)} />
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
             <div className="focus-content max-w-2xl w-full p-8 pointer-events-auto max-h-[80vh] overflow-y-auto rounded-xl">
-              {focusedNotice.image_url && <img src={focusedNotice.image_url} alt="" className="w-full max-h-72 rounded mb-4 object-contain" />}
+              {focusedNotice.image_url && <img src={focusedNotice.image_url} alt="" className="w-full max-h-72 mb-4 object-cover rounded-xl" />}
               <div className="flex items-center gap-2 mb-4">
                 {focusedNotice.is_pinned && <Pin className="w-3 h-3 text-primary" strokeWidth={1.5} />}
                 <h2 className="font-heading font-bold text-2xl text-primary">{focusedNotice.title}</h2>
@@ -140,7 +140,7 @@ export default function NoticesPage() {
             </div>
           </div>
         </>
-      )}
-    </AppLayout>
-  );
+      }
+    </AppLayout>);
+
 }
