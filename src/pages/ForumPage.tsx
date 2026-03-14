@@ -69,9 +69,11 @@ interface OnlineUser {
 
 export default function ForumPage() {
   const { user, profile, isAdmin } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
+  const deepLinked = useRef(false);
   const [replies, setReplies] = useState<Record<string, ForumReply[]>>({});
   const [authorProfiles, setAuthorProfiles] = useState<Record<string, string | null>>({});
   const [pollData, setPollData] = useState<Record<string, PollOption[]>>({});
