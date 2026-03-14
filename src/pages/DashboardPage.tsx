@@ -65,7 +65,7 @@ export default function DashboardPage() {
         const filtered = noticesRes.data.filter((n: any) => !n.target_user_ids || (user && n.target_user_ids.includes(user.id)));
         setNotices(filtered.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [] })));
       }
-      if (materialsRes.data) setMaterials(materialsRes.data);
+      if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
       if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
     };
