@@ -29,6 +29,7 @@ export default function AdminPage() {
     { key: "forum-categories", label: "Categorias Fórum" },
     { key: "links", label: "Links Menu" },
     { key: "users", label: "Usuários" },
+    { key: "password", label: "Alterar Senha" },
   ];
 
   return (
