@@ -31,6 +31,7 @@ interface ForumTopic {
   author_avatar_url: string | null;
   image_url: string | null;
   is_poll: boolean;
+  is_pinned: boolean;
   category_id: string | null;
   category_name?: string;
   created_at: string;
