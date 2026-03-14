@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
-import { Play, MessageCircle, Send, Trash2, ChevronDown, ChevronUp, ListVideo } from "lucide-react";
+import { Play, MessageCircle, Send, Trash2, ChevronDown, ChevronUp, ListVideo, Reply } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -22,6 +22,7 @@ interface VideoComment {
   user_name: string;
   content: string;
   created_at: string;
+  parent_comment_id: string | null;
 }
 
 interface Playlist {
@@ -50,6 +51,7 @@ export default function VideoLessonsPage() {
   const [expandedVideo, setExpandedVideo] = useState<string | null>(null);
   const [comments, setComments] = useState<Record<string, VideoComment[]>>({});
   const [newComment, setNewComment] = useState("");
+  const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [expandedPlaylist, setExpandedPlaylist] = useState<string | null>(null);
 
@@ -78,11 +80,12 @@ export default function VideoLessonsPage() {
   const filtered = videos.filter((v) => !categoryFilter || v.category === categoryFilter);
 
   const formatDate = (d: string) =>
-  new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
 
   const toggleComments = async (videoId: string) => {
-    if (expandedVideo === videoId) {setExpandedVideo(null);return;}
+    if (expandedVideo === videoId) { setExpandedVideo(null); return; }
     setExpandedVideo(videoId);
+    setReplyingTo(null);
     if (!comments[videoId]) {
       const { data } = await supabase.from("video_comments").select("*").eq("video_id", videoId).order("created_at", { ascending: true });
       if (data) setComments((prev) => ({ ...prev, [videoId]: data as VideoComment[] }));
@@ -92,33 +95,80 @@ export default function VideoLessonsPage() {
   const handleComment = async (videoId: string) => {
     if (!newComment.trim() || !user) return;
     const { data, error } = await supabase.from("video_comments").insert({
-      video_id: videoId, user_id: user.id,
-      user_name: profile?.full_name || user.email || "", content: newComment.trim()
-    }).select().single();
-    if (error) {toast.error("Erro ao comentar.");return;}
+      video_id: videoId,
+      user_id: user.id,
+      user_name: profile?.full_name || user.email || "",
+      content: newComment.trim(),
+      parent_comment_id: replyingTo?.id || null
+    } as any).select().single();
+    if (error) { toast.error("Erro ao comentar."); return; }
     setComments((prev) => ({ ...prev, [videoId]: [...(prev[videoId] || []), data as VideoComment] }));
     setNewComment("");
+    setReplyingTo(null);
   };
 
   const handleDeleteComment = async (commentId: string, videoId: string) => {
     const { error } = await supabase.from("video_comments").delete().eq("id", commentId);
-    if (error) {toast.error("Erro ao excluir comentário.");return;}
+    if (error) { toast.error("Erro ao excluir comentário."); return; }
     setComments((prev) => ({ ...prev, [videoId]: (prev[videoId] || []).filter((c) => c.id !== commentId) }));
   };
+
+  const getThreadedComments = (videoId: string) => {
+    const all = comments[videoId] || [];
+    const topLevel = all.filter((c) => !c.parent_comment_id);
+    const childrenMap: Record<string, VideoComment[]> = {};
+    all.filter((c) => c.parent_comment_id).forEach((c) => {
+      if (!childrenMap[c.parent_comment_id!]) childrenMap[c.parent_comment_id!] = [];
+      childrenMap[c.parent_comment_id!].push(c);
+    });
+    return { topLevel, childrenMap };
+  };
+
+  const renderComment = (c: VideoComment, videoId: string, isChild = false) => (
+    <div key={c.id} className={`flex gap-2 items-start ${isChild ? "pl-6 border-l-2 border-muted ml-2" : ""}`}>
+      <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
+        <span className="text-[10px] font-bold text-secondary-foreground">
+          {c.user_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+        </span>
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-primary-foreground text-base font-bold">{c.user_name}</p>
+        {c.parent_comment_id && (
+          <p className="text-primary-foreground/60 italic text-xs">
+            respondendo a {(comments[videoId] || []).find((r) => r.id === c.parent_comment_id)?.user_name || "..."}
+          </p>
+        )}
+        <p className="text-primary-foreground text-base">{c.content}</p>
+        <div className="flex items-center gap-2 mt-0.5">
+          <p className="text-[10px] text-primary-foreground">{formatDate(c.created_at)}</p>
+          <button
+            onClick={() => setReplyingTo({ id: c.id, name: c.user_name })}
+            className="flex items-center gap-1 text-[10px] text-primary-foreground/70 hover:text-primary-foreground"
+          >
+            <Reply className="w-3 h-3" /> Responder
+          </button>
+        </div>
+      </div>
+      {user && (c.user_id === user.id || isAdmin) &&
+        <button onClick={() => handleDeleteComment(c.id, videoId)} className="text-destructive p-0.5">
+          <Trash2 className="w-3 h-3" strokeWidth={1.5} />
+        </button>
+      }
+    </div>
+  );
 
   const renderVideoCard = (v: VideoLesson) => {
     const embedUrl = getEmbedUrl(v.video_url);
     const isExpanded = expandedVideo === v.id;
-    const videoComments = comments[v.id] || [];
+    const { topLevel, childrenMap } = getThreadedComments(v.id);
 
     return (
       <div key={v.id} className="border overflow-hidden bg-accent rounded-2xl">
         {embedUrl ?
-        <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+          <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
             <iframe src={embedUrl} className="absolute inset-0 w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen title={v.title} />
           </div> :
-
-        <a href={v.video_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-muted p-8 text-primary hover:underline">
+          <a href={v.video_url} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 bg-muted p-8 text-primary hover:underline">
             <Play className="w-5 h-5" strokeWidth={1.5} /> Assistir vídeo
           </a>
         }
@@ -131,27 +181,29 @@ export default function VideoLessonsPage() {
             {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
           </button>
           {isExpanded &&
-          <div className="mt-3 border-t pt-3 space-y-3">
-              {videoComments.length === 0 && <p className="text-xs text-primary-foreground">Nenhum comentário ainda.</p>}
-              {videoComments.map((c) =>
-            <div key={c.id} className="flex gap-2 items-start">
-                  <div className="w-7 h-7 rounded-full bg-secondary flex items-center justify-center flex-shrink-0">
-                    <span className="text-[10px] font-bold text-secondary-foreground">{c.user_name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-primary-foreground text-base font-bold">{c.user_name}</p>
-                    <p className="text-primary-foreground text-base">{c.content}</p>
-                    <p className="text-[10px] mt-0.5 text-primary-foreground">{formatDate(c.created_at)}</p>
-                  </div>
-                  {user && (c.user_id === user.id || isAdmin) &&
-              <button onClick={() => handleDeleteComment(c.id, v.id)} className="text-destructive p-0.5">
-                      <Trash2 className="w-3 h-3" strokeWidth={1.5} />
-                    </button>
-              }
+            <div className="mt-3 border-t pt-3 space-y-3">
+              {topLevel.length === 0 && <p className="text-xs text-primary-foreground">Nenhum comentário ainda.</p>}
+              {topLevel.map((c) => (
+                <div key={c.id}>
+                  {renderComment(c, v.id)}
+                  {(childrenMap[c.id] || []).map((child) => renderComment(child, v.id, true))}
                 </div>
-            )}
+              ))}
+              {replyingTo && (
+                <div className="flex items-center gap-1 text-xs text-primary-foreground/70 bg-primary-foreground/10 rounded px-2 py-1">
+                  <Reply className="w-3 h-3" />
+                  Respondendo a {replyingTo.name}
+                  <button onClick={() => setReplyingTo(null)} className="ml-auto text-primary-foreground hover:text-destructive">✕</button>
+                </div>
+              )}
               <div className="flex gap-2">
-                <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleComment(v.id)} placeholder="Escreva um comentário..." className="flex-1 border bg-background px-3 py-1.5 text-xs rounded" />
+                <input
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleComment(v.id)}
+                  placeholder={replyingTo ? `Respondendo a ${replyingTo.name}...` : "Escreva um comentário..."}
+                  className="flex-1 border bg-background px-3 py-1.5 text-xs rounded"
+                />
                 <Button size="sm" variant="ghost" onClick={() => handleComment(v.id)} className="px-2">
                   <Send className="w-3.5 h-3.5" strokeWidth={1.5} />
                 </Button>
@@ -159,8 +211,8 @@ export default function VideoLessonsPage() {
             </div>
           }
         </div>
-      </div>);
-
+      </div>
+    );
   };
 
   return (
@@ -168,40 +220,38 @@ export default function VideoLessonsPage() {
       <div className="w-full">
         <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Videoaulas</h2>
 
-        {/* Playlists */}
         {playlists.length > 0 &&
-        <section className="mb-8">
+          <section className="mb-8">
             {playlists.map((pl) =>
-          <div key={pl.id} className="mb-4 border bg-card rounded-xl overflow-hidden">
+              <div key={pl.id} className="mb-4 border bg-card rounded-xl overflow-hidden">
                 <button
-              onClick={() => setExpandedPlaylist(expandedPlaylist === pl.id ? null : pl.id)}
-              className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors">
-              
+                  onClick={() => setExpandedPlaylist(expandedPlaylist === pl.id ? null : pl.id)}
+                  className="w-full flex items-center gap-3 p-4 hover:bg-secondary/50 transition-colors">
                   <ListVideo className="w-5 h-5 text-primary" strokeWidth={1.5} />
                   <span className="font-heading font-bold text-lg">{pl.title}</span>
                   <span className="text-xs text-muted-foreground ml-auto">{pl.videos.length} vídeos</span>
                   {expandedPlaylist === pl.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 </button>
                 {expandedPlaylist === pl.id &&
-            <div className="border-t p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  <div className="border-t p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {pl.videos.map((v) => {
-                const thumb = getYouTubeThumbnail(v.video_url);
-                return (
-                  <div key={v.id} className="border bg-muted/30 rounded-xl overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors"
-                  onClick={() => {setCategoryFilter("");setExpandedVideo(v.id);document.getElementById(`video-${v.id}`)?.scrollIntoView({ behavior: "smooth" });}}>
+                      const thumb = getYouTubeThumbnail(v.video_url);
+                      return (
+                        <div key={v.id} className="border bg-muted/30 rounded-xl overflow-hidden cursor-pointer hover:bg-muted/50 transition-colors"
+                          onClick={() => { setCategoryFilter(""); setExpandedVideo(v.id); document.getElementById(`video-${v.id}`)?.scrollIntoView({ behavior: "smooth" }); }}>
                           <div className="aspect-video bg-muted relative">
                             {thumb ? <img src={thumb} alt={v.title} className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center"><Play className="w-6 h-6 text-muted-foreground" /></div>}
                           </div>
                           <div className="p-2">
                             <p className="text-sm font-medium line-clamp-1">{v.title}</p>
                           </div>
-                        </div>);
-
-              })}
+                        </div>
+                      );
+                    })}
                   </div>
-            }
+                }
               </div>
-          )}
+            )}
           </section>
         }
 
@@ -213,15 +263,14 @@ export default function VideoLessonsPage() {
         </div>
 
         {filtered.length === 0 ?
-        <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p> :
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p> :
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((v) =>
-          <div key={v.id} id={`video-${v.id}`}>{renderVideoCard(v)}</div>
-          )}
+              <div key={v.id} id={`video-${v.id}`}>{renderVideoCard(v)}</div>
+            )}
           </div>
         }
       </div>
-    </AppLayout>);
-
+    </AppLayout>
+  );
 }

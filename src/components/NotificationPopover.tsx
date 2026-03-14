@@ -7,17 +7,21 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 
 interface NotificationItem {
   id: string;
-  type: "notice" | "topic" | "video" | "material";
+  type: "notice" | "topic" | "video" | "material" | "forum_reply" | "video_reply";
   title: string;
   created_at: string;
+  route?: string;
 }
 
 function getNotificationRoute(item: NotificationItem): string {
+  if (item.route) return item.route;
   switch (item.type) {
     case "notice": return "/mural";
     case "topic": return `/forum?topic=${item.id}`;
     case "video": return "/videoaulas";
     case "material": return "/materiais";
+    case "forum_reply": return item.route || "/forum";
+    case "video_reply": return item.route || "/videoaulas";
     default: return "/home";
   }
 }
@@ -46,11 +50,21 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     if (!user) return;
     const lr = await fetchLastRead();
 
-    const [notices, topics, videos, materials] = await Promise.all([
+    const [notices, topics, videos, materials, forumReplies, videoReplies] = await Promise.all([
       supabase.from("notices").select("id, title, created_at, target_user_ids").order("created_at", { ascending: false }).limit(10),
       supabase.from("forum_topics").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
       supabase.from("video_lessons").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
       supabase.from("materials").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
+      // Replies to my forum comments
+      supabase.from("forum_replies").select("id, topic_id, author_name, parent_reply_id, created_at")
+        .not("author_id", "eq", user.id)
+        .not("parent_reply_id", "is", null)
+        .order("created_at", { ascending: false }).limit(20),
+      // Replies to my video comments
+      supabase.from("video_comments").select("id, video_id, user_name, parent_comment_id, created_at, user_id")
+        .not("user_id", "eq", user.id)
+        .not("parent_comment_id", "is", null)
+        .order("created_at", { ascending: false }).limit(20),
     ]);
 
     const filteredNotices = (notices.data || []).filter((n: any) => {
@@ -58,11 +72,51 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       return n.target_user_ids.includes(user.id);
     });
 
+    // Filter forum replies: only those replying to MY comments
+    let myForumReplyNotifs: NotificationItem[] = [];
+    if (forumReplies.data && forumReplies.data.length > 0) {
+      const parentIds = [...new Set((forumReplies.data as any[]).map((r: any) => r.parent_reply_id).filter(Boolean))];
+      if (parentIds.length > 0) {
+        const { data: parentReplies } = await supabase.from("forum_replies").select("id, author_id").in("id", parentIds);
+        const myParentIds = new Set((parentReplies || []).filter((p: any) => p.author_id === user.id).map((p: any) => p.id));
+        myForumReplyNotifs = (forumReplies.data as any[])
+          .filter((r: any) => myParentIds.has(r.parent_reply_id))
+          .map((r: any) => ({
+            id: r.id,
+            title: `${r.author_name} respondeu ao seu comentário no fórum`,
+            created_at: r.created_at,
+            type: "forum_reply" as const,
+            route: `/forum?topic=${r.topic_id}`,
+          }));
+      }
+    }
+
+    // Filter video replies: only those replying to MY comments
+    let myVideoReplyNotifs: NotificationItem[] = [];
+    if (videoReplies.data && videoReplies.data.length > 0) {
+      const parentIds = [...new Set((videoReplies.data as any[]).map((r: any) => r.parent_comment_id).filter(Boolean))];
+      if (parentIds.length > 0) {
+        const { data: parentComments } = await supabase.from("video_comments").select("id, user_id").in("id", parentIds);
+        const myParentIds = new Set((parentComments || []).filter((p: any) => p.user_id === user.id).map((p: any) => p.id));
+        myVideoReplyNotifs = (videoReplies.data as any[])
+          .filter((r: any) => myParentIds.has(r.parent_comment_id))
+          .map((r: any) => ({
+            id: r.id,
+            title: `${r.user_name} respondeu ao seu comentário na videoaula`,
+            created_at: r.created_at,
+            type: "video_reply" as const,
+            route: "/videoaulas",
+          }));
+      }
+    }
+
     const all: NotificationItem[] = [
       ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const })),
       ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const })),
       ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const })),
       ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const })),
+      ...myForumReplyNotifs,
+      ...myVideoReplyNotifs,
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 20);
 
     setItems(all);
@@ -98,6 +152,8 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     topic: "Fórum",
     video: "Videoaula",
     material: "Material",
+    forum_reply: "Resposta",
+    video_reply: "Resposta",
   };
 
   const typeColor: Record<string, string> = {
@@ -105,6 +161,8 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     topic: "bg-accent",
     video: "bg-destructive",
     material: "bg-secondary-foreground",
+    forum_reply: "bg-accent",
+    video_reply: "bg-destructive",
   };
 
   const formatDate = (d: string) =>

@@ -1,0 +1,1 @@
+ALTER TABLE public.video_comments ADD COLUMN parent_comment_id uuid REFERENCES public.video_comments(id) ON DELETE CASCADE DEFAULT NULL;

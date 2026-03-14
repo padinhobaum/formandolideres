@@ -168,9 +168,16 @@ export default function LiderAIPage() {
                           ? "bg-primary text-primary-foreground rounded-br-md"
                           : "bg-card border border-border/60 backdrop-blur-sm rounded-bl-md shadow-sm"
                       }`}
-                    >
-                      {m.content}
-                    </div>
+                      dangerouslySetInnerHTML={{
+                        __html: m.content
+                          .replace(/&/g, "&amp;")
+                          .replace(/</g, "&lt;")
+                          .replace(/>/g, "&gt;")
+                          .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+                          .replace(/__(.+?)__/g, "<strong>$1</strong>")
+                          .replace(/\n/g, "<br />")
+                      }}
+                    />
                     {m.role === "user" && (
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                         <User className="w-4 h-4 text-muted-foreground" />

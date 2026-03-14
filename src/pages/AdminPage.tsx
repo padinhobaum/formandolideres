@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 
 type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password";
@@ -257,6 +257,20 @@ function AdminNotices() {
                 </div>
               </div>
               <div className="flex items-center gap-1">
+                {n.is_pinned && (
+                  <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium mr-1">Fixado</span>
+                )}
+                <button
+                  onClick={async () => {
+                    await supabase.from("notices").update({ is_pinned: !n.is_pinned } as any).eq("id", n.id);
+                    toast.success(n.is_pinned ? "Aviso desafixado." : "Aviso fixado.");
+                    fetchNotices();
+                  }}
+                  className="text-muted-foreground hover:text-primary p-1"
+                  title={n.is_pinned ? "Desafixar" : "Fixar"}
+                >
+                  <Pin className={`w-4 h-4 ${n.is_pinned ? "text-primary fill-primary" : ""}`} strokeWidth={1.5} />
+                </button>
                 <button onClick={() => fetchReads(n.id)} className="text-muted-foreground hover:text-foreground p-1" title="Ver quem leu">
                   <Eye className="w-4 h-4" strokeWidth={1.5} />
                 </button>
