@@ -1,4 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
@@ -68,9 +69,11 @@ interface OnlineUser {
 
 export default function ForumPage() {
   const { user, profile, isAdmin } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
+  const deepLinked = useRef(false);
   const [replies, setReplies] = useState<Record<string, ForumReply[]>>({});
   const [authorProfiles, setAuthorProfiles] = useState<Record<string, string | null>>({});
   const [pollData, setPollData] = useState<Record<string, PollOption[]>>({});
@@ -185,6 +188,20 @@ export default function ForumPage() {
 
     return () => {supabase.removeChannel(channel);};
   }, []);
+
+  // Deep-link: auto-expand topic from URL param
+  useEffect(() => {
+    const topicId = searchParams.get("topic");
+    if (topicId && topics.length > 0 && !deepLinked.current) {
+      deepLinked.current = true;
+      handleExpandTopic(topicId);
+      searchParams.delete("topic");
+      setSearchParams(searchParams, { replace: true });
+      setTimeout(() => {
+        document.getElementById(`topic-${topicId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  }, [topics, searchParams]);
 
   const handleCreateTopic = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -607,7 +624,7 @@ export default function ForumPage() {
             const totalVotes = topicPoll.reduce((sum, o) => sum + o.vote_count, 0);
 
             return (
-              <div key={topic.id} className="border bg-card rounded-xl overflow-hidden">
+              <div key={topic.id} id={`topic-${topic.id}`} className="border bg-card rounded-xl overflow-hidden">
                   <button
                   onClick={() => handleExpandTopic(topic.id)}
                   className="w-full p-4 text-left hover:bg-secondary/50 transition-colors">

@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 
-type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists";
+type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password";
 
 interface CtaButton {
   text: string;
@@ -29,6 +29,7 @@ export default function AdminPage() {
     { key: "forum-categories", label: "Categorias Fórum" },
     { key: "links", label: "Links Menu" },
     { key: "users", label: "Usuários" },
+    { key: "password", label: "Alterar Senha" },
   ];
 
   return (
@@ -60,6 +61,7 @@ export default function AdminPage() {
         {tab === "links" && <AdminLinks />}
         {tab === "forum-categories" && <AdminForumCategories />}
         {tab === "users" && <AdminUsers />}
+        {tab === "password" && <AdminChangePassword />}
       </div>
     </AppLayout>
   );
@@ -840,6 +842,102 @@ function AdminForumCategories() {
         ))}
         {categories.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma categoria criada ainda.</p>}
       </div>
+    </div>
+  );
+}
+
+/* ───── Change Password ───── */
+function AdminChangePassword() {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword.length < 6) {
+      toast.error("A nova senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      toast.error("A nova senha e a confirmação não coincidem.");
+      return;
+    }
+    setLoading(true);
+
+    // Verify current password by re-authenticating
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser?.email) {
+      toast.error("Erro ao obter dados do usuário.");
+      setLoading(false);
+      return;
+    }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: currentUser.email,
+      password: currentPassword,
+    });
+
+    if (signInError) {
+      toast.error("Senha atual incorreta.");
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    setLoading(false);
+
+    if (error) {
+      toast.error("Erro ao alterar a senha: " + error.message);
+      return;
+    }
+
+    toast.success("Senha alterada com sucesso!");
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleChangePassword} className="border bg-card p-5 mb-6 space-y-4 rounded-xl max-w-md">
+        <h3 className="font-heading font-bold text-sm mb-2">Alterar Senha</h3>
+        <div>
+          <Label className="text-sm">Senha atual</Label>
+          <Input
+            type="password"
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+            className="mt-1"
+            required
+          />
+        </div>
+        <div>
+          <Label className="text-sm">Nova senha</Label>
+          <Input
+            type="password"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className="mt-1"
+            required
+            minLength={6}
+          />
+        </div>
+        <div>
+          <Label className="text-sm">Confirmar nova senha</Label>
+          <Input
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="mt-1"
+            required
+            minLength={6}
+          />
+        </div>
+        <Button type="submit" size="sm" disabled={loading}>
+          {loading ? "Alterando..." : "Alterar Senha"}
+        </Button>
+      </form>
     </div>
   );
 }
