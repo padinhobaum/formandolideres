@@ -140,7 +140,7 @@ export default function ForumPage() {
       if (profs) {
         setAuthorProfiles((prev) => {
           const next = { ...prev };
-          profs.forEach((p: any) => { next[p.user_id] = p.class_name; });
+          profs.forEach((p: any) => {next[p.user_id] = p.class_name;});
           return next;
         });
       }
@@ -162,17 +162,17 @@ export default function ForumPage() {
 
     const userIds = presenceData.map((p: any) => p.user_id);
     const [profilesRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").in("user_id", userIds),
-      supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
-    ]);
+    supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").in("user_id", userIds),
+    supabase.from("user_roles").select("user_id, role").in("user_id", userIds)]
+    );
 
     const rolesMap: Record<string, string> = {};
-    rolesRes.data?.forEach((r: any) => { rolesMap[r.user_id] = r.role; });
+    rolesRes.data?.forEach((r: any) => {rolesMap[r.user_id] = r.role;});
 
     if (profilesRes.data) {
       setOnlineUsers(profilesRes.data.map((p: any) => ({
         ...p,
-        role: rolesMap[p.user_id] || "leader",
+        role: rolesMap[p.user_id] || "leader"
       })));
     }
   };
@@ -280,7 +280,7 @@ export default function ForumPage() {
       if (profs) {
         setAuthorProfiles((prev) => {
           const next = { ...prev };
-          profs.forEach((p: any) => { next[p.user_id] = p.class_name; });
+          profs.forEach((p: any) => {next[p.user_id] = p.class_name;});
           return next;
         });
       }
@@ -378,14 +378,14 @@ export default function ForumPage() {
 
   const handleTogglePin = async (topicId: string, currentlyPinned: boolean) => {
     const { error } = await supabase.from("forum_topics").update({ is_pinned: !currentlyPinned } as any).eq("id", topicId);
-    if (error) { toast.error("Erro ao fixar/desafixar."); return; }
+    if (error) {toast.error("Erro ao fixar/desafixar.");return;}
     toast.success(currentlyPinned ? "Tópico desafixado." : "Tópico fixado!");
     fetchTopics();
   };
 
   const handleDeleteReply = async (replyId: string, topicId: string) => {
     const { error } = await supabase.from("forum_replies").delete().eq("id", replyId);
-    if (error) { toast.error("Erro ao excluir resposta."); return; }
+    if (error) {toast.error("Erro ao excluir resposta.");return;}
     toast.success("Resposta excluída.");
     await fetchRepliesWithLikes(topicId);
   };
@@ -448,13 +448,13 @@ export default function ForumPage() {
            <Reply className="w-3 h-3" />
             <span>Responder</span>
           </button>
-          {(reply.author_id === user?.id || isAdmin) && (
-            <button
-              onClick={() => handleDeleteReply(reply.id, topicId)}
-              className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors">
+          {(reply.author_id === user?.id || isAdmin) &&
+        <button
+          onClick={() => handleDeleteReply(reply.id, topicId)}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors">
               <Trash2 className="w-3 h-3" />
             </button>
-          )}
+        }
         </div>
       </div>
     </div>;
@@ -472,20 +472,20 @@ export default function ForumPage() {
             const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
             const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
 
-            const renderGroup = (users: OnlineUser[], label: string) => (
-              <div>
+            const renderGroup = (users: OnlineUser[], label: string) =>
+            <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Circle className="w-3 h-3 text-accent fill-accent" />
                   <h3 className="font-heading font-bold text-sm">
                     {label} ({users.length})
                   </h3>
                 </div>
-                {users.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">Nenhum online no momento.</p>
-                ) : (
-                  <div className="flex flex-wrap gap-3">
-                    {users.map((u) => (
-                      <div key={u.user_id} className="flex items-center gap-2">
+                {users.length === 0 ?
+              <p className="text-xs text-muted-foreground">Nenhum online no momento.</p> :
+
+              <div className="flex flex-wrap gap-3">
+                    {users.map((u) =>
+                <div key={u.user_id} className="flex items-center gap-2">
                         <div className="relative">
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={u.avatar_url || undefined} />
@@ -498,18 +498,18 @@ export default function ForumPage() {
                         <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
                         <SalaBadge sala={u.class_name} />
                       </div>
-                    ))}
-                  </div>
                 )}
-              </div>
-            );
+                  </div>
+              }
+              </div>;
+
 
             return (
               <>
                 {renderGroup(adminsOnline, "Administradores Online")}
                 {renderGroup(leadersOnline, "Líderes Online")}
-              </>
-            );
+              </>);
+
           })()}
         </section>
 
@@ -684,9 +684,9 @@ export default function ForumPage() {
                   {isExpanded &&
                 <div className="border-t px-4 pb-4">
                       {/* Topic content */}
-                      <div className="font-heading whitespace-pre-wrap py-3 text-base"><RichText content={topic.content} /></div>
+                      <div className="font-body whitespace-pre-wrap py-3 text-base"><RichText content={topic.content} /></div>
                       {topic.image_url &&
-                  <img src={topic.image_url} alt="" className="mb-3 max-w-full max-h-72 rounded-lg object-cover" loading="lazy" />
+                  <img src={topic.image_url} alt="" className="mb-3 max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
                   }
 
                       {/* Poll */}
