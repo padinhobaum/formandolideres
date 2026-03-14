@@ -189,6 +189,20 @@ export default function ForumPage() {
     return () => {supabase.removeChannel(channel);};
   }, []);
 
+  // Deep-link: auto-expand topic from URL param
+  useEffect(() => {
+    const topicId = searchParams.get("topic");
+    if (topicId && topics.length > 0 && !deepLinked.current) {
+      deepLinked.current = true;
+      handleExpandTopic(topicId);
+      searchParams.delete("topic");
+      setSearchParams(searchParams, { replace: true });
+      setTimeout(() => {
+        document.getElementById(`topic-${topicId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
+    }
+  }, [topics, searchParams]);
+
   const handleCreateTopic = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim() || !newContent.trim() || !user) return;
