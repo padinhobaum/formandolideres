@@ -1,0 +1,1 @@
+ALTER TABLE public.forum_topics ADD COLUMN is_pinned boolean NOT NULL DEFAULT false;

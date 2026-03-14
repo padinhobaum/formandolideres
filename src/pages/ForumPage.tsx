@@ -10,8 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { toast } from "sonner";
 import {
-  MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter } from
+  MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter, Pin } from
 "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import RichTextEditor, { RichText } from "@/components/RichTextEditor";
 import SalaBadge from "@/components/SalaBadge";
 
@@ -30,6 +31,7 @@ interface ForumTopic {
   author_avatar_url: string | null;
   image_url: string | null;
   is_poll: boolean;
+  is_pinned: boolean;
   category_id: string | null;
   category_name?: string;
   created_at: string;
@@ -109,6 +111,7 @@ export default function ForumPage() {
     const { data } = await supabase.
     from("forum_topics").
     select("*, forum_categories(name)").
+    order("is_pinned", { ascending: false }).
     order("created_at", { ascending: false });
     if (!data) return;
 
@@ -370,6 +373,13 @@ export default function ForumPage() {
     const { error } = await supabase.from("forum_topics").delete().eq("id", id);
     if (error) {toast.error("Erro ao excluir.");return;}
     toast.success("Tópico excluído.");
+    fetchTopics();
+  };
+
+  const handleTogglePin = async (topicId: string, currentlyPinned: boolean) => {
+    const { error } = await supabase.from("forum_topics").update({ is_pinned: !currentlyPinned } as any).eq("id", topicId);
+    if (error) { toast.error("Erro ao fixar/desafixar."); return; }
+    toast.success(currentlyPinned ? "Tópico desafixado." : "Tópico fixado!");
     fetchTopics();
   };
 
@@ -639,6 +649,12 @@ export default function ForumPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-heading font-bold text-lg">{topic.title}</h4>
+                          {topic.is_pinned &&
+                        <Badge variant="default" className="gap-1 text-[10px] px-1.5 py-0.5">
+                              <Pin className="w-3 h-3" strokeWidth={2} />
+                              Tópico Fixado
+                            </Badge>
+                        }
                           {topic.category_name &&
                         <span className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded font-body">
                               {topic.category_name}
@@ -750,14 +766,22 @@ export default function ForumPage() {
                         </div>
                       </div>
 
-                      {canDelete &&
-                  <button
-                    onClick={() => handleDeleteTopic(topic.id)}
-                    className="text-xs text-destructive hover:underline mt-2 flex items-center gap-1">
-                    
-                          <Trash2 className="w-3 h-3" /> Excluir tópico
-                        </button>
-                  }
+                      <div className="flex items-center gap-3 mt-2">
+                        {isAdmin &&
+                    <button
+                      onClick={() => handleTogglePin(topic.id, topic.is_pinned)}
+                      className="text-xs text-primary hover:underline flex items-center gap-1">
+                      <Pin className="w-3 h-3" /> {topic.is_pinned ? "Desafixar tópico" : "Fixar tópico"}
+                    </button>
+                    }
+                        {canDelete &&
+                    <button
+                      onClick={() => handleDeleteTopic(topic.id)}
+                      className="text-xs text-destructive hover:underline flex items-center gap-1">
+                      <Trash2 className="w-3 h-3" /> Excluir tópico
+                    </button>
+                    }
+                      </div>
                     </div>
                 }
                 </div>);
