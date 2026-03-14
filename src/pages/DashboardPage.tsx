@@ -25,6 +25,7 @@ interface ForumTopic {
   id: string;
   title: string;
   author_name: string;
+  author_avatar_url: string | null;
   updated_at: string;
   category_id: string | null;
 }
