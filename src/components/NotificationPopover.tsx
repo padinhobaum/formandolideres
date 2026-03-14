@@ -184,10 +184,10 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0" align="end">
-          <div className="p-3 border-b font-heading font-bold text-sm">Notificações</div>
-          <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} onItemClick={handleItemClick} />
-        </PopoverContent>
-      </Popover>
+        <NotificationHeader unreadCount={unreadCount} onClearAll={handleClearAll} />
+        <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} onItemClick={handleItemClick} />
+      </PopoverContent>
+    </Popover>
     );
   }
 
@@ -205,7 +205,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
         </button>
       </PopoverTrigger>
       <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0" side="right" align="start">
-        <div className="p-3 border-b font-heading font-bold text-sm">Notificações</div>
+        <NotificationHeader unreadCount={unreadCount} onClearAll={handleClearAll} />
         <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} onItemClick={handleItemClick} />
       </PopoverContent>
     </Popover>
