@@ -649,6 +649,12 @@ export default function ForumPage() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="font-heading font-bold text-lg">{topic.title}</h4>
+                          {topic.is_pinned &&
+                        <Badge variant="default" className="gap-1 text-[10px] px-1.5 py-0.5">
+                              <Pin className="w-3 h-3" strokeWidth={2} />
+                              Tópico Fixado
+                            </Badge>
+                        }
                           {topic.category_name &&
                         <span className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded font-body">
                               {topic.category_name}
