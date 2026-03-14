@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 
-type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists";
+type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password";
 
 interface CtaButton {
   text: string;

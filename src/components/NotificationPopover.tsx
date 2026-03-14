@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bell } from "lucide-react";
@@ -11,8 +12,19 @@ interface NotificationItem {
   created_at: string;
 }
 
+function getNotificationRoute(item: NotificationItem): string {
+  switch (item.type) {
+    case "notice": return "/mural";
+    case "topic": return `/forum?topic=${item.id}`;
+    case "video": return "/videoaulas";
+    case "material": return "/materiais";
+    default: return "/home";
+  }
+}
+
 export default function NotificationPopover({ variant = "sidebar" }: { variant?: "sidebar" | "header" }) {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
@@ -41,10 +53,9 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       supabase.from("materials").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
     ]);
 
-    // Filter notices: only show global or targeted to this user
     const filteredNotices = (notices.data || []).filter((n: any) => {
-      if (!n.target_user_ids || n.target_user_ids.length === 0) return true; // global
-      return n.target_user_ids.includes(user.id); // targeted to this user
+      if (!n.target_user_ids || n.target_user_ids.length === 0) return true;
+      return n.target_user_ids.includes(user.id);
     });
 
     const all: NotificationItem[] = [
@@ -75,6 +86,11 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       setUnreadCount(0);
       setLastReadAt(now);
     }
+  };
+
+  const handleItemClick = (item: NotificationItem) => {
+    setOpen(false);
+    navigate(getNotificationRoute(item));
   };
 
   const typeLabel: Record<string, string> = {
@@ -111,7 +127,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
         </PopoverTrigger>
         <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0" align="end">
           <div className="p-3 border-b font-heading font-bold text-sm">Notificações</div>
-          <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} />
+          <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} onItemClick={handleItemClick} />
         </PopoverContent>
       </Popover>
     );
@@ -132,18 +148,19 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       </PopoverTrigger>
       <PopoverContent className="w-80 max-h-96 overflow-y-auto p-0" side="right" align="start">
         <div className="p-3 border-b font-heading font-bold text-sm">Notificações</div>
-        <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} />
+        <NotificationList items={items} typeLabel={typeLabel} typeColor={typeColor} formatDate={formatDate} isUnread={isUnread} onItemClick={handleItemClick} />
       </PopoverContent>
     </Popover>
   );
 }
 
-function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread }: {
+function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread, onItemClick }: {
   items: NotificationItem[];
   typeLabel: Record<string, string>;
   typeColor: Record<string, string>;
   formatDate: (d: string) => string;
   isUnread: (d: string) => boolean;
+  onItemClick: (item: NotificationItem) => void;
 }) {
   if (items.length === 0) {
     return <p className="p-4 text-sm text-muted-foreground text-center">Nenhuma notificação.</p>;
@@ -151,7 +168,11 @@ function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread }:
   return (
     <div className="divide-y">
       {items.map((item) => (
-        <div key={`${item.type}-${item.id}`} className={`p-3 text-sm ${isUnread(item.created_at) ? "bg-secondary/50" : ""}`}>
+        <button
+          key={`${item.type}-${item.id}`}
+          onClick={() => onItemClick(item)}
+          className={`w-full text-left p-3 text-sm hover:bg-muted/50 transition-colors cursor-pointer ${isUnread(item.created_at) ? "bg-secondary/50" : ""}`}
+        >
           <div className="flex items-center gap-2 mb-0.5">
             <span className={`text-[10px] text-primary-foreground px-1.5 py-0.5 rounded font-body ${typeColor[item.type]}`}>
               {typeLabel[item.type]}
@@ -159,7 +180,7 @@ function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread }:
             <span className="text-[10px] text-muted-foreground">{formatDate(item.created_at)}</span>
           </div>
           <p className="font-body text-sm line-clamp-2">{item.title}</p>
-        </div>
+        </button>
       ))}
     </div>
   );
