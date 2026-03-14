@@ -435,19 +435,6 @@ export default function ForumPage() {
       </div>
     </div>;
 
-  // Deep-link: auto-expand topic from URL param
-  useEffect(() => {
-    const topicId = searchParams.get("topic");
-    if (topicId && topics.length > 0 && !deepLinked.current) {
-      deepLinked.current = true;
-      handleExpandTopic(topicId);
-      searchParams.delete("topic");
-      setSearchParams(searchParams, { replace: true });
-      setTimeout(() => {
-        document.getElementById(`topic-${topicId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 300);
-    }
-  }, [topics, searchParams]);
 
   return (
     <AppLayout>
