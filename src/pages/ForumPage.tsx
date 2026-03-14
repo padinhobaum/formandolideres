@@ -624,7 +624,7 @@ export default function ForumPage() {
             const totalVotes = topicPoll.reduce((sum, o) => sum + o.vote_count, 0);
 
             return (
-              <div key={topic.id} className="border bg-card rounded-xl overflow-hidden">
+              <div key={topic.id} id={`topic-${topic.id}`} className="border bg-card rounded-xl overflow-hidden">
                   <button
                   onClick={() => handleExpandTopic(topic.id)}
                   className="w-full p-4 text-left hover:bg-secondary/50 transition-colors">
