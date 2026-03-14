@@ -152,6 +152,8 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     topic: "Fórum",
     video: "Videoaula",
     material: "Material",
+    forum_reply: "Resposta",
+    video_reply: "Resposta",
   };
 
   const typeColor: Record<string, string> = {
@@ -159,6 +161,8 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     topic: "bg-accent",
     video: "bg-destructive",
     material: "bg-secondary-foreground",
+    forum_reply: "bg-accent",
+    video_reply: "bg-destructive",
   };
 
   const formatDate = (d: string) =>
