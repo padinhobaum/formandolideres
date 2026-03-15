@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -474,8 +475,8 @@ export default function ForumPage() {
         <h2 className="font-heading font-bold mb-1 text-4xl text-accent">Fórum de Líderes</h2>
         <p className="text-muted-foreground mb-6 text-lg">Discussões, perguntas e enquetes</p>
 
-        {/* Online Users */}
-        <section className="mb-6 border bg-card rounded-xl p-4 space-y-4">
+        {/* Online Users - mobile/tablet only */}
+        <section className="mb-6 border bg-card rounded-xl p-4 space-y-4 lg:hidden">
           {(() => {
             const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
             const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
@@ -511,13 +512,11 @@ export default function ForumPage() {
               }
               </div>;
 
-
             return (
               <>
                 {renderGroup(adminsOnline, "Administradores Online")}
                 {renderGroup(leadersOnline, "Líderes Online")}
               </>);
-
           })()}
         </section>
 
@@ -798,7 +797,51 @@ export default function ForumPage() {
           </div>
         }
       </div>
-      <aside className="hidden lg:block w-72 shrink-0">
+      <aside className="hidden lg:block w-72 shrink-0 space-y-4">
+        {/* Online Users - desktop sidebar */}
+        <Card className="sticky top-4">
+          <CardContent className="p-4 space-y-4">
+            {(() => {
+              const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
+              const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
+
+              const renderGroup = (users: OnlineUser[], label: string) =>
+              <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Circle className="w-3 h-3 text-accent fill-accent" />
+                    <h3 className="font-heading font-bold text-sm">
+                      {label} ({users.length})
+                    </h3>
+                  </div>
+                  {users.length === 0 ?
+                <p className="text-xs text-muted-foreground">Nenhum online no momento.</p> :
+                <div className="flex flex-wrap gap-3">
+                      {users.map((u) =>
+                  <div key={u.user_id} className="flex items-center gap-2">
+                          <div className="relative">
+                            <Avatar className="w-7 h-7">
+                              <AvatarImage src={u.avatar_url || undefined} />
+                              <AvatarFallback className="text-[9px] bg-primary text-primary-foreground">
+                                {getInitials(u.full_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-accent rounded-full border-2 border-card" />
+                          </div>
+                          <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
+                        </div>
+                  )}
+                    </div>
+                }
+                </div>;
+
+              return (
+                <>
+                  {renderGroup(adminsOnline, "Administradores Online")}
+                  {renderGroup(leadersOnline, "Líderes Online")}
+                </>);
+            })()}
+          </CardContent>
+        </Card>
         <ForumRanking />
       </aside>
       </div>
