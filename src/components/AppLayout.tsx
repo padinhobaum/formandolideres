@@ -2,10 +2,12 @@ import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles } from "lucide-react";
+import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePresence } from "@/hooks/usePresence";
 import NotificationPopover from "@/components/NotificationPopover";
+import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 
 interface NavItem {
   label: string;
@@ -39,6 +41,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
   const navigate = useNavigate();
   const location = useLocation();
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   useEffect(() => {
     supabase.from("custom_links").select("*").order("sort_order").then(({ data }) => {
@@ -115,27 +118,38 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
         </nav>
 
         <div className="p-3 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <Avatar className="w-9 h-9">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="text-xs font-body font-semibold bg-sidebar-primary text-sidebar-primary-foreground">
-                {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate text-sidebar-foreground">{profile?.full_name}</p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">
-                {isAdmin ? "Administrador" : "Líder de Classe"}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/60 hover:text-destructive hover:bg-sidebar-accent/50 rounded transition-colors mt-1">
-            
-            <LogOut className="w-4 h-4" strokeWidth={1.5} />
-            <span>Sair</span>
-          </button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded hover:bg-sidebar-accent/50 transition-colors">
+                <Avatar className="w-9 h-9">
+                  <AvatarImage src={profile?.avatar_url || undefined} />
+                  <AvatarFallback className="text-xs font-body font-semibold bg-sidebar-primary text-sidebar-primary-foreground">
+                    {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium truncate text-sidebar-foreground">{profile?.full_name}</p>
+                  <p className="text-xs text-sidebar-foreground/60 truncate">
+                    {isAdmin ? "Administrador" : "Líder de Classe"}
+                  </p>
+                </div>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="start" className="w-56 p-1">
+              <button
+                onClick={() => setChangePasswordOpen(true)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-accent transition-colors">
+                <KeyRound className="w-4 h-4" />
+                Alterar senha
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded text-destructive hover:bg-accent transition-colors">
+                <LogOut className="w-4 h-4" />
+                Sair
+              </button>
+            </PopoverContent>
+          </Popover>
         </div>
       </aside>
 
@@ -146,15 +160,32 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
           <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-10 w-auto" />
           <div className="flex items-center gap-2">
             <NotificationPopover variant="header" />
-            <Avatar className="w-9 h-9">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="text-xs font-body font-semibold bg-foreground text-background">
-                {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <button onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 text-destructive" strokeWidth={1.5} />
-            </button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button>
+                  <Avatar className="w-9 h-9">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="text-xs font-body font-semibold bg-foreground text-background">
+                      {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="bottom" align="end" className="w-56 p-1">
+                <button
+                  onClick={() => setChangePasswordOpen(true)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-accent transition-colors">
+                  <KeyRound className="w-4 h-4" />
+                  Alterar senha
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded text-destructive hover:bg-accent transition-colors">
+                  <LogOut className="w-4 h-4" />
+                  Sair
+                </button>
+              </PopoverContent>
+            </Popover>
           </div>
         </header>
         <div className="p-4 md:p-8 flex-1">{children}</div>
@@ -214,6 +245,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
           </button>
         }
       </nav>
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
     </div>);
 
 }
