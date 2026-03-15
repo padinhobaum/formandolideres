@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import RichTextEditor, { RichText } from "@/components/RichTextEditor";
 import SalaBadge from "@/components/SalaBadge";
+import ForumRanking from "@/components/ForumRanking";
 
 interface ForumCategory {
   id: string;
@@ -468,7 +469,8 @@ export default function ForumPage() {
 
   return (
     <AppLayout>
-      <div className="w-full max-w-4xl">
+      <div className="w-full flex gap-6">
+      <div className="flex-1 min-w-0 max-w-4xl">
         <h2 className="font-heading font-bold mb-1 text-4xl text-accent">Fórum de Líderes</h2>
         <p className="text-muted-foreground mb-6 text-lg">Discussões, perguntas e enquetes</p>
 
@@ -795,6 +797,10 @@ export default function ForumPage() {
           })}
           </div>
         }
+      </div>
+      <aside className="hidden lg:block w-72 shrink-0">
+        <ForumRanking />
+      </aside>
       </div>
     </AppLayout>);
 
