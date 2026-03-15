@@ -34,17 +34,20 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [lastReadAt, setLastReadAt] = useState<string | null>(null);
+  const [clearedAt, setClearedAt] = useState<string | null>(null);
 
   const fetchLastRead = async () => {
-    if (!user) return null;
+    if (!user) return { lr: null, ca: null };
     const { data } = await supabase
       .from("notification_last_read")
-      .select("last_read_at")
+      .select("last_read_at, cleared_at")
       .eq("user_id", user.id)
       .maybeSingle();
     const lr = (data as any)?.last_read_at || null;
+    const ca = (data as any)?.cleared_at || null;
     setLastReadAt(lr);
-    return lr;
+    setClearedAt(ca);
+    return { lr, ca };
   };
 
   const fetchNotifications = async () => {
