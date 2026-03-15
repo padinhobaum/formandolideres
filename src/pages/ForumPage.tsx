@@ -346,6 +346,8 @@ export default function ForumPage() {
       parent_reply_id: replyingTo?.id || null
     } as any);
     if (error) {toast.error("Erro ao responder.");return;}
+    // Award 10 XP for replying
+    await awardXp("reply_topic", `${topicId}_${Date.now()}`, 10);
     setReplyText("");
     setReplyImage(null);
     setReplyingTo(null);
