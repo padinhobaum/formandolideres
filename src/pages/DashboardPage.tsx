@@ -54,6 +54,8 @@ export default function DashboardPage() {
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+  const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
+  const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
 
   useEffect(() => {
     const fetchData = async () => {
