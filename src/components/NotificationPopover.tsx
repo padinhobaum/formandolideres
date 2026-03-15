@@ -258,28 +258,26 @@ function NotificationHeader({ unreadCount, onClearAll }: { unreadCount: number; 
   return (
     <div className="p-3 border-b flex items-center justify-between">
       <span className="font-heading font-bold text-sm">Notificações</span>
-      {unreadCount > 0 && (
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <button className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
-              <CheckCheck className="w-3.5 h-3.5" />
-              Limpar tudo
-            </button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Limpar notificações?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Todas as notificações serão marcadas como lidas e a lista será limpa.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancelar</AlertDialogCancel>
-              <AlertDialogAction onClick={onClearAll}>Confirmar</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+      <AlertDialog>
+        <AlertDialogTrigger asChild>
+          <button className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
+            <CheckCheck className="w-3.5 h-3.5" />
+            Limpar tudo
+          </button>
+        </AlertDialogTrigger>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Limpar notificações?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Todas as notificações serão marcadas como lidas e a lista será limpa.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={onClearAll}>Confirmar</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
