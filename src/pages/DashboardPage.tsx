@@ -89,6 +89,8 @@ export default function DashboardPage() {
     setSelectedNotice(notice);
     if (user) {
       await supabase.from("notice_reads").upsert({ notice_id: notice.id, user_id: user.id } as any, { onConflict: "notice_id,user_id" });
+      // Award XP for reading a notice
+      await awardXp("read_notice", notice.id, 5);
     }
   };
 
