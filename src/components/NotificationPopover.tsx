@@ -52,7 +52,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
 
   const fetchNotifications = async () => {
     if (!user) return;
-    const lr = await fetchLastRead();
+    const { lr, ca } = await fetchLastRead();
 
     const [notices, topics, videos, materials, forumReplies, videoReplies] = await Promise.all([
       supabase.from("notices").select("id, title, created_at, target_user_ids").order("created_at", { ascending: false }).limit(10),
