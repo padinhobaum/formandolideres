@@ -360,14 +360,17 @@ export type Database = {
       }
       notification_last_read: {
         Row: {
+          cleared_at: string | null
           last_read_at: string
           user_id: string
         }
         Insert: {
+          cleared_at?: string | null
           last_read_at?: string
           user_id: string
         }
         Update: {
+          cleared_at?: string | null
           last_read_at?: string
           user_id?: string
         }
