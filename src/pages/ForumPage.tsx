@@ -474,8 +474,8 @@ export default function ForumPage() {
         <h2 className="font-heading font-bold mb-1 text-4xl text-accent">Fórum de Líderes</h2>
         <p className="text-muted-foreground mb-6 text-lg">Discussões, perguntas e enquetes</p>
 
-        {/* Online Users */}
-        <section className="mb-6 border bg-card rounded-xl p-4 space-y-4">
+        {/* Online Users - mobile/tablet only */}
+        <section className="mb-6 border bg-card rounded-xl p-4 space-y-4 lg:hidden">
           {(() => {
             const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
             const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
@@ -511,13 +511,11 @@ export default function ForumPage() {
               }
               </div>;
 
-
             return (
               <>
                 {renderGroup(adminsOnline, "Administradores Online")}
                 {renderGroup(leadersOnline, "Líderes Online")}
               </>);
-
           })()}
         </section>
 
