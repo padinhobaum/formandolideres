@@ -797,7 +797,7 @@ export default function ForumPage() {
           </div>
         }
       </div>
-      <aside className="hidden lg:block w-72 shrink-0 mt-[5.5rem]">
+      <aside className="hidden lg:block w-72 shrink-0 mt-[6.75rem]">
         <ForumRanking />
       </aside>
       </div>

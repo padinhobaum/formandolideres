@@ -34,22 +34,25 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
   const [unreadCount, setUnreadCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [lastReadAt, setLastReadAt] = useState<string | null>(null);
+  const [clearedAt, setClearedAt] = useState<string | null>(null);
 
   const fetchLastRead = async () => {
-    if (!user) return null;
+    if (!user) return { lr: null, ca: null };
     const { data } = await supabase
       .from("notification_last_read")
-      .select("last_read_at")
+      .select("last_read_at, cleared_at")
       .eq("user_id", user.id)
       .maybeSingle();
     const lr = (data as any)?.last_read_at || null;
+    const ca = (data as any)?.cleared_at || null;
     setLastReadAt(lr);
-    return lr;
+    setClearedAt(ca);
+    return { lr, ca };
   };
 
   const fetchNotifications = async () => {
     if (!user) return;
-    const lr = await fetchLastRead();
+    const { lr, ca } = await fetchLastRead();
 
     const [notices, topics, videos, materials, forumReplies, videoReplies] = await Promise.all([
       supabase.from("notices").select("id, title, created_at, target_user_ids").order("created_at", { ascending: false }).limit(10),
@@ -111,15 +114,21 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       }
     }
 
-    const all: NotificationItem[] = [
+    let all: NotificationItem[] = [
       ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const })),
       ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const })),
       ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const })),
       ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const })),
       ...myForumReplyNotifs,
       ...myVideoReplyNotifs,
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 20);
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
+    // Filter out items that were cleared
+    if (ca) {
+      all = all.filter((i) => new Date(i.created_at) > new Date(ca));
+    }
+
+    all = all.slice(0, 20);
     setItems(all);
 
     if (lr) {
@@ -151,9 +160,10 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
   const handleClearAll = async () => {
     if (!user) return;
     const now = new Date().toISOString();
-    await supabase.from("notification_last_read").upsert({ user_id: user.id, last_read_at: now } as any, { onConflict: "user_id" });
+    await supabase.from("notification_last_read").upsert({ user_id: user.id, last_read_at: now, cleared_at: now } as any, { onConflict: "user_id" });
     setUnreadCount(0);
     setLastReadAt(now);
+    setClearedAt(now);
     setItems([]);
   };
 
