@@ -798,6 +798,10 @@ export default function ForumPage() {
           </div>
         }
       </div>
+      <aside className="hidden lg:block w-72 shrink-0">
+        <ForumRanking />
+      </aside>
+      </div>
     </AppLayout>);
 
 }
