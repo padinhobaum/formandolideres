@@ -245,6 +245,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
           </button>
         }
       </nav>
+      <ChangePasswordDialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen} />
     </div>);
 
 }
