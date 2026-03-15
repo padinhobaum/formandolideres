@@ -160,15 +160,32 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
           <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-10 w-auto" />
           <div className="flex items-center gap-2">
             <NotificationPopover variant="header" />
-            <Avatar className="w-9 h-9">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="text-xs font-body font-semibold bg-foreground text-background">
-                {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <button onClick={handleSignOut}>
-              <LogOut className="w-4 h-4 text-destructive" strokeWidth={1.5} />
-            </button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button>
+                  <Avatar className="w-9 h-9">
+                    <AvatarImage src={profile?.avatar_url || undefined} />
+                    <AvatarFallback className="text-xs font-body font-semibold bg-foreground text-background">
+                      {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </button>
+              </PopoverTrigger>
+              <PopoverContent side="bottom" align="end" className="w-56 p-1">
+                <button
+                  onClick={() => setChangePasswordOpen(true)}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-accent transition-colors">
+                  <KeyRound className="w-4 h-4" />
+                  Alterar senha
+                </button>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded text-destructive hover:bg-accent transition-colors">
+                  <LogOut className="w-4 h-4" />
+                  Sair
+                </button>
+              </PopoverContent>
+            </Popover>
           </div>
         </header>
         <div className="p-4 md:p-8 flex-1">{children}</div>
