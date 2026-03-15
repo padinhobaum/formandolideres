@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from "react";
+import { useUserXp } from "@/hooks/useUserXp";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -71,6 +72,7 @@ interface OnlineUser {
 
 export default function ForumPage() {
   const { user, profile, isAdmin } = useAuth();
+  const { awardXp } = useUserXp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
@@ -242,6 +244,8 @@ export default function ForumPage() {
     }
 
     toast.success("Tópico criado!");
+    // Award 20 XP for creating a topic
+    if (topicData) await awardXp("create_topic", (topicData as any).id, 20);
     setNewTitle("");setNewContent("");setNewImage(null);setIsPoll(false);setPollOptions(["", ""]);setNewCategoryId("");setShowNewTopic(false);
     fetchTopics();
   };
@@ -342,6 +346,8 @@ export default function ForumPage() {
       parent_reply_id: replyingTo?.id || null
     } as any);
     if (error) {toast.error("Erro ao responder.");return;}
+    // Award 10 XP for replying
+    await awardXp("reply_topic", `${topicId}_${Date.now()}`, 10);
     setReplyText("");
     setReplyImage(null);
     setReplyingTo(null);

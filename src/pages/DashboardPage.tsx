@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
 import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles } from "lucide-react";
+import { useUserXp } from "@/hooks/useUserXp";
+import UserLevelBadge from "@/components/UserLevelBadge";
 
 interface Notice {
   id: string;
@@ -52,6 +54,8 @@ export default function DashboardPage() {
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+  const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
+  const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -89,6 +93,8 @@ export default function DashboardPage() {
     setSelectedNotice(notice);
     if (user) {
       await supabase.from("notice_reads").upsert({ notice_id: notice.id, user_id: user.id } as any, { onConflict: "notice_id,user_id" });
+      // Award XP for reading a notice
+      await awardXp("read_notice", notice.id, 5);
     }
   };
 
@@ -121,24 +127,26 @@ export default function DashboardPage() {
       <div className="w-full">
         {/* Welcome with avatar */}
         <div className="flex items-center gap-4 mb-8 flex-wrap">
-          <div className="relative group">
-            <Avatar className="w-16 h-16 border-2 border-accent">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="text-lg bg-primary text-primary-foreground font-heading">
-                {getInitials(profile?.full_name || "U")}
-              </AvatarFallback>
-            </Avatar>
+          <UserLevelBadge
+            avatarUrl={profile?.avatar_url}
+            fullName={profile?.full_name || "U"}
+            xpData={xpData}
+            size={64}
+          >
             <label className="absolute inset-0 flex items-center justify-center bg-foreground/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
               <Camera className="w-5 h-5 text-background" />
               <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
             </label>
-          </div>
+          </UserLevelBadge>
           <div>
             <h2 className="font-heading font-bold text-4xl text-accent">
               Olá, {profile?.full_name?.split(" ")[0]}
             </h2>
             <p className="text-muted-foreground text-lg">
               {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
+            </p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Nível {level} · <span className="text-accent font-medium">{totalXp} XP</span> / {nextLevelXp} XP
             </p>
           </div>
           <div className="flex-1" />

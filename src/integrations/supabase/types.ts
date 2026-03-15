@@ -619,6 +619,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_xp: {
+        Row: {
+          level: number
+          total_xp: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          level?: number
+          total_xp?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          level?: number
+          total_xp?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       video_comments: {
         Row: {
           content: string
@@ -694,11 +715,48 @@ export type Database = {
         }
         Relationships: []
       }
+      xp_events: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          reference_id: string
+          user_id: string
+          xp_amount: number
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          reference_id: string
+          user_id: string
+          xp_amount: number
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          reference_id?: string
+          user_id?: string
+          xp_amount?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      award_xp: {
+        Args: {
+          _action: string
+          _reference_id: string
+          _user_id: string
+          _xp_amount: number
+        }
+        Returns: undefined
+      }
+      calculate_level: { Args: { xp: number }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
