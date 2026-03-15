@@ -476,7 +476,7 @@ export default function ForumPage() {
         <p className="text-muted-foreground mb-6 text-lg">Discussões, perguntas e enquetes</p>
 
         {/* Online Users - mobile/tablet only */}
-        <section className="mb-6 border bg-card rounded-xl p-4 space-y-4 lg:hidden">
+        <section className="mb-6 border bg-card rounded-xl p-4 space-y-4">
           {(() => {
             const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
             const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
