@@ -16,6 +16,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import RichTextEditor, { RichText } from "@/components/RichTextEditor";
 import SalaBadge from "@/components/SalaBadge";
+import ForumRanking from "@/components/ForumRanking";
 
 interface ForumCategory {
   id: string;
