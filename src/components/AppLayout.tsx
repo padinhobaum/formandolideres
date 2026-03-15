@@ -118,27 +118,38 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
         </nav>
 
         <div className="p-3 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 px-3 py-2">
-            <Avatar className="w-9 h-9">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="text-xs font-body font-semibold bg-sidebar-primary text-sidebar-primary-foreground">
-                {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate text-sidebar-foreground">{profile?.full_name}</p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">
-                {isAdmin ? "Administrador" : "Líder de Classe"}
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={handleSignOut}
-            className="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-sidebar-foreground/60 hover:text-destructive hover:bg-sidebar-accent/50 rounded transition-colors mt-1">
-            
-            <LogOut className="w-4 h-4" strokeWidth={1.5} />
-            <span>Sair</span>
-          </button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <button className="w-full flex items-center gap-3 px-3 py-2 rounded hover:bg-sidebar-accent/50 transition-colors">
+                <Avatar className="w-9 h-9">
+                  <AvatarImage src={profile?.avatar_url || undefined} />
+                  <AvatarFallback className="text-xs font-body font-semibold bg-sidebar-primary text-sidebar-primary-foreground">
+                    {(profile?.full_name || "U").split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0 text-left">
+                  <p className="text-sm font-medium truncate text-sidebar-foreground">{profile?.full_name}</p>
+                  <p className="text-xs text-sidebar-foreground/60 truncate">
+                    {isAdmin ? "Administrador" : "Líder de Classe"}
+                  </p>
+                </div>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="top" align="start" className="w-56 p-1">
+              <button
+                onClick={() => setChangePasswordOpen(true)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded hover:bg-accent transition-colors">
+                <KeyRound className="w-4 h-4" />
+                Alterar senha
+              </button>
+              <button
+                onClick={handleSignOut}
+                className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded text-destructive hover:bg-accent transition-colors">
+                <LogOut className="w-4 h-4" />
+                Sair
+              </button>
+            </PopoverContent>
+          </Popover>
         </div>
       </aside>
 
