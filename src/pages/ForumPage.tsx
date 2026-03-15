@@ -244,6 +244,8 @@ export default function ForumPage() {
     }
 
     toast.success("Tópico criado!");
+    // Award 20 XP for creating a topic
+    if (topicData) await awardXp("create_topic", (topicData as any).id, 20);
     setNewTitle("");setNewContent("");setNewImage(null);setIsPoll(false);setPollOptions(["", ""]);setNewCategoryId("");setShowNewTopic(false);
     fetchTopics();
   };
