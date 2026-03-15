@@ -72,6 +72,7 @@ interface OnlineUser {
 
 export default function ForumPage() {
   const { user, profile, isAdmin } = useAuth();
+  const { awardXp } = useUserXp();
   const [searchParams, setSearchParams] = useSearchParams();
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
