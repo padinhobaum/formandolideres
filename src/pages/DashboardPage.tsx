@@ -9,6 +9,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
 import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles } from "lucide-react";
+import { useUserXp } from "@/hooks/useUserXp";
+import UserLevelBadge from "@/components/UserLevelBadge";
 
 interface Notice {
   id: string;
