@@ -160,9 +160,10 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
   const handleClearAll = async () => {
     if (!user) return;
     const now = new Date().toISOString();
-    await supabase.from("notification_last_read").upsert({ user_id: user.id, last_read_at: now } as any, { onConflict: "user_id" });
+    await supabase.from("notification_last_read").upsert({ user_id: user.id, last_read_at: now, cleared_at: now } as any, { onConflict: "user_id" });
     setUnreadCount(0);
     setLastReadAt(now);
+    setClearedAt(now);
     setItems([]);
   };
 
