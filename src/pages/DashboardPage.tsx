@@ -127,24 +127,26 @@ export default function DashboardPage() {
       <div className="w-full">
         {/* Welcome with avatar */}
         <div className="flex items-center gap-4 mb-8 flex-wrap">
-          <div className="relative group">
-            <Avatar className="w-16 h-16 border-2 border-accent">
-              <AvatarImage src={profile?.avatar_url || undefined} />
-              <AvatarFallback className="text-lg bg-primary text-primary-foreground font-heading">
-                {getInitials(profile?.full_name || "U")}
-              </AvatarFallback>
-            </Avatar>
+          <UserLevelBadge
+            avatarUrl={profile?.avatar_url}
+            fullName={profile?.full_name || "U"}
+            xpData={xpData}
+            size={64}
+          >
             <label className="absolute inset-0 flex items-center justify-center bg-foreground/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
               <Camera className="w-5 h-5 text-background" />
               <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
             </label>
-          </div>
+          </UserLevelBadge>
           <div>
             <h2 className="font-heading font-bold text-4xl text-accent">
               Olá, {profile?.full_name?.split(" ")[0]}
             </h2>
             <p className="text-muted-foreground text-lg">
               {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
+            </p>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Nível {level} · <span className="text-accent font-medium">{totalXp} XP</span> / {nextLevelXp} XP
             </p>
           </div>
           <div className="flex-1" />
