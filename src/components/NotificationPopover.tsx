@@ -123,14 +123,19 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       ...myVideoReplyNotifs,
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-    // Filter out items that were cleared (older than lastReadAt set by "clear all")
-    if (lr) {
-      all = all.filter((i) => new Date(i.created_at) > new Date(lr));
+    // Filter out items that were cleared
+    if (ca) {
+      all = all.filter((i) => new Date(i.created_at) > new Date(ca));
     }
 
     all = all.slice(0, 20);
     setItems(all);
-    setUnreadCount(0); // After filtering, all visible items are new (post-clear)
+
+    if (lr) {
+      setUnreadCount(all.filter((i) => new Date(i.created_at) > new Date(lr)).length);
+    } else {
+      setUnreadCount(all.length);
+    }
   };
 
   useEffect(() => {
