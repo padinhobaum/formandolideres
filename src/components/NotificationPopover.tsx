@@ -111,22 +111,23 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       }
     }
 
-    const all: NotificationItem[] = [
+    let all: NotificationItem[] = [
       ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const })),
       ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const })),
       ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const })),
       ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const })),
       ...myForumReplyNotifs,
       ...myVideoReplyNotifs,
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 20);
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-    setItems(all);
-
+    // Filter out items that were cleared (older than lastReadAt set by "clear all")
     if (lr) {
-      setUnreadCount(all.filter((i) => new Date(i.created_at) > new Date(lr)).length);
-    } else {
-      setUnreadCount(all.length);
+      all = all.filter((i) => new Date(i.created_at) > new Date(lr));
     }
+
+    all = all.slice(0, 20);
+    setItems(all);
+    setUnreadCount(0); // After filtering, all visible items are new (post-clear)
   };
 
   useEffect(() => {
