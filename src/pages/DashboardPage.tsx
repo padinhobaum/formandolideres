@@ -232,7 +232,15 @@ export default function DashboardPage() {
                   </div>
                   <div className="p-3 flex flex-col flex-1">
                     <h4 className="font-heading line-clamp-2 font-bold text-primary text-base">{n.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">{n.author_name} · {formatDate(n.created_at)}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <Avatar className="w-5 h-5 flex-shrink-0">
+                        <AvatarImage src={n.author_avatar_url || undefined} />
+                        <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
+                          {getInitials(n.author_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="text-xs text-muted-foreground">{n.author_name} · {formatDate(n.created_at)}</p>
+                    </div>
                     <div className="mt-auto pt-2">
                       <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenNotice(n)}>
                         Ler aviso completo
