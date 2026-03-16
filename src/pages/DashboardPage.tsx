@@ -17,6 +17,8 @@ interface Notice {
   title: string;
   content: string;
   author_name: string;
+  author_id: string;
+  author_avatar_url?: string | null;
   is_pinned: boolean;
   created_at: string;
   image_url: string | null;
