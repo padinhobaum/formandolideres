@@ -107,14 +107,22 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       if (parentIds.length > 0) {
         const { data: parentComments } = await supabase.from("video_comments").select("id, user_id").in("id", parentIds);
         const myParentIds = new Set((parentComments || []).filter((p: any) => p.user_id === user.id).map((p: any) => p.id));
-        myVideoReplyNotifs = (videoReplies.data as any[])
-          .filter((r: any) => myParentIds.has(r.parent_comment_id))
-          .map((r: any) => ({
+        const filteredVideoReplies = (videoReplies.data as any[]).filter((r: any) => myParentIds.has(r.parent_comment_id));
+        // Fetch avatars for video reply authors
+        const videoReplyAuthorIds = [...new Set(filteredVideoReplies.map((r: any) => r.user_id))];
+        let videoReplyAvatarMap: Record<string, string | null> = {};
+        if (videoReplyAuthorIds.length > 0) {
+          const { data: vrProfiles } = await supabase.from("profiles").select("user_id, avatar_url").in("user_id", videoReplyAuthorIds);
+          (vrProfiles || []).forEach((p: any) => { videoReplyAvatarMap[p.user_id] = p.avatar_url; });
+        }
+        myVideoReplyNotifs = filteredVideoReplies.map((r: any) => ({
             id: r.id,
             title: `${r.user_name} respondeu ao seu comentário na videoaula`,
             created_at: r.created_at,
             type: "video_reply" as const,
             route: "/videoaulas",
+            author_avatar_url: videoReplyAvatarMap[r.user_id],
+            author_name: r.user_name,
           }));
       }
     }
