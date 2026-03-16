@@ -69,15 +69,27 @@ export default function DashboardPage() {
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
       supabase.from("forum_topics").select("id, title, author_name, author_avatar_url, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
-      supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4)]
+      supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4)]
       );
+
+      // Collect author IDs for avatar lookup
+      const authorIds = new Set<string>();
+      (noticesRes.data || []).forEach((n: any) => { if (n.author_id) authorIds.add(n.author_id); });
+      (videosRes.data || []).forEach((v: any) => { if (v.created_by) authorIds.add(v.created_by); });
+
+      let avatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
+      if (authorIds.size > 0) {
+        const { data: profiles } = await supabase.from("profiles").select("user_id, avatar_url, full_name").in("user_id", [...authorIds]);
+        (profiles || []).forEach((p: any) => { avatarMap[p.user_id] = { avatar_url: p.avatar_url, full_name: p.full_name }; });
+      }
+
       if (noticesRes.data) {
         const filtered = noticesRes.data.filter((n: any) => !n.target_user_ids || user && n.target_user_ids.includes(user.id));
-        setNotices(filtered.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [] })));
+        setNotices(filtered.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [], author_avatar_url: avatarMap[n.author_id]?.avatar_url })));
       }
       if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
-      if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
+      if (videosRes.data) setVideoLessons((videosRes.data as any[]).map((v: any) => ({ ...v, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })) as VideoLesson[]);
     };
     fetchData();
 
