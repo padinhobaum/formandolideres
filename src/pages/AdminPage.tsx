@@ -22,7 +22,6 @@ export default function AdminPage() {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "notices", label: "Avisos" },
-    { key: "students", label: "Alunos" },
     { key: "materials", label: "Materiais" },
     { key: "videos", label: "Videoaulas" },
     { key: "playlists", label: "Playlists" },
