@@ -53,7 +53,6 @@ export default function AdminPage() {
         </div>
 
         {tab === "notices" && <AdminNotices />}
-        {tab === "students" && <AdminStudents />}
         {tab === "materials" && <AdminMaterials />}
         {tab === "videos" && <AdminVideos />}
         {tab === "playlists" && <AdminPlaylists />}

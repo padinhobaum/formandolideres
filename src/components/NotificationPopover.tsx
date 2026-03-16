@@ -258,6 +258,9 @@ function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread, o
   if (items.length === 0) {
     return <p className="p-4 text-sm text-muted-foreground text-center">Nenhuma notificação.</p>;
   }
+  const getInitials = (name?: string) =>
+    name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
+
   return (
     <div className="divide-y">
       {items.map((item) => (
@@ -266,13 +269,23 @@ function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread, o
           onClick={() => onItemClick(item)}
           className={`w-full text-left p-3 text-sm hover:bg-muted/50 transition-colors cursor-pointer ${isUnread(item.created_at) ? "bg-secondary/50" : ""}`}
         >
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className={`text-[10px] text-primary-foreground px-1.5 py-0.5 rounded font-body ${typeColor[item.type]}`}>
-              {typeLabel[item.type]}
-            </span>
-            <span className="text-[10px] text-muted-foreground">{formatDate(item.created_at)}</span>
+          <div className="flex items-start gap-2.5">
+            <Avatar className="w-7 h-7 flex-shrink-0 mt-0.5">
+              <AvatarImage src={item.author_avatar_url || undefined} />
+              <AvatarFallback className="text-[9px] font-bold bg-secondary text-secondary-foreground">
+                {getInitials(item.author_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className={`text-[10px] text-primary-foreground px-1.5 py-0.5 rounded font-body ${typeColor[item.type]}`}>
+                  {typeLabel[item.type]}
+                </span>
+                <span className="text-[10px] text-muted-foreground">{formatDate(item.created_at)}</span>
+              </div>
+              <p className="font-body text-sm line-clamp-2">{item.title}</p>
+            </div>
           </div>
-          <p className="font-body text-sm line-clamp-2">{item.title}</p>
         </button>
       ))}
     </div>
