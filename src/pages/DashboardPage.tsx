@@ -280,7 +280,15 @@ export default function DashboardPage() {
                     </div>
                     <div className="p-3">
                       <h4 className="font-heading line-clamp-1 text-accent text-base font-bold">{v.title}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">{v.category} · {formatDate(v.created_at)}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Avatar className="w-5 h-5 flex-shrink-0">
+                          <AvatarImage src={v.author_avatar_url || undefined} />
+                          <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
+                            {getInitials(v.author_name || v.category)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-xs text-muted-foreground">{v.author_name || v.category} · {formatDate(v.created_at)}</p>
+                      </div>
                     </div>
                   </button>);
             })}
