@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password";
 
