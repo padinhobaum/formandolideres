@@ -63,7 +63,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       supabase.from("video_lessons").select("id, title, created_at, created_by").order("created_at", { ascending: false }).limit(10),
       supabase.from("materials").select("id, title, created_at, uploaded_by").order("created_at", { ascending: false }).limit(10),
       // Replies to my forum comments
-      supabase.from("forum_replies").select("id, topic_id, author_name, parent_reply_id, created_at")
+      supabase.from("forum_replies").select("id, topic_id, author_name, author_avatar_url, parent_reply_id, created_at")
         .not("author_id", "eq", user.id)
         .not("parent_reply_id", "is", null)
         .order("created_at", { ascending: false }).limit(20),
