@@ -208,6 +208,12 @@ function AdminNotices() {
                       else setSelectedUserIds(selectedUserIds.filter((id) => id !== u.user_id));
                     }}
                   />
+                  <Avatar className="w-6 h-6 flex-shrink-0">
+                    <AvatarImage src={u.avatar_url || undefined} />
+                    <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
+                      {u.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
                   {u.full_name} {u.class_name && <span className="text-muted-foreground text-xs">({u.class_name})</span>}
                 </label>
               ))}
