@@ -40,6 +40,9 @@ interface VideoLesson {
   video_url: string;
   category: string;
   created_at: string;
+  created_by: string;
+  author_avatar_url?: string | null;
+  author_name?: string;
 }
 
 function getYouTubeThumbnail(url: string): string | null {
