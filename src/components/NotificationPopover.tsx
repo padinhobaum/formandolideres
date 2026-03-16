@@ -117,11 +117,23 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       }
     }
 
+    // Collect author IDs that need avatar lookup (notices, videos, materials)
+    const authorIdsToLookup = new Set<string>();
+    filteredNotices.forEach((n: any) => { if (n.author_id) authorIdsToLookup.add(n.author_id); });
+    (videos.data || []).forEach((v: any) => { if (v.created_by) authorIdsToLookup.add(v.created_by); });
+    (materials.data || []).forEach((m: any) => { if (m.uploaded_by) authorIdsToLookup.add(m.uploaded_by); });
+
+    let avatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
+    if (authorIdsToLookup.size > 0) {
+      const { data: profiles } = await supabase.from("profiles").select("user_id, avatar_url, full_name").in("user_id", [...authorIdsToLookup]);
+      (profiles || []).forEach((p: any) => { avatarMap[p.user_id] = { avatar_url: p.avatar_url, full_name: p.full_name }; });
+    }
+
     let all: NotificationItem[] = [
-      ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const })),
-      ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const })),
-      ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const })),
-      ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const })),
+      ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const, author_avatar_url: avatarMap[n.author_id]?.avatar_url, author_name: n.author_name })),
+      ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const, author_avatar_url: t.author_avatar_url, author_name: t.author_name })),
+      ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })),
+      ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const, author_avatar_url: avatarMap[m.uploaded_by]?.avatar_url, author_name: avatarMap[m.uploaded_by]?.full_name })),
       ...myForumReplyNotifs,
       ...myVideoReplyNotifs,
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
