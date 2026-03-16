@@ -94,6 +94,8 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
             created_at: r.created_at,
             type: "forum_reply" as const,
             route: `/forum?topic=${r.topic_id}`,
+            author_avatar_url: r.author_avatar_url,
+            author_name: r.author_name,
           }));
       }
     }
