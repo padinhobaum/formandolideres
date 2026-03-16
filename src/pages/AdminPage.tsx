@@ -8,8 +8,9 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Tab = "users" | "students" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password";
+type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password";
 
 interface CtaButton {
   text: string;
@@ -22,7 +23,6 @@ export default function AdminPage() {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "notices", label: "Avisos" },
-    { key: "students", label: "Alunos" },
     { key: "materials", label: "Materiais" },
     { key: "videos", label: "Videoaulas" },
     { key: "playlists", label: "Playlists" },
@@ -54,7 +54,6 @@ export default function AdminPage() {
         </div>
 
         {tab === "notices" && <AdminNotices />}
-        {tab === "students" && <AdminStudents />}
         {tab === "materials" && <AdminMaterials />}
         {tab === "videos" && <AdminVideos />}
         {tab === "playlists" && <AdminPlaylists />}
@@ -89,7 +88,7 @@ function AdminNotices() {
   };
 
   const fetchAllUsers = async () => {
-    const { data } = await supabase.from("profiles").select("user_id, full_name, class_name");
+    const { data } = await supabase.from("profiles").select("user_id, full_name, class_name, avatar_url");
     if (data) setAllUsers(data);
   };
 
@@ -209,6 +208,12 @@ function AdminNotices() {
                       else setSelectedUserIds(selectedUserIds.filter((id) => id !== u.user_id));
                     }}
                   />
+                  <Avatar className="w-6 h-6 flex-shrink-0">
+                    <AvatarImage src={u.avatar_url || undefined} />
+                    <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
+                      {u.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
                   {u.full_name} {u.class_name && <span className="text-muted-foreground text-xs">({u.class_name})</span>}
                 </label>
               ))}

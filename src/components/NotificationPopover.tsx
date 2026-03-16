@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Bell, CheckCheck } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NotificationItem {
   id: string;
@@ -12,6 +13,8 @@ interface NotificationItem {
   title: string;
   created_at: string;
   route?: string;
+  author_avatar_url?: string | null;
+  author_name?: string;
 }
 
 function getNotificationRoute(item: NotificationItem): string {
@@ -55,12 +58,12 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     const { lr, ca } = await fetchLastRead();
 
     const [notices, topics, videos, materials, forumReplies, videoReplies] = await Promise.all([
-      supabase.from("notices").select("id, title, created_at, target_user_ids").order("created_at", { ascending: false }).limit(10),
-      supabase.from("forum_topics").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
-      supabase.from("video_lessons").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
-      supabase.from("materials").select("id, title, created_at").order("created_at", { ascending: false }).limit(10),
+      supabase.from("notices").select("id, title, created_at, target_user_ids, author_id, author_name").order("created_at", { ascending: false }).limit(10),
+      supabase.from("forum_topics").select("id, title, created_at, author_id, author_name, author_avatar_url").order("created_at", { ascending: false }).limit(10),
+      supabase.from("video_lessons").select("id, title, created_at, created_by").order("created_at", { ascending: false }).limit(10),
+      supabase.from("materials").select("id, title, created_at, uploaded_by").order("created_at", { ascending: false }).limit(10),
       // Replies to my forum comments
-      supabase.from("forum_replies").select("id, topic_id, author_name, parent_reply_id, created_at")
+      supabase.from("forum_replies").select("id, topic_id, author_name, author_avatar_url, parent_reply_id, created_at")
         .not("author_id", "eq", user.id)
         .not("parent_reply_id", "is", null)
         .order("created_at", { ascending: false }).limit(20),
@@ -91,6 +94,8 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
             created_at: r.created_at,
             type: "forum_reply" as const,
             route: `/forum?topic=${r.topic_id}`,
+            author_avatar_url: r.author_avatar_url,
+            author_name: r.author_name,
           }));
       }
     }
@@ -102,23 +107,43 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       if (parentIds.length > 0) {
         const { data: parentComments } = await supabase.from("video_comments").select("id, user_id").in("id", parentIds);
         const myParentIds = new Set((parentComments || []).filter((p: any) => p.user_id === user.id).map((p: any) => p.id));
-        myVideoReplyNotifs = (videoReplies.data as any[])
-          .filter((r: any) => myParentIds.has(r.parent_comment_id))
-          .map((r: any) => ({
+        const filteredVideoReplies = (videoReplies.data as any[]).filter((r: any) => myParentIds.has(r.parent_comment_id));
+        // Fetch avatars for video reply authors
+        const videoReplyAuthorIds = [...new Set(filteredVideoReplies.map((r: any) => r.user_id))];
+        let videoReplyAvatarMap: Record<string, string | null> = {};
+        if (videoReplyAuthorIds.length > 0) {
+          const { data: vrProfiles } = await supabase.from("profiles").select("user_id, avatar_url").in("user_id", videoReplyAuthorIds);
+          (vrProfiles || []).forEach((p: any) => { videoReplyAvatarMap[p.user_id] = p.avatar_url; });
+        }
+        myVideoReplyNotifs = filteredVideoReplies.map((r: any) => ({
             id: r.id,
             title: `${r.user_name} respondeu ao seu comentário na videoaula`,
             created_at: r.created_at,
             type: "video_reply" as const,
             route: "/videoaulas",
+            author_avatar_url: videoReplyAvatarMap[r.user_id],
+            author_name: r.user_name,
           }));
       }
     }
 
+    // Collect author IDs that need avatar lookup (notices, videos, materials)
+    const authorIdsToLookup = new Set<string>();
+    filteredNotices.forEach((n: any) => { if (n.author_id) authorIdsToLookup.add(n.author_id); });
+    (videos.data || []).forEach((v: any) => { if (v.created_by) authorIdsToLookup.add(v.created_by); });
+    (materials.data || []).forEach((m: any) => { if (m.uploaded_by) authorIdsToLookup.add(m.uploaded_by); });
+
+    let avatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
+    if (authorIdsToLookup.size > 0) {
+      const { data: profiles } = await supabase.from("profiles").select("user_id, avatar_url, full_name").in("user_id", [...authorIdsToLookup]);
+      (profiles || []).forEach((p: any) => { avatarMap[p.user_id] = { avatar_url: p.avatar_url, full_name: p.full_name }; });
+    }
+
     let all: NotificationItem[] = [
-      ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const })),
-      ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const })),
-      ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const })),
-      ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const })),
+      ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const, author_avatar_url: avatarMap[n.author_id]?.avatar_url, author_name: n.author_name })),
+      ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const, author_avatar_url: t.author_avatar_url, author_name: t.author_name })),
+      ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })),
+      ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const, author_avatar_url: avatarMap[m.uploaded_by]?.avatar_url, author_name: avatarMap[m.uploaded_by]?.full_name })),
       ...myForumReplyNotifs,
       ...myVideoReplyNotifs,
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -243,6 +268,9 @@ function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread, o
   if (items.length === 0) {
     return <p className="p-4 text-sm text-muted-foreground text-center">Nenhuma notificação.</p>;
   }
+  const getInitials = (name?: string) =>
+    name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
+
   return (
     <div className="divide-y">
       {items.map((item) => (
@@ -251,13 +279,23 @@ function NotificationList({ items, typeLabel, typeColor, formatDate, isUnread, o
           onClick={() => onItemClick(item)}
           className={`w-full text-left p-3 text-sm hover:bg-muted/50 transition-colors cursor-pointer ${isUnread(item.created_at) ? "bg-secondary/50" : ""}`}
         >
-          <div className="flex items-center gap-2 mb-0.5">
-            <span className={`text-[10px] text-primary-foreground px-1.5 py-0.5 rounded font-body ${typeColor[item.type]}`}>
-              {typeLabel[item.type]}
-            </span>
-            <span className="text-[10px] text-muted-foreground">{formatDate(item.created_at)}</span>
+          <div className="flex items-start gap-2.5">
+            <Avatar className="w-7 h-7 flex-shrink-0 mt-0.5">
+              <AvatarImage src={item.author_avatar_url || undefined} />
+              <AvatarFallback className="text-[9px] font-bold bg-secondary text-secondary-foreground">
+                {getInitials(item.author_name)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-0.5">
+                <span className={`text-[10px] text-primary-foreground px-1.5 py-0.5 rounded font-body ${typeColor[item.type]}`}>
+                  {typeLabel[item.type]}
+                </span>
+                <span className="text-[10px] text-muted-foreground">{formatDate(item.created_at)}</span>
+              </div>
+              <p className="font-body text-sm line-clamp-2">{item.title}</p>
+            </div>
           </div>
-          <p className="font-body text-sm line-clamp-2">{item.title}</p>
         </button>
       ))}
     </div>

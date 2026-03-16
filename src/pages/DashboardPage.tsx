@@ -17,6 +17,8 @@ interface Notice {
   title: string;
   content: string;
   author_name: string;
+  author_id: string;
+  author_avatar_url?: string | null;
   is_pinned: boolean;
   created_at: string;
   image_url: string | null;
@@ -38,6 +40,9 @@ interface VideoLesson {
   video_url: string;
   category: string;
   created_at: string;
+  created_by: string;
+  author_avatar_url?: string | null;
+  author_name?: string;
 }
 
 function getYouTubeThumbnail(url: string): string | null {
@@ -64,15 +69,27 @@ export default function DashboardPage() {
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
       supabase.from("forum_topics").select("id, title, author_name, author_avatar_url, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
-      supabase.from("video_lessons").select("id, title, video_url, category, created_at").order("created_at", { ascending: false }).limit(4)]
+      supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4)]
       );
+
+      // Collect author IDs for avatar lookup
+      const authorIds = new Set<string>();
+      (noticesRes.data || []).forEach((n: any) => { if (n.author_id) authorIds.add(n.author_id); });
+      (videosRes.data || []).forEach((v: any) => { if (v.created_by) authorIds.add(v.created_by); });
+
+      let avatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
+      if (authorIds.size > 0) {
+        const { data: profiles } = await supabase.from("profiles").select("user_id, avatar_url, full_name").in("user_id", [...authorIds]);
+        (profiles || []).forEach((p: any) => { avatarMap[p.user_id] = { avatar_url: p.avatar_url, full_name: p.full_name }; });
+      }
+
       if (noticesRes.data) {
         const filtered = noticesRes.data.filter((n: any) => !n.target_user_ids || user && n.target_user_ids.includes(user.id));
-        setNotices(filtered.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [] })));
+        setNotices(filtered.map((n: any) => ({ ...n, cta_buttons: Array.isArray(n.cta_buttons) ? n.cta_buttons : [], author_avatar_url: avatarMap[n.author_id]?.avatar_url })));
       }
       if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
-      if (videosRes.data) setVideoLessons(videosRes.data as VideoLesson[]);
+      if (videosRes.data) setVideoLessons((videosRes.data as any[]).map((v: any) => ({ ...v, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })) as VideoLesson[]);
     };
     fetchData();
 
@@ -215,7 +232,15 @@ export default function DashboardPage() {
                   </div>
                   <div className="p-3 flex flex-col flex-1">
                     <h4 className="font-heading line-clamp-2 font-bold text-primary text-base">{n.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1">{n.author_name} · {formatDate(n.created_at)}</p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <Avatar className="w-5 h-5 flex-shrink-0">
+                        <AvatarImage src={n.author_avatar_url || undefined} />
+                        <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
+                          {getInitials(n.author_name)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="text-xs text-muted-foreground">{n.author_name} · {formatDate(n.created_at)}</p>
+                    </div>
                     <div className="mt-auto pt-2">
                       <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenNotice(n)}>
                         Ler aviso completo
@@ -255,7 +280,15 @@ export default function DashboardPage() {
                     </div>
                     <div className="p-3">
                       <h4 className="font-heading line-clamp-1 text-accent text-base font-bold">{v.title}</h4>
-                      <p className="text-xs text-muted-foreground mt-1">{v.category} · {formatDate(v.created_at)}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <Avatar className="w-5 h-5 flex-shrink-0">
+                          <AvatarImage src={v.author_avatar_url || undefined} />
+                          <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
+                            {getInitials(v.author_name || v.category)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <p className="text-xs text-muted-foreground">{v.author_name || v.category} · {formatDate(v.created_at)}</p>
+                      </div>
                     </div>
                   </button>);
             })}
