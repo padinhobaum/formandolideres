@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Bell, CheckCheck } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NotificationItem {
   id: string;
@@ -12,6 +13,8 @@ interface NotificationItem {
   title: string;
   created_at: string;
   route?: string;
+  author_avatar_url?: string | null;
+  author_name?: string;
 }
 
 function getNotificationRoute(item: NotificationItem): string {
