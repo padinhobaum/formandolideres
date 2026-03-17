@@ -136,7 +136,7 @@ export default function ForumPage() {
       ...t,
       reply_count: countMap[t.id] || 0,
       category_name: t.forum_categories?.name || null,
-      category_color: t.forum_categories?.color || null,
+      category_color: t.forum_categories?.color || null
     }));
     setTopics(topicsData);
 
@@ -478,11 +478,11 @@ export default function ForumPage() {
         {/* Online Users - mobile/tablet only */}
         <section className="mb-4 border bg-card rounded-xl p-4 space-y-4 lg:hidden">
           {(() => {
-            const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
-            const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
+              const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
+              const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
 
-            const renderGroup = (users: OnlineUser[], label: string) =>
-            <div>
+              const renderGroup = (users: OnlineUser[], label: string) =>
+              <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Circle className="w-3 h-3 text-accent fill-accent" />
                   <h3 className="font-heading font-bold text-sm">
@@ -490,10 +490,10 @@ export default function ForumPage() {
                   </h3>
                 </div>
                 {users.length === 0 ?
-              <p className="text-xs text-muted-foreground">Nenhum online no momento.</p> :
-              <div className="flex flex-wrap gap-3">
+                <p className="text-xs text-muted-foreground">Nenhum online no momento.</p> :
+                <div className="flex flex-wrap gap-3">
                     {users.map((u) =>
-                <div key={u.user_id} className="flex items-center gap-2">
+                  <div key={u.user_id} className="flex items-center gap-2">
                         <div className="relative">
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={u.avatar_url || undefined} />
@@ -506,17 +506,17 @@ export default function ForumPage() {
                         <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
                         <SalaBadge sala={u.class_name} />
                       </div>
-                )}
+                  )}
                   </div>
-              }
+                }
               </div>;
 
-            return (
-              <>
+              return (
+                <>
                 {renderGroup(adminsOnline, "Administradores Online")}
                 {renderGroup(leadersOnline, "Líderes Online")}
               </>);
-          })()}
+            })()}
         </section>
 
         {/* New Topic + Category Filter */}
@@ -526,24 +526,24 @@ export default function ForumPage() {
             Novo Tópico
           </Button>
           {categories.length > 0 &&
-          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
               <Filter className="w-4 h-4 text-muted-foreground" />
               <select
-              value={selectedCategoryFilter}
-              onChange={(e) => setSelectedCategoryFilter(e.target.value)}
-              className="border bg-background px-3 py-1.5 text-sm font-body rounded-full h-9">
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="border bg-background px-3 py-1.5 text-sm font-body rounded-full h-9">
                 <option value="all">Todas</option>
                 {categories.map((c) =>
-              <option key={c.id} value={c.id}>{c.name}</option>
-              )}
+                <option key={c.id} value={c.id}>{c.name}</option>
+                )}
               </select>
             </div>
-          }
+            }
         </div>
 
         {/* New Topic Form */}
         {showNewTopic &&
-        <form onSubmit={handleCreateTopic} className="border bg-card rounded-xl p-5 mb-4 space-y-3">
+          <form onSubmit={handleCreateTopic} className="border bg-card rounded-xl p-5 mb-4 space-y-3">
             <h3 className="font-heading font-bold text-sm">Criar Tópico</h3>
             <div>
               <Label className="text-sm">Título</Label>
@@ -556,13 +556,13 @@ export default function ForumPage() {
             <div>
               <Label className="text-sm">Categoria</Label>
               <select
-              value={newCategoryId}
-              onChange={(e) => setNewCategoryId(e.target.value)}
-              className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10">
+                value={newCategoryId}
+                onChange={(e) => setNewCategoryId(e.target.value)}
+                className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10">
                 <option value="">Sem categoria</option>
                 {categories.map((c) =>
-              <option key={c.id} value={c.id}>{c.name}</option>
-              )}
+                <option key={c.id} value={c.id}>{c.name}</option>
+                )}
               </select>
             </div>
             <div>
@@ -571,13 +571,13 @@ export default function ForumPage() {
               </Label>
               <Input type="file" accept="image/*" onChange={(e) => setNewImage(e.target.files?.[0] || null)} className="mt-1" />
               {newImage &&
-            <div className="mt-2 relative inline-block">
+              <div className="mt-2 relative inline-block">
                   <img src={URL.createObjectURL(newImage)} alt="Preview" className="max-h-32 rounded-lg" />
                   <button type="button" onClick={() => setNewImage(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5">
                     <X className="w-3 h-3" />
                   </button>
                 </div>
-            }
+              }
             </div>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={isPoll} onChange={(e) => setIsPoll(e.target.checked)} />
@@ -585,44 +585,44 @@ export default function ForumPage() {
               Incluir enquete/votação
             </label>
             {isPoll &&
-          <div className="space-y-2 pl-6">
+            <div className="space-y-2 pl-6">
                 <Label className="text-sm">Opções da enquete</Label>
                 {pollOptions.map((opt, i) =>
-            <div key={i} className="flex gap-2">
-                    <Input placeholder={`Opção ${i + 1}`} value={opt} onChange={(e) => { const updated = [...pollOptions]; updated[i] = e.target.value; setPollOptions(updated); }} className="h-8 text-sm" />
+              <div key={i} className="flex gap-2">
+                    <Input placeholder={`Opção ${i + 1}`} value={opt} onChange={(e) => {const updated = [...pollOptions];updated[i] = e.target.value;setPollOptions(updated);}} className="h-8 text-sm" />
                     {i >= 2 && <button type="button" onClick={() => setPollOptions(pollOptions.filter((_, idx) => idx !== i))} className="text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>}
                   </div>
-            )}
+              )}
                 {pollOptions.length < 6 &&
-            <button type="button" onClick={() => setPollOptions([...pollOptions, ""])} className="text-xs text-primary hover:underline flex items-center gap-1">
+              <button type="button" onClick={() => setPollOptions([...pollOptions, ""])} className="text-xs text-primary hover:underline flex items-center gap-1">
                     <Plus className="w-3 h-3" /> Adicionar opção
                   </button>
-            }
+              }
               </div>
-          }
+            }
             <Button type="submit" size="sm">Publicar</Button>
           </form>
-        }
+          }
 
         {/* Topics Feed */}
         {topics.length === 0 ?
-        <p className="text-sm text-muted-foreground">Nenhum tópico ainda. Seja o primeiro a criar!</p> :
+          <p className="text-sm text-muted-foreground">Nenhum tópico ainda. Seja o primeiro a criar!</p> :
 
-        <div className="border bg-card rounded-xl overflow-hidden divide-y divide-border">
+          <div className="border bg-card rounded-xl overflow-hidden divide-y divide-border">
             {topics.filter((t) => selectedCategoryFilter === "all" || t.category_id === selectedCategoryFilter).map((topic) => {
-            const isExpanded = expandedTopicId === topic.id;
-            const { topLevel, childrenMap } = getThreadedReplies(topic.id);
-            const topicPoll = pollData[topic.id] || [];
-            const canDelete = topic.author_id === user?.id || isAdmin;
-            const totalVotes = topicPoll.reduce((sum, o) => sum + o.vote_count, 0);
-            const catColor = topic.category_color || null;
+              const isExpanded = expandedTopicId === topic.id;
+              const { topLevel, childrenMap } = getThreadedReplies(topic.id);
+              const topicPoll = pollData[topic.id] || [];
+              const canDelete = topic.author_id === user?.id || isAdmin;
+              const totalVotes = topicPoll.reduce((sum, o) => sum + o.vote_count, 0);
+              const catColor = topic.category_color || null;
 
-            return (
-              <div key={topic.id} id={`topic-${topic.id}`}>
+              return (
+                <div key={topic.id} id={`topic-${topic.id}`}>
                   <button
-                  onClick={() => handleExpandTopic(topic.id)}
-                  className="w-full text-left hover:bg-muted/50 transition-colors"
-                  style={catColor ? { borderLeft: `3px solid ${catColor}` } : {}}>
+                    onClick={() => handleExpandTopic(topic.id)}
+                    className="w-full text-left hover:bg-muted/50 transition-colors"
+                    style={catColor ? { borderLeft: `3px solid ${catColor}` } : {}}>
                     <div className="flex gap-3 p-4">
                       <Avatar className="w-10 h-10 flex-shrink-0 mt-0.5">
                         <AvatarImage src={topic.author_avatar_url || undefined} />
@@ -632,29 +632,29 @@ export default function ForumPage() {
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-heading font-bold text-sm">{topic.author_name}</span>
+                          <span className="font-heading font-bold text-sm text-slate-600">{topic.author_name}</span>
                           <SalaBadge sala={authorProfiles[topic.author_id]} />
                           <span className="text-muted-foreground text-xs">· {formatDate(topic.created_at)}</span>
                         </div>
-                        <h4 className="font-heading font-bold text-base mt-1">{topic.title}</h4>
+                        <h4 className="font-heading font-bold text-base mt-1 text-primary">{topic.title}</h4>
                         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                           {topic.is_pinned &&
-                        <Badge variant="default" className="gap-1 text-[10px] px-1.5 py-0.5 h-5">
+                          <Badge variant="default" className="gap-1 text-[10px] px-1.5 py-0.5 h-5">
                               <Pin className="w-3 h-3" strokeWidth={2} /> Fixado
                             </Badge>
-                        }
+                          }
                           {topic.category_name &&
-                        <span
-                          className="text-[10px] px-2 py-0.5 rounded-full font-medium border"
-                          style={catColor ? { backgroundColor: `${catColor}20`, color: catColor, borderColor: `${catColor}40` } : {}}>
+                          <span
+                            className="text-[10px] px-2 py-0.5 rounded-full font-medium border"
+                            style={catColor ? { backgroundColor: `${catColor}20`, color: catColor, borderColor: `${catColor}40` } : {}}>
                               {topic.category_name}
                             </span>
-                        }
+                          }
                           {topic.is_poll &&
-                        <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
+                          <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
                               Enquete
                             </span>
-                        }
+                          }
                         </div>
                         {/* Interaction stats */}
                         <div className="flex items-center gap-4 mt-2">
@@ -668,78 +668,78 @@ export default function ForumPage() {
                   </button>
 
                   {isExpanded &&
-                <div className="px-4 pb-4">
+                  <div className="px-4 pb-4">
                       {/* Topic content */}
                       <div className="text-sm whitespace-pre-wrap leading-relaxed py-3 pl-[52px]"><RichText content={topic.content} /></div>
                       {topic.image_url &&
-                  <img src={topic.image_url} alt="" className="mb-3 ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
-                  }
+                    <img src={topic.image_url} alt="" className="mb-3 ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
+                    }
 
                       {/* Poll */}
                       {topic.is_poll && topicPoll.length > 0 &&
-                  <div className="space-y-2 mb-4 ml-[52px] border bg-muted/30 rounded-xl p-3">
+                    <div className="space-y-2 mb-4 ml-[52px] border bg-muted/30 rounded-xl p-3">
                           {topicPoll.map((opt) => {
-                      const pct = totalVotes > 0 ? Math.round(opt.vote_count / totalVotes * 100) : 0;
-                      return (
-                        <button
-                          key={opt.id}
-                          onClick={() => handleVote(opt.id, topic.id, opt.voted)}
-                          className={`w-full text-left rounded-lg p-2.5 text-sm transition-colors relative overflow-hidden ${
-                          opt.voted ? "bg-primary/10 border border-primary" : "bg-card border hover:bg-secondary"}`
-                          }>
+                        const pct = totalVotes > 0 ? Math.round(opt.vote_count / totalVotes * 100) : 0;
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => handleVote(opt.id, topic.id, opt.voted)}
+                            className={`w-full text-left rounded-lg p-2.5 text-sm transition-colors relative overflow-hidden ${
+                            opt.voted ? "bg-primary/10 border border-primary" : "bg-card border hover:bg-secondary"}`
+                            }>
                                 <div className="absolute inset-y-0 left-0 bg-primary/10 transition-all" style={{ width: `${pct}%` }} />
                                 <div className="relative flex justify-between items-center">
                                   <span className="font-body">{opt.label}</span>
                                   <span className="text-xs text-muted-foreground">{opt.vote_count} ({pct}%)</span>
                                 </div>
                               </button>);
-                    })}
+                      })}
                           <p className="text-xs text-muted-foreground text-center">{totalVotes} voto(s)</p>
                         </div>
-                  }
+                    }
 
                       {/* Threaded Replies */}
                       {topLevel.length > 0 &&
-                  <div className="ml-[52px]">
+                    <div className="ml-[52px]">
                           {topLevel.map((reply) =>
-                    <div key={reply.id}>
+                      <div key={reply.id}>
                               {renderReply(reply, topic.id)}
                               {childrenMap[reply.id]?.map((child) => renderReply(child, topic.id, true))}
                             </div>
-                    )}
+                      )}
                         </div>
-                  }
+                    }
 
                       {/* Replying-to indicator */}
                       {replyingTo &&
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mb-2 ml-[52px]">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mb-2 ml-[52px]">
                           <Reply className="w-3 h-3" />
                           <span>Respondendo a <strong>{replyingTo.name}</strong></span>
                           <button onClick={() => setReplyingTo(null)} className="ml-auto"><X className="w-3 h-3" /></button>
                         </div>
-                  }
+                    }
 
                       {/* Reply input */}
                       <div className="space-y-2 mt-3 ml-[52px]">
                         {replyImage &&
-                    <div className="relative inline-block">
+                      <div className="relative inline-block">
                             <img src={URL.createObjectURL(replyImage)} alt="Preview" className="max-h-24 rounded-lg" />
                             <button onClick={() => setReplyImage(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5">
                               <X className="w-3 h-3" />
                             </button>
                           </div>
-                    }
+                      }
                         <div className="flex gap-2">
                           <label className="flex-shrink-0 cursor-pointer flex items-center justify-center h-9 w-9 rounded-full border border-input hover:bg-secondary transition-colors">
                             <ImagePlus className="w-4 h-4 text-muted-foreground" />
                             <input type="file" accept="image/*" className="hidden" onChange={(e) => setReplyImage(e.target.files?.[0] || null)} />
                           </label>
                           <Input
-                        placeholder={replyingTo ? `Respondendo a ${replyingTo.name}...` : "Escreva uma resposta..."}
-                        value={expandedTopicId === topic.id ? replyText : ""}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        className="h-9 text-sm rounded-full"
-                        onKeyDown={(e) => {if (e.key === "Enter" && !e.shiftKey) handleReply(topic.id);}} />
+                          placeholder={replyingTo ? `Respondendo a ${replyingTo.name}...` : "Escreva uma resposta..."}
+                          value={expandedTopicId === topic.id ? replyText : ""}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          className="h-9 text-sm rounded-full"
+                          onKeyDown={(e) => {if (e.key === "Enter" && !e.shiftKey) handleReply(topic.id);}} />
                           <Button size="sm" onClick={() => handleReply(topic.id)} className="h-9 px-3 rounded-full">
                             <Send className="w-4 h-4" />
                           </Button>
@@ -748,47 +748,47 @@ export default function ForumPage() {
 
                       <div className="flex items-center gap-3 mt-3 ml-[52px]">
                         {isAdmin &&
-                    <button
-                      onClick={() => handleTogglePin(topic.id, topic.is_pinned)}
-                      className="text-xs text-primary hover:underline flex items-center gap-1">
+                      <button
+                        onClick={() => handleTogglePin(topic.id, topic.is_pinned)}
+                        className="text-xs text-primary hover:underline flex items-center gap-1">
                       <Pin className="w-3 h-3" /> {topic.is_pinned ? "Desafixar" : "Fixar"}
                     </button>
-                    }
+                      }
                         {canDelete &&
-                    <button
-                      onClick={() => handleDeleteTopic(topic.id)}
-                      className="text-xs text-destructive hover:underline flex items-center gap-1">
+                      <button
+                        onClick={() => handleDeleteTopic(topic.id)}
+                        className="text-xs text-destructive hover:underline flex items-center gap-1">
                       <Trash2 className="w-3 h-3" /> Excluir
                     </button>
-                    }
+                      }
                       </div>
                     </div>
-                }
+                  }
                 </div>);
 
-          })}
+            })}
           </div>
-        }
+          }
       </div>
       {/* Desktop sidebar */}
       <aside className="hidden lg:block w-72 shrink-0 space-y-4 mt-[6.75rem]">
         {/* Online users desktop */}
         <section className="border bg-card rounded-xl p-4 space-y-4">
           {(() => {
-            const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
-            const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
+              const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
+              const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
 
-            const renderGroup = (users: OnlineUser[], label: string) =>
-            <div>
+              const renderGroup = (users: OnlineUser[], label: string) =>
+              <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Circle className="w-3 h-3 text-accent fill-accent" />
                   <h3 className="font-heading font-bold text-xs">{label} ({users.length})</h3>
                 </div>
                 {users.length === 0 ?
-              <p className="text-xs text-muted-foreground">Nenhum online.</p> :
-              <div className="space-y-2">
+                <p className="text-xs text-muted-foreground">Nenhum online.</p> :
+                <div className="space-y-2">
                     {users.map((u) =>
-                <div key={u.user_id} className="flex items-center gap-2">
+                  <div key={u.user_id} className="flex items-center gap-2">
                         <div className="relative">
                           <Avatar className="w-7 h-7">
                             <AvatarImage src={u.avatar_url || undefined} />
@@ -799,17 +799,17 @@ export default function ForumPage() {
                         <span className="text-xs font-body truncate">{u.full_name.split(" ")[0]}</span>
                         <SalaBadge sala={u.class_name} />
                       </div>
-                )}
+                  )}
                   </div>
-              }
+                }
               </div>;
 
-            return (
-              <>
+              return (
+                <>
                 {renderGroup(adminsOnline, "Admins Online")}
                 {renderGroup(leadersOnline, "Líderes Online")}
               </>);
-          })()}
+            })()}
         </section>
         <ForumRanking />
       </aside>
