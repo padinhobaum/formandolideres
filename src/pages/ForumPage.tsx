@@ -115,7 +115,7 @@ export default function ForumPage() {
   const fetchTopics = async () => {
     const { data } = await supabase.
     from("forum_topics").
-    select("*, forum_categories(name)").
+    select("*, forum_categories(name, color)").
     order("is_pinned", { ascending: false }).
     order("created_at", { ascending: false });
     if (!data) return;
@@ -134,7 +134,8 @@ export default function ForumPage() {
     const topicsData = data.map((t: any) => ({
       ...t,
       reply_count: countMap[t.id] || 0,
-      category_name: t.forum_categories?.name || null
+      category_name: t.forum_categories?.name || null,
+      category_color: t.forum_categories?.color || null,
     }));
     setTopics(topicsData);
 
