@@ -371,6 +371,7 @@ export default function DashboardPage() {
           }
         </section>
       </div>
+      <LevelUpModal open={showLevelUp} onClose={() => setShowLevelUp(false)} newLevel={level} />
     </AppLayout>);
 
 }
