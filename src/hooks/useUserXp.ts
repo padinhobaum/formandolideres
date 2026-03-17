@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-const LEVEL_THRESHOLDS = [0, 100, 250, 500, 800, 1200, 1700, 2300, 3000, 4000];
+const LEVEL_THRESHOLDS = [0, 50, 125, 250, 400, 600, 850, 1150, 1500, 2000];
 
 export interface UserXpData {
   totalXp: number;
