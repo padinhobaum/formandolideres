@@ -38,6 +38,7 @@ interface ForumTopic {
   is_pinned: boolean;
   category_id: string | null;
   category_name?: string;
+  category_color?: string | null;
   created_at: string;
   reply_count?: number;
 }
