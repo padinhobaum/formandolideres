@@ -420,48 +420,48 @@ export default function ForumPage() {
   };
 
   const renderReply = (reply: ForumReply, topicId: string, isChild = false) =>
-  <div key={reply.id} className={`flex gap-3 ${isChild ? "pl-10" : ""} py-3 ${!isChild ? "border-t border-border" : ""}`}>
-      <Avatar className="w-8 h-8 flex-shrink-0 mt-0.5">
+  <div key={reply.id} className={`flex gap-2 sm:gap-3 ${isChild ? "pl-6 sm:pl-10" : ""} py-3 ${!isChild ? "border-t border-border" : ""}`}>
+      <Avatar className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 mt-0.5">
         <AvatarImage src={reply.author_avatar_url || undefined} />
         <AvatarFallback className="text-[9px] bg-primary text-primary-foreground font-bold">
           {getInitials(reply.author_name)}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="font-heading font-bold text-sm">{reply.author_name}</span>
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+          <span className="font-heading font-bold text-xs sm:text-sm">{reply.author_name}</span>
           <SalaBadge sala={authorProfiles[reply.author_id]} />
-          <span className="text-muted-foreground text-xs">· {formatDate(reply.created_at)}</span>
+          <span className="text-muted-foreground text-[10px] sm:text-xs">· {formatDate(reply.created_at)}</span>
         </div>
         {reply.parent_reply_id &&
-      <p className="text-muted-foreground text-xs mt-0.5">
+      <p className="text-muted-foreground text-[10px] sm:text-xs mt-0.5">
             respondendo a <span className="text-primary font-medium">{replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}</span>
           </p>
       }
-        <div className="mt-1 text-sm leading-relaxed"><RichText content={reply.content} /></div>
+        <div className="mt-1 text-xs sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
         {reply.image_url &&
-      <img src={reply.image_url} alt="" className="mt-2 max-w-xs max-h-48 rounded-xl object-cover" loading="lazy" />
+      <img src={reply.image_url} alt="" className="mt-2 max-w-full sm:max-w-xs max-h-48 rounded-xl object-cover" loading="lazy" />
       }
-        <div className="flex items-center gap-4 mt-2">
+        <div className="flex items-center gap-3 sm:gap-4 mt-2">
           <button
           onClick={() => handleToggleLike(reply.id, topicId, reply.liked_by_me)}
-          className={`flex items-center gap-1.5 text-xs transition-colors ${
+          className={`flex items-center gap-1 text-xs transition-colors ${
           reply.liked_by_me ? "text-destructive" : "text-muted-foreground hover:text-destructive"}`
           }>
-            <Heart className={`w-4 h-4 ${reply.liked_by_me ? "fill-current" : ""}`} />
+            <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${reply.liked_by_me ? "fill-current" : ""}`} />
             {reply.like_count > 0 && <span>{reply.like_count}</span>}
           </button>
           <button
           onClick={() => setReplyingTo({ id: reply.id, name: reply.author_name })}
-          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
-            <Reply className="w-4 h-4" />
-            <span>Responder</span>
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+            <Reply className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline">Responder</span>
           </button>
           {(reply.author_id === user?.id || isAdmin) &&
         <button
           onClick={() => handleDeleteReply(reply.id, topicId)}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors">
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
             </button>
         }
         </div>
@@ -470,13 +470,13 @@ export default function ForumPage() {
 
   return (
     <AppLayout>
-      <div className="w-full flex gap-6">
-      <div className="flex-1 min-w-0 max-w-3xl mx-auto">
-        <h2 className="font-heading font-bold mb-1 text-4xl text-accent">Fórum de Líderes</h2>
-        <p className="text-muted-foreground mb-6 text-lg">Discussões, perguntas e enquetes</p>
+      <div className="w-full flex flex-col lg:flex-row gap-4 lg:gap-6">
+      <div className="flex-1 min-w-0 max-w-3xl mx-auto w-full">
+        <h2 className="font-heading font-bold mb-1 text-2xl sm:text-3xl lg:text-4xl text-accent">Fórum de Líderes</h2>
+        <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">Discussões, perguntas e enquetes</p>
 
         {/* Online Users - mobile/tablet only */}
-        <section className="mb-4 border bg-card rounded-xl p-4 space-y-4 lg:hidden">
+        <section className="mb-4 border bg-card rounded-xl p-3 sm:p-4 space-y-4 lg:hidden">
           {(() => {
               const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
               const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
@@ -543,7 +543,7 @@ export default function ForumPage() {
 
         {/* New Topic Form */}
         {showNewTopic &&
-          <form onSubmit={handleCreateTopic} className="border bg-card rounded-xl p-5 mb-4 space-y-3">
+          <form onSubmit={handleCreateTopic} className="border bg-card rounded-xl p-3 sm:p-5 mb-4 space-y-3">
             <h3 className="font-heading font-bold text-sm">Criar Tópico</h3>
             <div>
               <Label className="text-sm">Título</Label>
@@ -623,21 +623,21 @@ export default function ForumPage() {
                     onClick={() => handleExpandTopic(topic.id)}
                     className="w-full text-left hover:bg-muted/50 transition-colors"
                     style={catColor ? { borderLeft: `3px solid ${catColor}` } : {}}>
-                    <div className="flex gap-3 p-4">
-                      <Avatar className="w-10 h-10 flex-shrink-0 mt-0.5">
+                    <div className="flex gap-2 sm:gap-3 p-3 sm:p-4">
+                      <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-0.5">
                         <AvatarImage src={topic.author_avatar_url || undefined} />
-                        <AvatarFallback className="text-xs bg-primary text-primary-foreground font-bold">
+                        <AvatarFallback className="text-[10px] sm:text-xs bg-primary text-primary-foreground font-bold">
                           {getInitials(topic.author_name)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-heading font-bold text-sm text-slate-600">{topic.author_name}</span>
+                        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                          <span className="font-heading font-bold text-xs sm:text-sm text-foreground">{topic.author_name}</span>
                           <SalaBadge sala={authorProfiles[topic.author_id]} />
-                          <span className="text-muted-foreground text-xs">· {formatDate(topic.created_at)}</span>
+                          <span className="text-muted-foreground text-[10px] sm:text-xs">· {formatDate(topic.created_at)}</span>
                         </div>
-                        <h4 className="font-heading font-bold text-base mt-1 text-primary">{topic.title}</h4>
-                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <h4 className="font-heading font-bold text-sm sm:text-base mt-1 text-primary break-words">{topic.title}</h4>
+                        <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 flex-wrap">
                           {topic.is_pinned &&
                           <Badge variant="default" className="gap-1 text-[10px] px-1.5 py-0.5 h-5">
                               <Pin className="w-3 h-3" strokeWidth={2} /> Fixado
@@ -656,7 +656,6 @@ export default function ForumPage() {
                             </span>
                           }
                         </div>
-                        {/* Interaction stats */}
                         <div className="flex items-center gap-4 mt-2">
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <MessageSquare className="w-3.5 h-3.5" /> {topic.reply_count || 0}
@@ -668,16 +667,16 @@ export default function ForumPage() {
                   </button>
 
                   {isExpanded &&
-                  <div className="px-4 pb-4">
+                  <div className="px-3 sm:px-4 pb-3 sm:pb-4">
                       {/* Topic content */}
-                      <div className="text-sm whitespace-pre-wrap leading-relaxed py-3 pl-[52px]"><RichText content={topic.content} /></div>
+                      <div className="text-xs sm:text-sm whitespace-pre-wrap leading-relaxed py-3 pl-0 sm:pl-[52px] break-words"><RichText content={topic.content} /></div>
                       {topic.image_url &&
-                    <img src={topic.image_url} alt="" className="mb-3 ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
+                    <img src={topic.image_url} alt="" className="mb-3 sm:ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
                     }
 
                       {/* Poll */}
                       {topic.is_poll && topicPoll.length > 0 &&
-                    <div className="space-y-2 mb-4 ml-[52px] border bg-muted/30 rounded-xl p-3">
+                    <div className="space-y-2 mb-4 sm:ml-[52px] border bg-muted/30 rounded-xl p-3">
                           {topicPoll.map((opt) => {
                         const pct = totalVotes > 0 ? Math.round(opt.vote_count / totalVotes * 100) : 0;
                         return (
@@ -700,7 +699,7 @@ export default function ForumPage() {
 
                       {/* Threaded Replies */}
                       {topLevel.length > 0 &&
-                    <div className="ml-[52px]">
+                    <div className="sm:ml-[52px]">
                           {topLevel.map((reply) =>
                       <div key={reply.id}>
                               {renderReply(reply, topic.id)}
@@ -712,7 +711,7 @@ export default function ForumPage() {
 
                       {/* Replying-to indicator */}
                       {replyingTo &&
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mb-2 ml-[52px]">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mb-2 sm:ml-[52px]">
                           <Reply className="w-3 h-3" />
                           <span>Respondendo a <strong>{replyingTo.name}</strong></span>
                           <button onClick={() => setReplyingTo(null)} className="ml-auto"><X className="w-3 h-3" /></button>
@@ -720,7 +719,7 @@ export default function ForumPage() {
                     }
 
                       {/* Reply input */}
-                      <div className="space-y-2 mt-3 ml-[52px]">
+                      <div className="space-y-2 mt-3 sm:ml-[52px]">
                         {replyImage &&
                       <div className="relative inline-block">
                             <img src={URL.createObjectURL(replyImage)} alt="Preview" className="max-h-24 rounded-lg" />
@@ -746,7 +745,7 @@ export default function ForumPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 mt-3 ml-[52px]">
+                      <div className="flex items-center gap-3 mt-3 sm:ml-[52px]">
                         {isAdmin &&
                       <button
                         onClick={() => handleTogglePin(topic.id, topic.is_pinned)}
