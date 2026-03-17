@@ -543,7 +543,7 @@ export default function ForumPage() {
 
         {/* New Topic Form */}
         {showNewTopic &&
-          <form onSubmit={handleCreateTopic} className="border bg-card rounded-xl p-5 mb-4 space-y-3">
+          <form onSubmit={handleCreateTopic} className="border bg-card rounded-xl p-3 sm:p-5 mb-4 space-y-3">
             <h3 className="font-heading font-bold text-sm">Criar Tópico</h3>
             <div>
               <Label className="text-sm">Título</Label>
