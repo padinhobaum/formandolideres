@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles } from "lucide-react";
 import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
+import LevelUpModal from "@/components/LevelUpModal";
 
 interface Notice {
   id: string;
@@ -61,6 +62,15 @@ export default function DashboardPage() {
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const prevLevelRef = useRef(level);
+  // Detect level-up
+  useEffect(() => {
+    if (prevLevelRef.current > 0 && level > prevLevelRef.current && !isAdmin) {
+      setShowLevelUp(true);
+    }
+    prevLevelRef.current = level;
+  }, [level, isAdmin]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -361,6 +371,7 @@ export default function DashboardPage() {
           }
         </section>
       </div>
+      <LevelUpModal open={showLevelUp} onClose={() => setShowLevelUp(false)} newLevel={level} />
     </AppLayout>);
 
 }

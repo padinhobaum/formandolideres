@@ -784,9 +784,11 @@ function AdminForumCategories() {
   const [categories, setCategories] = useState<any[]>([]);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [color, setColor] = useState("#3b82f6");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editDescription, setEditDescription] = useState("");
+  const [editColor, setEditColor] = useState("#3b82f6");
 
   const fetchCategories = async () => {
     const { data } = await supabase.from("forum_categories").select("*").order("sort_order");
@@ -798,16 +800,16 @@ function AdminForumCategories() {
     e.preventDefault();
     if (!name.trim()) return;
     const maxOrder = categories.length > 0 ? Math.max(...categories.map((c) => c.sort_order)) + 1 : 0;
-    const { error } = await supabase.from("forum_categories").insert({ name: name.trim(), description: description.trim() || null, sort_order: maxOrder } as any);
+    const { error } = await supabase.from("forum_categories").insert({ name: name.trim(), description: description.trim() || null, sort_order: maxOrder, color } as any);
     if (error) { toast.error("Erro ao criar categoria."); return; }
     toast.success("Categoria criada.");
-    setName(""); setDescription("");
+    setName(""); setDescription(""); setColor("#3b82f6");
     fetchCategories();
   };
 
   const handleUpdate = async (id: string) => {
     if (!editName.trim()) return;
-    const { error } = await supabase.from("forum_categories").update({ name: editName.trim(), description: editDescription.trim() || null } as any).eq("id", id);
+    const { error } = await supabase.from("forum_categories").update({ name: editName.trim(), description: editDescription.trim() || null, color: editColor } as any).eq("id", id);
     if (error) { toast.error("Erro ao atualizar."); return; }
     toast.success("Categoria atualizada.");
     setEditingId(null);
@@ -821,15 +823,22 @@ function AdminForumCategories() {
     fetchCategories();
   };
 
-  const startEdit = (cat: any) => { setEditingId(cat.id); setEditName(cat.name); setEditDescription(cat.description || ""); };
+  const startEdit = (cat: any) => { setEditingId(cat.id); setEditName(cat.name); setEditDescription(cat.description || ""); setEditColor(cat.color || "#3b82f6"); };
 
   return (
     <div>
       <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
         <h3 className="font-heading font-bold text-sm mb-2">Nova Categoria do Fórum</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div><Label className="text-sm">Nome</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Descrição (opcional)</Label><Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" /></div>
+          <div>
+            <Label className="text-sm">Cor</Label>
+            <div className="flex items-center gap-2 mt-1">
+              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-10 rounded border cursor-pointer" />
+              <Input value={color} onChange={(e) => setColor(e.target.value)} className="flex-1 h-10 text-sm font-mono" />
+            </div>
+          </div>
         </div>
         <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Criar Categoria</Button>
       </form>
@@ -840,6 +849,11 @@ function AdminForumCategories() {
               <div className="space-y-2">
                 <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nome" className="h-8 text-sm" />
                 <Input value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Descrição" className="h-8 text-sm" />
+                <div className="flex items-center gap-2">
+                  <Label className="text-sm">Cor</Label>
+                  <input type="color" value={editColor} onChange={(e) => setEditColor(e.target.value)} className="w-8 h-8 rounded border cursor-pointer" />
+                  <Input value={editColor} onChange={(e) => setEditColor(e.target.value)} className="w-28 h-8 text-sm font-mono" />
+                </div>
                 <div className="flex gap-2">
                   <Button size="sm" onClick={() => handleUpdate(cat.id)}>Salvar</Button>
                   <Button size="sm" variant="outline" onClick={() => setEditingId(null)}>Cancelar</Button>
@@ -847,9 +861,12 @@ function AdminForumCategories() {
               </div>
             ) : (
               <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-body font-medium">{cat.name}</p>
-                  {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 rounded-full border flex-shrink-0" style={{ backgroundColor: cat.color || "#3b82f6" }} />
+                  <div>
+                    <p className="text-sm font-body font-medium">{cat.name}</p>
+                    {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
+                  </div>
                 </div>
                 <div className="flex items-center gap-1">
                   <button onClick={() => startEdit(cat)} className="text-muted-foreground hover:text-foreground p-1"><Pencil className="w-4 h-4" strokeWidth={1.5} /></button>
