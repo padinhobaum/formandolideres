@@ -623,21 +623,21 @@ export default function ForumPage() {
                     onClick={() => handleExpandTopic(topic.id)}
                     className="w-full text-left hover:bg-muted/50 transition-colors"
                     style={catColor ? { borderLeft: `3px solid ${catColor}` } : {}}>
-                    <div className="flex gap-3 p-4">
-                      <Avatar className="w-10 h-10 flex-shrink-0 mt-0.5">
+                    <div className="flex gap-2 sm:gap-3 p-3 sm:p-4">
+                      <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-0.5">
                         <AvatarImage src={topic.author_avatar_url || undefined} />
-                        <AvatarFallback className="text-xs bg-primary text-primary-foreground font-bold">
+                        <AvatarFallback className="text-[10px] sm:text-xs bg-primary text-primary-foreground font-bold">
                           {getInitials(topic.author_name)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="font-heading font-bold text-sm text-slate-600">{topic.author_name}</span>
+                        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                          <span className="font-heading font-bold text-xs sm:text-sm text-foreground">{topic.author_name}</span>
                           <SalaBadge sala={authorProfiles[topic.author_id]} />
-                          <span className="text-muted-foreground text-xs">· {formatDate(topic.created_at)}</span>
+                          <span className="text-muted-foreground text-[10px] sm:text-xs">· {formatDate(topic.created_at)}</span>
                         </div>
-                        <h4 className="font-heading font-bold text-base mt-1 text-primary">{topic.title}</h4>
-                        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                        <h4 className="font-heading font-bold text-sm sm:text-base mt-1 text-primary break-words">{topic.title}</h4>
+                        <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 flex-wrap">
                           {topic.is_pinned &&
                           <Badge variant="default" className="gap-1 text-[10px] px-1.5 py-0.5 h-5">
                               <Pin className="w-3 h-3" strokeWidth={2} /> Fixado
@@ -656,7 +656,6 @@ export default function ForumPage() {
                             </span>
                           }
                         </div>
-                        {/* Interaction stats */}
                         <div className="flex items-center gap-4 mt-2">
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <MessageSquare className="w-3.5 h-3.5" /> {topic.reply_count || 0}
