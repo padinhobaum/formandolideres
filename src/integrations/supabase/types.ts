@@ -128,6 +128,7 @@ export type Database = {
       }
       forum_categories: {
         Row: {
+          color: string | null
           created_at: string
           description: string | null
           id: string
@@ -135,6 +136,7 @@ export type Database = {
           sort_order: number
         }
         Insert: {
+          color?: string | null
           created_at?: string
           description?: string | null
           id?: string
@@ -142,6 +144,7 @@ export type Database = {
           sort_order?: number
         }
         Update: {
+          color?: string | null
           created_at?: string
           description?: string | null
           id?: string
