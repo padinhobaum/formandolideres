@@ -17,8 +17,8 @@ export default function LevelUpModal({ open, onClose, newLevel }: LevelUpModalPr
             <div className="w-20 h-20 rounded-full bg-accent/20 flex items-center justify-center animate-scale-in">
               <Trophy className="w-10 h-10 text-accent" />
             </div>
-            <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-yellow-500 animate-fade-in" />
-            <Star className="absolute -bottom-1 -left-2 w-5 h-5 text-yellow-500 animate-fade-in" />
+            <Sparkles className="absolute -top-2 -right-2 w-6 h-6 text-accent animate-fade-in" />
+            <Star className="absolute -bottom-1 -left-2 w-5 h-5 text-accent animate-fade-in" />
           </div>
         </div>
         <div className="space-y-2 animate-fade-in">
