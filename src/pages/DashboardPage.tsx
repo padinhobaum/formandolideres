@@ -64,6 +64,13 @@ export default function DashboardPage() {
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
   const [showLevelUp, setShowLevelUp] = useState(false);
   const prevLevelRef = useRef(level);
+  // Detect level-up
+  useEffect(() => {
+    if (prevLevelRef.current > 0 && level > prevLevelRef.current && !isAdmin) {
+      setShowLevelUp(true);
+    }
+    prevLevelRef.current = level;
+  }, [level, isAdmin]);
 
   useEffect(() => {
     const fetchData = async () => {
