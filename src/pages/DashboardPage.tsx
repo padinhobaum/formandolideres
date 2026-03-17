@@ -62,6 +62,8 @@ export default function DashboardPage() {
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const prevLevelRef = useRef(level);
 
   useEffect(() => {
     const fetchData = async () => {
