@@ -420,56 +420,53 @@ export default function ForumPage() {
   };
 
   const renderReply = (reply: ForumReply, topicId: string, isChild = false) =>
-  <div key={reply.id} className={`flex gap-2 ${isChild ? "pl-8" : "pl-2"} border-l-2 border-muted`}>
-      <Avatar className="w-6 h-6 flex-shrink-0 mt-0.5">
+  <div key={reply.id} className={`flex gap-3 ${isChild ? "pl-10" : ""} py-3 ${!isChild ? "border-t border-border" : ""}`}>
+      <Avatar className="w-8 h-8 flex-shrink-0 mt-0.5">
         <AvatarImage src={reply.author_avatar_url || undefined} />
-        <AvatarFallback className="text-[8px] bg-muted text-muted-foreground">
+        <AvatarFallback className="text-[9px] bg-primary text-primary-foreground font-bold">
           {getInitials(reply.author_name)}
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm flex items-center gap-1.5">
-          {reply.author_name}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="font-heading font-bold text-sm">{reply.author_name}</span>
           <SalaBadge sala={authorProfiles[reply.author_id]} />
-          <span className="text-muted-foreground font-normal">· {formatDate(reply.created_at)}</span>
-        </p>
+          <span className="text-muted-foreground text-xs">· {formatDate(reply.created_at)}</span>
+        </div>
         {reply.parent_reply_id &&
-      <p className="text-muted-foreground italic text-xs">
-            respondendo a {replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}
+      <p className="text-muted-foreground text-xs mt-0.5">
+            respondendo a <span className="text-primary font-medium">{replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}</span>
           </p>
       }
-        <span className="font-body mt-0.5 whitespace-pre-wrap text-base"><RichText content={reply.content} /></span>
+        <div className="mt-1 text-sm leading-relaxed"><RichText content={reply.content} /></div>
         {reply.image_url &&
-      <img src={reply.image_url} alt="" className="mt-1 max-w-xs max-h-48 rounded-lg object-cover" loading="lazy" />
+      <img src={reply.image_url} alt="" className="mt-2 max-w-xs max-h-48 rounded-xl object-cover" loading="lazy" />
       }
-        <div className="flex items-center gap-3 mt-1">
+        <div className="flex items-center gap-4 mt-2">
           <button
           onClick={() => handleToggleLike(reply.id, topicId, reply.liked_by_me)}
-          className={`flex items-center gap-1 text-xs transition-colors ${
+          className={`flex items-center gap-1.5 text-xs transition-colors ${
           reply.liked_by_me ? "text-destructive" : "text-muted-foreground hover:text-destructive"}`
           }>
-          
-            <Heart className={`w-3 h-3 ${reply.liked_by_me ? "fill-current" : ""}`} />
+            <Heart className={`w-4 h-4 ${reply.liked_by_me ? "fill-current" : ""}`} />
             {reply.like_count > 0 && <span>{reply.like_count}</span>}
           </button>
           <button
           onClick={() => setReplyingTo({ id: reply.id, name: reply.author_name })}
-          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-          
-           <Reply className="w-3 h-3" />
+          className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors">
+            <Reply className="w-4 h-4" />
             <span>Responder</span>
           </button>
           {(reply.author_id === user?.id || isAdmin) &&
         <button
           onClick={() => handleDeleteReply(reply.id, topicId)}
           className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors">
-              <Trash2 className="w-3 h-3" />
+              <Trash2 className="w-3.5 h-3.5" />
             </button>
         }
         </div>
       </div>
     </div>;
-
 
   return (
     <AppLayout>
