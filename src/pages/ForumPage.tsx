@@ -23,6 +23,7 @@ interface ForumCategory {
   id: string;
   name: string;
   description: string | null;
+  color: string | null;
 }
 
 interface ForumTopic {
