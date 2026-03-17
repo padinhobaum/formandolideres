@@ -667,9 +667,9 @@ export default function ForumPage() {
                   </button>
 
                   {isExpanded &&
-                  <div className="px-4 pb-4">
+                  <div className="px-3 sm:px-4 pb-3 sm:pb-4">
                       {/* Topic content */}
-                      <div className="text-sm whitespace-pre-wrap leading-relaxed py-3 pl-[52px]"><RichText content={topic.content} /></div>
+                      <div className="text-xs sm:text-sm whitespace-pre-wrap leading-relaxed py-3 pl-0 sm:pl-[52px] break-words"><RichText content={topic.content} /></div>
                       {topic.image_url &&
                     <img src={topic.image_url} alt="" className="mb-3 ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
                     }
