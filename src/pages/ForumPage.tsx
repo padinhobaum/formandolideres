@@ -671,12 +671,12 @@ export default function ForumPage() {
                       {/* Topic content */}
                       <div className="text-xs sm:text-sm whitespace-pre-wrap leading-relaxed py-3 pl-0 sm:pl-[52px] break-words"><RichText content={topic.content} /></div>
                       {topic.image_url &&
-                    <img src={topic.image_url} alt="" className="mb-3 ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
+                    <img src={topic.image_url} alt="" className="mb-3 sm:ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
                     }
 
                       {/* Poll */}
                       {topic.is_poll && topicPoll.length > 0 &&
-                    <div className="space-y-2 mb-4 ml-[52px] border bg-muted/30 rounded-xl p-3">
+                    <div className="space-y-2 mb-4 sm:ml-[52px] border bg-muted/30 rounded-xl p-3">
                           {topicPoll.map((opt) => {
                         const pct = totalVotes > 0 ? Math.round(opt.vote_count / totalVotes * 100) : 0;
                         return (
@@ -699,7 +699,7 @@ export default function ForumPage() {
 
                       {/* Threaded Replies */}
                       {topLevel.length > 0 &&
-                    <div className="ml-[52px]">
+                    <div className="sm:ml-[52px]">
                           {topLevel.map((reply) =>
                       <div key={reply.id}>
                               {renderReply(reply, topic.id)}
@@ -711,7 +711,7 @@ export default function ForumPage() {
 
                       {/* Replying-to indicator */}
                       {replyingTo &&
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mb-2 ml-[52px]">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mb-2 sm:ml-[52px]">
                           <Reply className="w-3 h-3" />
                           <span>Respondendo a <strong>{replyingTo.name}</strong></span>
                           <button onClick={() => setReplyingTo(null)} className="ml-auto"><X className="w-3 h-3" /></button>
@@ -719,7 +719,7 @@ export default function ForumPage() {
                     }
 
                       {/* Reply input */}
-                      <div className="space-y-2 mt-3 ml-[52px]">
+                      <div className="space-y-2 mt-3 sm:ml-[52px]">
                         {replyImage &&
                       <div className="relative inline-block">
                             <img src={URL.createObjectURL(replyImage)} alt="Preview" className="max-h-24 rounded-lg" />
@@ -745,7 +745,7 @@ export default function ForumPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 mt-3 ml-[52px]">
+                      <div className="flex items-center gap-3 mt-3 sm:ml-[52px]">
                         {isAdmin &&
                       <button
                         onClick={() => handleTogglePin(topic.id, topic.is_pinned)}
