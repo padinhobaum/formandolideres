@@ -170,6 +170,46 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <div className="w-full">
+        {/* Active Banners */}
+        {banners.length > 0 && (
+          <div className="mb-6 space-y-4">
+            {banners.slice(0, 3).map((banner) => (
+              <div key={banner.id} className="relative rounded-2xl overflow-hidden w-full" style={{ minHeight: "180px" }}>
+                {banner.media_type === "video" ? (
+                  <video
+                    src={banner.media_url}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <img src={banner.media_url} alt={banner.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                )}
+                {/* Subtle blue gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
+                <div className="relative z-10 flex flex-col justify-end p-5 sm:p-8 h-full min-h-[180px]">
+                  <h3 className="font-heading font-bold text-xl sm:text-3xl text-primary-foreground drop-shadow-lg mb-2">
+                    {banner.title}
+                  </h3>
+                  {banner.button_text && banner.button_url && (
+                    <a
+                      href={banner.button_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-primary-foreground text-primary font-medium text-sm px-5 py-2 rounded-full w-fit hover:opacity-90 transition-opacity shadow-lg"
+                    >
+                      {banner.button_text}
+                      <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Welcome with avatar */}
         <div className="flex items-center gap-4 mb-8 flex-wrap">
           <UserLevelBadge
