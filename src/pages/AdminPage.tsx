@@ -350,8 +350,8 @@ function AdminBanners() {
       button_url: buttonUrl.trim() || null,
       media_url: urlData.publicUrl,
       media_type: mediaType,
-      starts_at: startsAt || new Date().toISOString(),
-      ends_at: endsAt || null,
+      starts_at: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
+      ends_at: endsAt ? new Date(endsAt).toISOString() : null,
       created_by: user!.id,
     } as any);
 
