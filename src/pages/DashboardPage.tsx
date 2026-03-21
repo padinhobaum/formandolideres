@@ -114,6 +114,10 @@ export default function DashboardPage() {
       if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
       if (videosRes.data) setVideoLessons((videosRes.data as any[]).map((v: any) => ({ ...v, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })) as VideoLesson[]);
+      if (bannersRes.data) {
+        const activeBanners = bannersRes.data.filter((b: any) => !b.ends_at || new Date(b.ends_at) > new Date());
+        setBanners(activeBanners as Banner[]);
+      }
     };
     fetchData();
 
