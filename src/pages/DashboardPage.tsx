@@ -13,6 +13,17 @@ import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 
+interface Banner {
+  id: string;
+  title: string;
+  button_text: string | null;
+  button_url: string | null;
+  media_url: string;
+  media_type: string;
+  starts_at: string;
+  ends_at: string | null;
+}
+
 interface Notice {
   id: string;
   title: string;
