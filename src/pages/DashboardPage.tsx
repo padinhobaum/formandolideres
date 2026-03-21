@@ -87,12 +87,14 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const [noticesRes, forumRes, presenceRes, videosRes] = await Promise.all([
+      const now = new Date().toISOString();
+      const [noticesRes, forumRes, presenceRes, videosRes, bannersRes] = await Promise.all([
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
       supabase.from("forum_topics").select("id, title, author_name, author_avatar_url, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
-      supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4)]
-      );
+      supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4),
+      supabase.from("banners").select("*").lte("starts_at", now).order("created_at", { ascending: false }),
+      ]);
 
       // Collect author IDs for avatar lookup
       const authorIds = new Set<string>();
