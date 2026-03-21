@@ -309,6 +309,127 @@ function AdminNotices() {
   );
 }
 
+/* ───── Banners ───── */
+function AdminBanners() {
+  const { user } = useAuth();
+  const [banners, setBanners] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [buttonText, setButtonText] = useState("");
+  const [buttonUrl, setButtonUrl] = useState("");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [startsAt, setStartsAt] = useState("");
+  const [endsAt, setEndsAt] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const fetchBanners = async () => {
+    const { data } = await supabase.from("banners").select("*").order("created_at", { ascending: false });
+    if (data) setBanners(data);
+  };
+  useEffect(() => { fetchBanners(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !mediaFile) return;
+    setUploading(true);
+
+    const path = `${Date.now()}_${mediaFile.name}`;
+    const { error: upErr } = await supabase.storage.from("banners").upload(path, mediaFile);
+    if (upErr) { toast.error("Erro no upload da mídia."); setUploading(false); return; }
+    const { data: urlData } = supabase.storage.from("banners").getPublicUrl(path);
+
+    const mediaType = mediaFile.type.startsWith("video/") ? "video" : "image";
+
+    const { error } = await supabase.from("banners").insert({
+      title: title.trim(),
+      button_text: buttonText.trim() || null,
+      button_url: buttonUrl.trim() || null,
+      media_url: urlData.publicUrl,
+      media_type: mediaType,
+      starts_at: startsAt || new Date().toISOString(),
+      ends_at: endsAt || null,
+      created_by: user!.id,
+    } as any);
+
+    setUploading(false);
+    if (error) { toast.error("Erro ao criar banner."); return; }
+    toast.success("Banner criado!");
+    setTitle(""); setButtonText(""); setButtonUrl(""); setMediaFile(null); setStartsAt(""); setEndsAt("");
+    fetchBanners();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("banners").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir."); return; }
+    toast.success("Banner excluído.");
+    fetchBanners();
+  };
+
+  const formatDate = (d: string) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+
+  return (
+    <div>
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
+        <h3 className="font-heading font-bold text-sm mb-2">Novo Banner</h3>
+        <div>
+          <Label className="text-sm">Título do Banner</Label>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><Label className="text-sm">Texto do botão (opcional)</Label><Input value={buttonText} onChange={(e) => setButtonText(e.target.value)} className="mt-1" placeholder="Saiba mais" /></div>
+          <div><Label className="text-sm">Link do botão (opcional)</Label><Input value={buttonUrl} onChange={(e) => setButtonUrl(e.target.value)} className="mt-1" placeholder="https://..." /></div>
+        </div>
+        <div>
+          <Label className="text-sm flex items-center gap-1">
+            <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem ou Vídeo
+          </Label>
+          <input type="file" accept="image/*,video/*" onChange={(e) => setMediaFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" required />
+          {mediaFile && mediaFile.type.startsWith("video/") && (
+            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo selecionado — será reproduzido em loop, sem som.</p>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-sm">Data de início</Label>
+            <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="mt-1" />
+          </div>
+          <div>
+            <Label className="text-sm">Data de fim (opcional)</Label>
+            <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="mt-1" />
+          </div>
+        </div>
+        <Button type="submit" size="sm" disabled={uploading}>
+          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
+          {uploading ? "Enviando..." : "Publicar Banner"}
+        </Button>
+      </form>
+      <div className="space-y-2">
+        {banners.map((b) => (
+          <div key={b.id} className="border bg-card p-4 rounded-xl flex items-center gap-3">
+            {b.media_type === "video" ? (
+              <div className="w-16 h-10 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                <Video className="w-5 h-5 text-muted-foreground" />
+              </div>
+            ) : (
+              <img src={b.media_url} alt="" className="w-16 h-10 object-cover rounded flex-shrink-0" />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-body font-medium truncate">{b.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatDate(b.starts_at)}
+                {b.ends_at ? ` → ${formatDate(b.ends_at)}` : " → Sem prazo"}
+              </p>
+            </div>
+            <button onClick={() => handleDelete(b.id)} className="text-destructive hover:text-destructive/80 p-1 flex-shrink-0">
+              <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+            </button>
+          </div>
+        ))}
+        {banners.length === 0 && <p className="text-sm text-muted-foreground">Nenhum banner criado.</p>}
+      </div>
+    </div>
+  );
+}
+
 /* ───── Links ───── */
 function AdminLinks() {
   const [links, setLinks] = useState<any[]>([]);
