@@ -505,7 +505,12 @@ function AdminLinks() {
         </div>
         <div>
           <Label className="text-sm">Ícone (imagem, opcional)</Label>
-          <input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file && file.size > 2 * 1024 * 1024) { toast.error("Ícone muito grande. Máximo: 2MB."); e.target.value = ""; return; }
+            setIconFile(file || null);
+          }} className="mt-1 block w-full text-sm font-body" />
+          <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, SVG · Máx: 2MB</p>
         </div>
         <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Salvando..." : "Adicionar"}</Button>
       </form>
