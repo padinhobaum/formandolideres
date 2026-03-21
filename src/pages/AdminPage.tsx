@@ -178,7 +178,12 @@ function AdminNotices() {
           <Label className="text-sm flex items-center gap-1">
             <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem (opcional)
           </Label>
-          <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file && file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande. Máximo: 10MB."); e.target.value = ""; return; }
+            setImageFile(file || null);
+          }} className="mt-1 block w-full text-sm font-body" />
+          <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, GIF · Máx: 10MB</p>
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
