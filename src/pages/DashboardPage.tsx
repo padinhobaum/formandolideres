@@ -69,6 +69,7 @@ export default function DashboardPage() {
   const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
