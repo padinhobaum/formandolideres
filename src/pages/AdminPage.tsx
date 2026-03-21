@@ -717,7 +717,11 @@ function AdminVideos() {
           <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Categoria</Label><Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" /></div>
         </div>
-        <div><Label className="text-sm">URL do vídeo (YouTube ou Vimeo)</Label><Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." required /></div>
+        <div>
+          <Label className="text-sm">URL do vídeo (YouTube ou Vimeo)</Label>
+          <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." required />
+          <p className="text-xs text-muted-foreground mt-1">Cole o link do YouTube ou Vimeo</p>
+        </div>
         <div><Label className="text-sm">Descrição (opcional)</Label><textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y" /></div>
         <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Publicar</Button>
       </form>
