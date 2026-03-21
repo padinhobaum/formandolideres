@@ -178,7 +178,12 @@ function AdminNotices() {
           <Label className="text-sm flex items-center gap-1">
             <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem (opcional)
           </Label>
-          <input type="file" accept="image/*" onChange={(e) => setImageFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file && file.size > 10 * 1024 * 1024) { toast.error("Arquivo muito grande. Máximo: 10MB."); e.target.value = ""; return; }
+            setImageFile(file || null);
+          }} className="mt-1 block w-full text-sm font-body" />
+          <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, GIF · Máx: 10MB</p>
         </div>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
@@ -345,8 +350,8 @@ function AdminBanners() {
       button_url: buttonUrl.trim() || null,
       media_url: urlData.publicUrl,
       media_type: mediaType,
-      starts_at: startsAt || new Date().toISOString(),
-      ends_at: endsAt || null,
+      starts_at: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
+      ends_at: endsAt ? new Date(endsAt).toISOString() : null,
       created_by: user!.id,
     } as any);
 
@@ -382,9 +387,14 @@ function AdminBanners() {
           <Label className="text-sm flex items-center gap-1">
             <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem ou Vídeo
           </Label>
-          <input type="file" accept="image/*,video/*" onChange={(e) => setMediaFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" required />
+          <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file && file.size > 20 * 1024 * 1024) { toast.error("Arquivo muito grande. Máximo: 20MB."); e.target.value = ""; return; }
+            setMediaFile(file || null);
+          }} className="mt-1 block w-full text-sm font-body" required />
+          <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, MP4, WEBM · Máx: 20MB</p>
           {mediaFile && mediaFile.type.startsWith("video/") && (
-            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo selecionado — será reproduzido em loop, sem som.</p>
+            <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo selecionado — será reproduzido em loop, sem som.</p>
           )}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -495,7 +505,12 @@ function AdminLinks() {
         </div>
         <div>
           <Label className="text-sm">Ícone (imagem, opcional)</Label>
-          <input type="file" accept="image/*" onChange={(e) => setIconFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file && file.size > 2 * 1024 * 1024) { toast.error("Ícone muito grande. Máximo: 2MB."); e.target.value = ""; return; }
+            setIconFile(file || null);
+          }} className="mt-1 block w-full text-sm font-body" />
+          <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, SVG · Máx: 2MB</p>
         </div>
         <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Salvando..." : "Adicionar"}</Button>
       </form>
@@ -702,7 +717,11 @@ function AdminVideos() {
           <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Categoria</Label><Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" /></div>
         </div>
-        <div><Label className="text-sm">URL do vídeo (YouTube ou Vimeo)</Label><Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." required /></div>
+        <div>
+          <Label className="text-sm">URL do vídeo (YouTube ou Vimeo)</Label>
+          <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." required />
+          <p className="text-xs text-muted-foreground mt-1">Cole o link do YouTube ou Vimeo</p>
+        </div>
         <div><Label className="text-sm">Descrição (opcional)</Label><textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y" /></div>
         <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Publicar</Button>
       </form>
