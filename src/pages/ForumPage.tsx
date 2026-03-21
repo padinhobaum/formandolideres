@@ -438,7 +438,7 @@ export default function ForumPage() {
             respondendo a <span className="text-primary font-medium">{replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}</span>
           </p>
       }
-        <div className="mt-1 text-xs sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
+        <div className="font-heading mt-1 text-xs sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
         {reply.image_url &&
       <img src={reply.image_url} alt="" className="mt-2 max-w-full sm:max-w-xs max-h-48 rounded-xl object-cover" loading="lazy" />
       }

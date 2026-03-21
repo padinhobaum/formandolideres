@@ -465,7 +465,7 @@ function AdminMaterials() {
   const [materials, setMaterials] = useState<any[]>([]);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Geral");
-  const [file, setFile] = useState<File | null>(null);
+  const [driveUrl, setDriveUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const fetchMaterials = async () => {
@@ -474,28 +474,30 @@ function AdminMaterials() {
   };
   useEffect(() => { fetchMaterials(); }, []);
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const isValidDriveLink = (url: string) => {
+    return /^https:\/\/(drive\.google\.com|docs\.google\.com)\/.+/.test(url.trim());
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !title.trim()) return;
+    if (!title.trim() || !driveUrl.trim()) return;
+    if (!isValidDriveLink(driveUrl)) {
+      toast.error("Insira um link válido do Google Drive.");
+      return;
+    }
     setUploading(true);
-    const filePath = `${Date.now()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("materials").upload(filePath, file);
-    if (uploadError) { toast.error("Erro no upload."); setUploading(false); return; }
-    const { data: urlData } = supabase.storage.from("materials").getPublicUrl(filePath);
     const { error } = await supabase.from("materials").insert({
-      title: title.trim(), category: category.trim(), file_name: file.name,
-      file_url: urlData.publicUrl, file_size: file.size, uploaded_by: user!.id,
+      title: title.trim(), category: category.trim(), file_name: "Google Drive",
+      file_url: driveUrl.trim(), file_size: null, uploaded_by: user!.id,
     });
     setUploading(false);
     if (error) { toast.error("Erro ao registrar material."); return; }
     toast.success("Material publicado.");
-    setTitle(""); setCategory("Geral"); setFile(null);
+    setTitle(""); setCategory("Geral"); setDriveUrl("");
     fetchMaterials();
   };
 
-  const handleDelete = async (id: string, fileUrl: string) => {
-    const path = fileUrl.split("/materials/")[1];
-    if (path) await supabase.storage.from("materials").remove([path]);
+  const handleDelete = async (id: string) => {
     const { error } = await supabase.from("materials").delete().eq("id", id);
     if (error) { toast.error("Erro ao excluir."); return; }
     toast.success("Material excluído.");
@@ -504,20 +506,29 @@ function AdminMaterials() {
 
   return (
     <div>
-      <form onSubmit={handleUpload} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Upload de Material</h3>
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
+        <h3 className="font-heading font-bold text-sm mb-2">Novo Material (Google Drive)</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Categoria</Label><Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" /></div>
         </div>
-        <div><Label className="text-sm">Arquivo</Label><input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" required /></div>
-        <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Enviando..." : "Publicar"}</Button>
+        <div>
+          <Label className="text-sm">Link do Google Drive</Label>
+          <Input value={driveUrl} onChange={(e) => setDriveUrl(e.target.value)} className="mt-1" placeholder="https://drive.google.com/file/d/..." required />
+          {driveUrl && !isValidDriveLink(driveUrl) && (
+            <p className="text-xs text-destructive mt-1">Link inválido. Use um link do Google Drive.</p>
+          )}
+        </div>
+        <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Publicando..." : "Publicar"}</Button>
       </form>
       <div className="space-y-2">
         {materials.map((m) => (
           <div key={m.id} className="border bg-card p-4 flex items-center justify-between rounded-xl">
-            <div><p className="text-sm font-body font-medium">{m.title}</p><p className="text-xs text-muted-foreground">{m.category} · {m.file_name}</p></div>
-            <button onClick={() => handleDelete(m.id, m.file_url)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+            <div><p className="text-sm font-body font-medium">{m.title}</p><p className="text-xs text-muted-foreground">{m.category}</p></div>
+            <div className="flex items-center gap-2">
+              <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1"><ExternalLink className="w-3.5 h-3.5" />Abrir</a>
+              <button onClick={() => handleDelete(m.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+            </div>
           </div>
         ))}
       </div>
