@@ -13,6 +13,17 @@ import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 
+interface Banner {
+  id: string;
+  title: string;
+  button_text: string | null;
+  button_url: string | null;
+  media_url: string;
+  media_type: string;
+  starts_at: string;
+  ends_at: string | null;
+}
+
 interface Notice {
   id: string;
   title: string;
@@ -58,6 +69,7 @@ export default function DashboardPage() {
   const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
@@ -75,12 +87,14 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-      const [noticesRes, forumRes, presenceRes, videosRes] = await Promise.all([
+      const now = new Date().toISOString();
+      const [noticesRes, forumRes, presenceRes, videosRes, bannersRes] = await Promise.all([
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
       supabase.from("forum_topics").select("id, title, author_name, author_avatar_url, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
-      supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4)]
-      );
+      supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4),
+      supabase.from("banners").select("*").lte("starts_at", now).order("created_at", { ascending: false }),
+      ]);
 
       // Collect author IDs for avatar lookup
       const authorIds = new Set<string>();
@@ -100,6 +114,10 @@ export default function DashboardPage() {
       if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
       if (videosRes.data) setVideoLessons((videosRes.data as any[]).map((v: any) => ({ ...v, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })) as VideoLesson[]);
+      if (bannersRes.data) {
+        const activeBanners = bannersRes.data.filter((b: any) => !b.ends_at || new Date(b.ends_at) > new Date());
+        setBanners(activeBanners as Banner[]);
+      }
     };
     fetchData();
 
@@ -152,6 +170,46 @@ export default function DashboardPage() {
   return (
     <AppLayout>
       <div className="w-full">
+        {/* Active Banners */}
+        {banners.length > 0 && (
+          <div className="mb-6 space-y-4">
+            {banners.slice(0, 3).map((banner) => (
+              <div key={banner.id} className="relative rounded-2xl overflow-hidden w-full" style={{ minHeight: "180px" }}>
+                {banner.media_type === "video" ? (
+                  <video
+                    src={banner.media_url}
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="absolute inset-0 w-full h-full object-cover"
+                  />
+                ) : (
+                  <img src={banner.media_url} alt={banner.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                )}
+                {/* Subtle blue gradient overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
+                <div className="relative z-10 flex flex-col justify-end p-5 sm:p-8 h-full min-h-[180px]">
+                  <h3 className="font-heading font-bold text-xl sm:text-3xl text-primary-foreground drop-shadow-lg mb-2">
+                    {banner.title}
+                  </h3>
+                  {banner.button_text && banner.button_url && (
+                    <a
+                      href={banner.button_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 bg-primary-foreground text-primary font-medium text-sm px-5 py-2 rounded-full w-fit hover:opacity-90 transition-opacity shadow-lg"
+                    >
+                      {banner.button_text}
+                      <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    </a>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Welcome with avatar */}
         <div className="flex items-center gap-4 mb-8 flex-wrap">
           <UserLevelBadge

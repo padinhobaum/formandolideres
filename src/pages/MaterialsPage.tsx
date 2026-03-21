@@ -61,7 +61,7 @@ export default function MaterialsPage() {
 
         <div className="space-y-2">
             {filtered.map((m) =>
-          <div key={m.id} className="border bg-card p-4 flex items-center gap-4">
+          <div key={m.id} className="border bg-card p-4 flex items-center gap-4 rounded-xl">
                 <FileText className="text-muted-foreground flex-shrink-0 w-[30px] h-[30px]" strokeWidth={1.5} />
                 <div className="flex-1 min-w-0">
                   <p className="font-body font-medium truncate text-lg text-primary">{m.title}</p>
@@ -74,10 +74,10 @@ export default function MaterialsPage() {
               href={m.file_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-sm text-primary hover:underline flex-shrink-0">
+              className="flex items-center gap-1.5 text-sm bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-lg font-medium flex-shrink-0 transition-colors">
               
                   <Download className="w-4 h-4" strokeWidth={1.5} />
-                  <span className="hidden sm:inline">Baixar</span>
+                  <span className="hidden sm:inline">Acessar</span>
                 </a>
               </div>
           )}

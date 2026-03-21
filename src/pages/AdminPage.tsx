@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin } from "lucide-react";
+import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password";
+type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password" | "banners";
 
 interface CtaButton {
   text: string;
@@ -23,6 +23,7 @@ export default function AdminPage() {
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "notices", label: "Avisos" },
+    { key: "banners", label: "Banners" },
     { key: "materials", label: "Materiais" },
     { key: "videos", label: "Videoaulas" },
     { key: "playlists", label: "Playlists" },
@@ -54,6 +55,7 @@ export default function AdminPage() {
         </div>
 
         {tab === "notices" && <AdminNotices />}
+        {tab === "banners" && <AdminBanners />}
         {tab === "materials" && <AdminMaterials />}
         {tab === "videos" && <AdminVideos />}
         {tab === "playlists" && <AdminPlaylists />}
@@ -307,6 +309,127 @@ function AdminNotices() {
   );
 }
 
+/* ───── Banners ───── */
+function AdminBanners() {
+  const { user } = useAuth();
+  const [banners, setBanners] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [buttonText, setButtonText] = useState("");
+  const [buttonUrl, setButtonUrl] = useState("");
+  const [mediaFile, setMediaFile] = useState<File | null>(null);
+  const [startsAt, setStartsAt] = useState("");
+  const [endsAt, setEndsAt] = useState("");
+  const [uploading, setUploading] = useState(false);
+
+  const fetchBanners = async () => {
+    const { data } = await supabase.from("banners").select("*").order("created_at", { ascending: false });
+    if (data) setBanners(data);
+  };
+  useEffect(() => { fetchBanners(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !mediaFile) return;
+    setUploading(true);
+
+    const path = `${Date.now()}_${mediaFile.name}`;
+    const { error: upErr } = await supabase.storage.from("banners").upload(path, mediaFile);
+    if (upErr) { toast.error("Erro no upload da mídia."); setUploading(false); return; }
+    const { data: urlData } = supabase.storage.from("banners").getPublicUrl(path);
+
+    const mediaType = mediaFile.type.startsWith("video/") ? "video" : "image";
+
+    const { error } = await supabase.from("banners").insert({
+      title: title.trim(),
+      button_text: buttonText.trim() || null,
+      button_url: buttonUrl.trim() || null,
+      media_url: urlData.publicUrl,
+      media_type: mediaType,
+      starts_at: startsAt || new Date().toISOString(),
+      ends_at: endsAt || null,
+      created_by: user!.id,
+    } as any);
+
+    setUploading(false);
+    if (error) { toast.error("Erro ao criar banner."); return; }
+    toast.success("Banner criado!");
+    setTitle(""); setButtonText(""); setButtonUrl(""); setMediaFile(null); setStartsAt(""); setEndsAt("");
+    fetchBanners();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("banners").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir."); return; }
+    toast.success("Banner excluído.");
+    fetchBanners();
+  };
+
+  const formatDate = (d: string) => new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+
+  return (
+    <div>
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
+        <h3 className="font-heading font-bold text-sm mb-2">Novo Banner</h3>
+        <div>
+          <Label className="text-sm">Título do Banner</Label>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div><Label className="text-sm">Texto do botão (opcional)</Label><Input value={buttonText} onChange={(e) => setButtonText(e.target.value)} className="mt-1" placeholder="Saiba mais" /></div>
+          <div><Label className="text-sm">Link do botão (opcional)</Label><Input value={buttonUrl} onChange={(e) => setButtonUrl(e.target.value)} className="mt-1" placeholder="https://..." /></div>
+        </div>
+        <div>
+          <Label className="text-sm flex items-center gap-1">
+            <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem ou Vídeo
+          </Label>
+          <input type="file" accept="image/*,video/*" onChange={(e) => setMediaFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" required />
+          {mediaFile && mediaFile.type.startsWith("video/") && (
+            <p className="text-xs text-muted-foreground mt-1 flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo selecionado — será reproduzido em loop, sem som.</p>
+          )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-sm">Data de início</Label>
+            <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="mt-1" />
+          </div>
+          <div>
+            <Label className="text-sm">Data de fim (opcional)</Label>
+            <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="mt-1" />
+          </div>
+        </div>
+        <Button type="submit" size="sm" disabled={uploading}>
+          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
+          {uploading ? "Enviando..." : "Publicar Banner"}
+        </Button>
+      </form>
+      <div className="space-y-2">
+        {banners.map((b) => (
+          <div key={b.id} className="border bg-card p-4 rounded-xl flex items-center gap-3">
+            {b.media_type === "video" ? (
+              <div className="w-16 h-10 bg-muted rounded flex items-center justify-center flex-shrink-0">
+                <Video className="w-5 h-5 text-muted-foreground" />
+              </div>
+            ) : (
+              <img src={b.media_url} alt="" className="w-16 h-10 object-cover rounded flex-shrink-0" />
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-body font-medium truncate">{b.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatDate(b.starts_at)}
+                {b.ends_at ? ` → ${formatDate(b.ends_at)}` : " → Sem prazo"}
+              </p>
+            </div>
+            <button onClick={() => handleDelete(b.id)} className="text-destructive hover:text-destructive/80 p-1 flex-shrink-0">
+              <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+            </button>
+          </div>
+        ))}
+        {banners.length === 0 && <p className="text-sm text-muted-foreground">Nenhum banner criado.</p>}
+      </div>
+    </div>
+  );
+}
+
 /* ───── Links ───── */
 function AdminLinks() {
   const [links, setLinks] = useState<any[]>([]);
@@ -465,7 +588,7 @@ function AdminMaterials() {
   const [materials, setMaterials] = useState<any[]>([]);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Geral");
-  const [file, setFile] = useState<File | null>(null);
+  const [driveUrl, setDriveUrl] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const fetchMaterials = async () => {
@@ -474,28 +597,30 @@ function AdminMaterials() {
   };
   useEffect(() => { fetchMaterials(); }, []);
 
-  const handleUpload = async (e: React.FormEvent) => {
+  const isValidDriveLink = (url: string) => {
+    return /^https:\/\/(drive\.google\.com|docs\.google\.com)\/.+/.test(url.trim());
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !title.trim()) return;
+    if (!title.trim() || !driveUrl.trim()) return;
+    if (!isValidDriveLink(driveUrl)) {
+      toast.error("Insira um link válido do Google Drive.");
+      return;
+    }
     setUploading(true);
-    const filePath = `${Date.now()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage.from("materials").upload(filePath, file);
-    if (uploadError) { toast.error("Erro no upload."); setUploading(false); return; }
-    const { data: urlData } = supabase.storage.from("materials").getPublicUrl(filePath);
     const { error } = await supabase.from("materials").insert({
-      title: title.trim(), category: category.trim(), file_name: file.name,
-      file_url: urlData.publicUrl, file_size: file.size, uploaded_by: user!.id,
+      title: title.trim(), category: category.trim(), file_name: "Google Drive",
+      file_url: driveUrl.trim(), file_size: null, uploaded_by: user!.id,
     });
     setUploading(false);
     if (error) { toast.error("Erro ao registrar material."); return; }
     toast.success("Material publicado.");
-    setTitle(""); setCategory("Geral"); setFile(null);
+    setTitle(""); setCategory("Geral"); setDriveUrl("");
     fetchMaterials();
   };
 
-  const handleDelete = async (id: string, fileUrl: string) => {
-    const path = fileUrl.split("/materials/")[1];
-    if (path) await supabase.storage.from("materials").remove([path]);
+  const handleDelete = async (id: string) => {
     const { error } = await supabase.from("materials").delete().eq("id", id);
     if (error) { toast.error("Erro ao excluir."); return; }
     toast.success("Material excluído.");
@@ -504,20 +629,29 @@ function AdminMaterials() {
 
   return (
     <div>
-      <form onSubmit={handleUpload} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Upload de Material</h3>
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
+        <h3 className="font-heading font-bold text-sm mb-2">Novo Material (Google Drive)</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Categoria</Label><Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" /></div>
         </div>
-        <div><Label className="text-sm">Arquivo</Label><input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" required /></div>
-        <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Enviando..." : "Publicar"}</Button>
+        <div>
+          <Label className="text-sm">Link do Google Drive</Label>
+          <Input value={driveUrl} onChange={(e) => setDriveUrl(e.target.value)} className="mt-1" placeholder="https://drive.google.com/file/d/..." required />
+          {driveUrl && !isValidDriveLink(driveUrl) && (
+            <p className="text-xs text-destructive mt-1">Link inválido. Use um link do Google Drive.</p>
+          )}
+        </div>
+        <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Publicando..." : "Publicar"}</Button>
       </form>
       <div className="space-y-2">
         {materials.map((m) => (
           <div key={m.id} className="border bg-card p-4 flex items-center justify-between rounded-xl">
-            <div><p className="text-sm font-body font-medium">{m.title}</p><p className="text-xs text-muted-foreground">{m.category} · {m.file_name}</p></div>
-            <button onClick={() => handleDelete(m.id, m.file_url)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+            <div><p className="text-sm font-body font-medium">{m.title}</p><p className="text-xs text-muted-foreground">{m.category}</p></div>
+            <div className="flex items-center gap-2">
+              <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1"><ExternalLink className="w-3.5 h-3.5" />Abrir</a>
+              <button onClick={() => handleDelete(m.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+            </div>
           </div>
         ))}
       </div>

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      banners: {
+        Row: {
+          button_text: string | null
+          button_url: string | null
+          created_at: string
+          created_by: string
+          ends_at: string | null
+          id: string
+          media_type: string
+          media_url: string
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          button_text?: string | null
+          button_url?: string | null
+          created_at?: string
+          created_by: string
+          ends_at?: string | null
+          id?: string
+          media_type?: string
+          media_url: string
+          starts_at?: string
+          title: string
+        }
+        Update: {
+          button_text?: string | null
+          button_url?: string | null
+          created_at?: string
+          created_by?: string
+          ends_at?: string | null
+          id?: string
+          media_type?: string
+          media_url?: string
+          starts_at?: string
+          title?: string
+        }
+        Relationships: []
+      }
       chat_conversations: {
         Row: {
           created_at: string

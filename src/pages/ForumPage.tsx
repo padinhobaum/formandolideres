@@ -438,7 +438,7 @@ export default function ForumPage() {
             respondendo a <span className="text-primary font-medium">{replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}</span>
           </p>
       }
-        <div className="mt-1 text-xs sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
+        <div className="font-heading mt-1 text-xs sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
         {reply.image_url &&
       <img src={reply.image_url} alt="" className="mt-2 max-w-full sm:max-w-xs max-h-48 rounded-xl object-cover" loading="lazy" />
       }
@@ -471,7 +471,7 @@ export default function ForumPage() {
   return (
     <AppLayout>
       <div className="w-full flex flex-col lg:flex-row gap-4 lg:gap-6">
-      <div className="flex-1 min-w-0 max-w-3xl mx-auto w-full">
+      <div className="flex-1 min-w-0 max-w-3xl w-full">
         <h2 className="font-heading font-bold mb-1 text-2xl sm:text-3xl lg:text-4xl text-accent">Fórum de Líderes</h2>
         <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">Discussões, perguntas e enquetes</p>
 
@@ -669,7 +669,7 @@ export default function ForumPage() {
                   {isExpanded &&
                   <div className="px-3 sm:px-4 pb-3 sm:pb-4">
                       {/* Topic content */}
-                      <div className="text-xs whitespace-pre-wrap leading-relaxed pl-0 sm:pl-[52px] break-words sm:text-base py-[12px] pr-[20px]"><RichText content={topic.content} /></div>
+                      <div className="font-heading text-xs whitespace-pre-wrap leading-relaxed pl-0 sm:pl-[52px] break-words sm:text-base py-[12px] pr-[20px]"><RichText content={topic.content} /></div>
                       {topic.image_url &&
                     <img src={topic.image_url} alt="" className="mb-3 sm:ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
                     }
