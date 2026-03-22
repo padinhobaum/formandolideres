@@ -167,51 +167,34 @@ export default function DashboardPage() {
   const getInitials = (name: string) =>
   name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
 
+  // Banner carousel state
+  const [currentBanner, setCurrentBanner] = useState(0);
+  const bannerTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const startBannerTimer = useCallback(() => {
+    if (bannerTimerRef.current) clearInterval(bannerTimerRef.current);
+    if (banners.length > 1) {
+      bannerTimerRef.current = setInterval(() => {
+        setCurrentBanner((prev) => (prev + 1) % banners.length);
+      }, 5000);
+    }
+  }, [banners.length]);
+
+  useEffect(() => {
+    startBannerTimer();
+    return () => { if (bannerTimerRef.current) clearInterval(bannerTimerRef.current); };
+  }, [startBannerTimer]);
+
+  const goToBanner = (index: number) => {
+    setCurrentBanner(index);
+    startBannerTimer();
+  };
+
   return (
     <AppLayout>
       <div className="w-full">
-        {/* Active Banners */}
-        {banners.length > 0 && (
-          <div className="mb-6 space-y-4">
-            {banners.slice(0, 3).map((banner) => (
-              <div key={banner.id} className="relative rounded-2xl overflow-hidden w-full" style={{ minHeight: "180px" }}>
-                {banner.media_type === "video" ? (
-                  <video
-                    src={banner.media_url}
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                ) : (
-                  <img src={banner.media_url} alt={banner.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
-                )}
-                {/* Subtle blue gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
-                <div className="relative z-10 flex flex-col justify-end p-5 sm:p-8 h-full min-h-[180px]">
-                  <h3 className="font-heading font-bold text-xl sm:text-3xl text-primary-foreground drop-shadow-lg mb-2">
-                    {banner.title}
-                  </h3>
-                  {banner.button_text && banner.button_url && (
-                    <a
-                      href={banner.button_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 bg-primary-foreground text-primary font-medium text-sm px-5 py-2 rounded-full w-fit hover:opacity-90 transition-opacity shadow-lg"
-                    >
-                      {banner.button_text}
-                      <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
-                    </a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
         {/* Welcome with avatar */}
-        <div className="flex items-center gap-4 mb-8 flex-wrap">
+        <div className="flex items-center gap-4 mb-6 flex-wrap">
           <UserLevelBadge
             avatarUrl={profile?.avatar_url}
             fullName={profile?.full_name || "U"}
@@ -238,11 +221,86 @@ export default function DashboardPage() {
           <Button
             onClick={() => navigate("/lider-ai")}
             className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg">
-            
             <Sparkles className="w-4 h-4" />
             Pergunte à LíderAI
           </Button>
         </div>
+
+        {/* Active Banners Carousel */}
+        {banners.length > 0 && (
+          <div className="mb-8 relative group/carousel">
+            <div className="relative rounded-2xl overflow-hidden" style={{ minHeight: "180px" }}>
+              {banners.map((banner, index) => (
+                <div
+                  key={banner.id}
+                  className="absolute inset-0 transition-opacity duration-700 ease-in-out"
+                  style={{ opacity: index === currentBanner ? 1 : 0, pointerEvents: index === currentBanner ? "auto" : "none" }}
+                >
+                  {banner.media_type === "video" ? (
+                    <video
+                      src={banner.media_url}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img src={banner.media_url} alt={banner.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
+                  <div className="relative z-10 flex flex-col justify-end p-5 sm:p-8 h-full min-h-[180px]">
+                    <h3 className="font-heading font-bold text-xl sm:text-3xl text-primary-foreground drop-shadow-lg mb-2">
+                      {banner.title}
+                    </h3>
+                    {banner.button_text && banner.button_url && (
+                      <a
+                        href={banner.button_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 bg-primary-foreground text-primary font-medium text-sm px-5 py-2 rounded-full w-fit hover:opacity-90 transition-opacity shadow-lg"
+                      >
+                        {banner.button_text}
+                        <ExternalLink className="w-3.5 h-3.5" strokeWidth={1.5} />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Navigation arrows */}
+            {banners.length > 1 && (
+              <>
+                <button
+                  onClick={() => goToBanner((currentBanner - 1 + banners.length) % banners.length)}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-foreground/30 hover:bg-foreground/50 text-primary-foreground flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
+                  aria-label="Banner anterior"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => goToBanner((currentBanner + 1) % banners.length)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-foreground/30 hover:bg-foreground/50 text-primary-foreground flex items-center justify-center opacity-0 group-hover/carousel:opacity-100 transition-opacity"
+                  aria-label="Próximo banner"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+                {/* Dot indicators */}
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+                  {banners.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => goToBanner(i)}
+                      className={`w-2 h-2 rounded-full transition-all ${i === currentBanner ? "bg-primary-foreground w-4" : "bg-primary-foreground/50"}`}
+                      aria-label={`Banner ${i + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        )}
 
         {/* Quick stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
