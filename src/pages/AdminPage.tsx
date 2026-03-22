@@ -387,12 +387,12 @@ function AdminBanners() {
           <Label className="text-sm flex items-center gap-1">
             <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem ou Vídeo
           </Label>
-          <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" onChange={(e) => {
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" onChange={(e) => {
             const file = e.target.files?.[0];
             if (file && file.size > 20 * 1024 * 1024) { toast.error("Arquivo muito grande. Máximo: 20MB."); e.target.value = ""; return; }
             setMediaFile(file || null);
           }} className="mt-1 block w-full text-sm font-body" required />
-          <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, MP4, WEBM · Máx: 20MB</p>
+          <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, GIF, MP4, WEBM · Máx: 20MB</p>
           {mediaFile && mediaFile.type.startsWith("video/") && (
             <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo selecionado — será reproduzido em loop, sem som.</p>
           )}
