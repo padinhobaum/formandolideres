@@ -22,6 +22,8 @@ interface Banner {
   media_type: string;
   starts_at: string;
   ends_at: string | null;
+  highlight_color?: string | null;
+  category?: string | null;
 }
 
 interface Notice {
