@@ -250,8 +250,16 @@ export default function DashboardPage() {
                   ) : (
                     <img src={banner.media_url} alt={banner.title} className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
                   )}
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/60 via-primary/30 to-transparent" />
+                  <div className="absolute inset-0" style={{ background: `linear-gradient(to right, ${banner.highlight_color || 'hsl(207,100%,27%)'}cc, ${banner.highlight_color || 'hsl(207,100%,27%)'}55, transparent)` }} />
                   <div className="relative z-10 flex flex-col justify-end p-5 sm:p-8 h-full min-h-[180px]">
+                    {banner.category && (
+                      <span
+                        className="inline-block text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-2 w-fit"
+                        style={{ backgroundColor: banner.highlight_color || 'hsl(207,100%,27%)', color: '#fff' }}
+                      >
+                        {banner.category}
+                      </span>
+                    )}
                     <h3 className="font-heading font-bold text-xl sm:text-3xl text-primary-foreground drop-shadow-lg mb-2">
                       {banner.title}
                     </h3>
