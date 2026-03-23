@@ -324,6 +324,8 @@ function AdminBanners() {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
+  const [highlightColor, setHighlightColor] = useState("#006ab5");
+  const [category, setCategory] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const fetchBanners = async () => {
