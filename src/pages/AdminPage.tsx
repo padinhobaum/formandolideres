@@ -362,7 +362,7 @@ function AdminBanners() {
     setUploading(false);
     if (error) { toast.error("Erro ao criar banner."); return; }
     toast.success("Banner criado!");
-    setTitle(""); setButtonText(""); setButtonUrl(""); setMediaFile(null); setStartsAt(""); setEndsAt("");
+    setTitle(""); setButtonText(""); setButtonUrl(""); setMediaFile(null); setStartsAt(""); setEndsAt(""); setHighlightColor("#006ab5"); setCategory("");
     fetchBanners();
   };
 
