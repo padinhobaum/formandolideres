@@ -403,6 +403,19 @@ function AdminBanners() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
+            <Label className="text-sm">Categoria (opcional)</Label>
+            <Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" placeholder="Ex: Evento, Novidade, Importante" />
+          </div>
+          <div>
+            <Label className="text-sm">Cor de destaque</Label>
+            <div className="flex items-center gap-2 mt-1">
+              <input type="color" value={highlightColor} onChange={(e) => setHighlightColor(e.target.value)} className="w-10 h-10 rounded-md border border-input cursor-pointer p-0.5" />
+              <Input value={highlightColor} onChange={(e) => setHighlightColor(e.target.value)} className="flex-1 font-mono text-xs" maxLength={7} />
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
             <Label className="text-sm">Data de início</Label>
             <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="mt-1" />
           </div>
