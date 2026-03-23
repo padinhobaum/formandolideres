@@ -18,9 +18,11 @@ export type Database = {
         Row: {
           button_text: string | null
           button_url: string | null
+          category: string | null
           created_at: string
           created_by: string
           ends_at: string | null
+          highlight_color: string | null
           id: string
           media_type: string
           media_url: string
@@ -30,9 +32,11 @@ export type Database = {
         Insert: {
           button_text?: string | null
           button_url?: string | null
+          category?: string | null
           created_at?: string
           created_by: string
           ends_at?: string | null
+          highlight_color?: string | null
           id?: string
           media_type?: string
           media_url: string
@@ -42,9 +46,11 @@ export type Database = {
         Update: {
           button_text?: string | null
           button_url?: string | null
+          category?: string | null
           created_at?: string
           created_by?: string
           ends_at?: string | null
+          highlight_color?: string | null
           id?: string
           media_type?: string
           media_url?: string

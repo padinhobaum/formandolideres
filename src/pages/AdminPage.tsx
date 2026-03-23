@@ -324,6 +324,8 @@ function AdminBanners() {
   const [mediaFile, setMediaFile] = useState<File | null>(null);
   const [startsAt, setStartsAt] = useState("");
   const [endsAt, setEndsAt] = useState("");
+  const [highlightColor, setHighlightColor] = useState("#006ab5");
+  const [category, setCategory] = useState("");
   const [uploading, setUploading] = useState(false);
 
   const fetchBanners = async () => {
@@ -353,12 +355,14 @@ function AdminBanners() {
       starts_at: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
       ends_at: endsAt ? new Date(endsAt).toISOString() : null,
       created_by: user!.id,
+      highlight_color: highlightColor,
+      category: category.trim() || null,
     } as any);
 
     setUploading(false);
     if (error) { toast.error("Erro ao criar banner."); return; }
     toast.success("Banner criado!");
-    setTitle(""); setButtonText(""); setButtonUrl(""); setMediaFile(null); setStartsAt(""); setEndsAt("");
+    setTitle(""); setButtonText(""); setButtonUrl(""); setMediaFile(null); setStartsAt(""); setEndsAt(""); setHighlightColor("#006ab5"); setCategory("");
     fetchBanners();
   };
 
@@ -396,6 +400,19 @@ function AdminBanners() {
           {mediaFile && mediaFile.type.startsWith("video/") && (
             <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1"><Video className="w-3 h-3" /> Vídeo selecionado — será reproduzido em loop, sem som.</p>
           )}
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-sm">Categoria (opcional)</Label>
+            <Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" placeholder="Ex: Evento, Novidade, Importante" />
+          </div>
+          <div>
+            <Label className="text-sm">Cor de destaque</Label>
+            <div className="flex items-center gap-2 mt-1">
+              <input type="color" value={highlightColor} onChange={(e) => setHighlightColor(e.target.value)} className="w-10 h-10 rounded-md border border-input cursor-pointer p-0.5" />
+              <Input value={highlightColor} onChange={(e) => setHighlightColor(e.target.value)} className="flex-1 font-mono text-xs" maxLength={7} />
+            </div>
+          </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
