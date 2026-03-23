@@ -86,6 +86,7 @@ export default function LiderAIPage() {
 
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
+    if (!hasStarted) setHasStarted(true);
     const userMsg: Msg = { role: "user", content: text.trim() };
     const allMsgs = [...messages, userMsg];
     setMessages(allMsgs);
