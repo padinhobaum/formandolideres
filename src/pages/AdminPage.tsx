@@ -355,6 +355,8 @@ function AdminBanners() {
       starts_at: startsAt ? new Date(startsAt).toISOString() : new Date().toISOString(),
       ends_at: endsAt ? new Date(endsAt).toISOString() : null,
       created_by: user!.id,
+      highlight_color: highlightColor,
+      category: category.trim() || null,
     } as any);
 
     setUploading(false);
