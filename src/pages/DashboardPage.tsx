@@ -123,6 +123,12 @@ export default function DashboardPage() {
         const activeBanners = bannersRes.data.filter((b: any) => !b.ends_at || new Date(b.ends_at) > new Date());
         setBanners(activeBanners as Banner[]);
       }
+      if (liveRes.data && liveRes.data.length > 0) {
+        setHasActiveLive(true);
+        setActiveLiveTitle((liveRes.data[0] as any).title);
+      } else {
+        setHasActiveLive(false);
+      }
     };
     fetchData();
 
