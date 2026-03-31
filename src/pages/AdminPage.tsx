@@ -10,7 +10,7 @@ import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDow
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password" | "banners";
+type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password" | "banners" | "lives";
 
 interface CtaButton {
   text: string;
