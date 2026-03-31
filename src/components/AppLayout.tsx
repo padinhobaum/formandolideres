@@ -42,6 +42,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
   const location = useLocation();
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [hasActiveLive, setHasActiveLive] = useState(false);
 
   useEffect(() => {
     supabase.from("custom_links").select("*").order("sort_order").then(({ data }) => {
