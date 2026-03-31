@@ -48,7 +48,18 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     supabase.from("custom_links").select("*").order("sort_order").then(({ data }) => {
       if (data) setCustomLinks(data as CustomLink[]);
     });
+    supabase.from("live_streams").select("id").eq("is_active", true).limit(1).then(({ data }) => {
+      setHasActiveLive(!!(data && data.length > 0));
+    });
   }, []);
+
+  const navItems: NavItem[] = hasActiveLive
+    ? [
+        ...baseNavItems.slice(0, 1),
+        { label: "Ao Vivo", path: "/ao-vivo", icon: Radio, badge: "LIVE" },
+        ...baseNavItems.slice(1),
+      ]
+    : baseNavItems;
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
