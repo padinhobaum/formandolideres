@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
-import { Radio, Tv, AlertCircle, Loader2 } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Radio, Tv, AlertCircle, Loader2, Users } from "lucide-react";
 
 interface LiveStream {
   id: string;
@@ -10,6 +13,12 @@ interface LiveStream {
   stream_url: string;
   platform: string;
   is_active: boolean;
+}
+
+interface LiveViewer {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
 }
 
 function extractEmbedUrl(url: string, platform: string): string | null {
@@ -37,9 +46,18 @@ function extractChatUrl(url: string, platform: string): string | null {
   return null;
 }
 
+const MAX_VISIBLE_VIEWERS = 10;
+
+function getInitials(name: string) {
+  return name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
+}
+
 export default function LivePage() {
+  const { user, profile } = useAuth();
   const [streams, setStreams] = useState<LiveStream[]>([]);
   const [loading, setLoading] = useState(true);
+  const [viewers, setViewers] = useState<LiveViewer[]>([]);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   useEffect(() => {
     supabase
@@ -54,8 +72,56 @@ export default function LivePage() {
   }, []);
 
   const active = streams[0] || null;
+
+  // Realtime presence for viewers
+  useEffect(() => {
+    if (!active || !user || !profile) return;
+
+    const channel = supabase.channel(`live-viewers-${active.id}`, {
+      config: { presence: { key: user.id } },
+    });
+
+    channel
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState<{ user_id: string; full_name: string; avatar_url: string | null }>();
+        const list: LiveViewer[] = [];
+        const seen = new Set<string>();
+        for (const key of Object.keys(state)) {
+          const presences = state[key];
+          if (presences && presences.length > 0) {
+            const p = presences[0];
+            if (!seen.has(p.user_id)) {
+              seen.add(p.user_id);
+              list.push({ user_id: p.user_id, full_name: p.full_name, avatar_url: p.avatar_url });
+            }
+          }
+        }
+        setViewers(list);
+      })
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({
+            user_id: user.id,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+          });
+        }
+      });
+
+    channelRef.current = channel;
+
+    return () => {
+      channel.untrack();
+      supabase.removeChannel(channel);
+      channelRef.current = null;
+    };
+  }, [active?.id, user?.id, profile?.full_name]);
+
   const embedUrl = active ? extractEmbedUrl(active.stream_url, active.platform) : null;
   const chatUrl = active ? extractChatUrl(active.stream_url, active.platform) : null;
+
+  const visibleViewers = viewers.slice(0, MAX_VISIBLE_VIEWERS);
+  const extraCount = Math.max(0, viewers.length - MAX_VISIBLE_VIEWERS);
 
   return (
     <AppLayout>
@@ -131,6 +197,47 @@ export default function LivePage() {
                       title="Live Chat"
                     />
                   </div>
+                </div>
+              )}
+            </div>
+
+            {/* Viewers section */}
+            <div className="border bg-card rounded-xl p-4 mt-2">
+              <div className="flex items-center gap-2 mb-3">
+                <Users className="w-4 h-4 text-primary" />
+                <h3 className="font-heading font-semibold text-sm">Assistindo agora</h3>
+                <span className="text-xs text-muted-foreground">({viewers.length})</span>
+              </div>
+
+              {viewers.length === 0 ? (
+                <p className="text-sm text-muted-foreground">Ninguém assistindo no momento.</p>
+              ) : (
+                <div className="flex items-center gap-1 flex-wrap">
+                  {visibleViewers.map((v) => {
+                    const isMe = v.user_id === user?.id;
+                    return (
+                      <Tooltip key={v.user_id}>
+                        <TooltipTrigger asChild>
+                          <div className={`relative transition-transform hover:scale-110 cursor-default ${isMe ? "ring-2 ring-primary ring-offset-2 ring-offset-card rounded-full" : ""}`}>
+                            <Avatar className="w-9 h-9 border-2 border-card shadow-sm">
+                              <AvatarImage src={v.avatar_url || undefined} />
+                              <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
+                                {getInitials(v.full_name)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom" className="text-xs">
+                          {v.full_name}{isMe ? " (você)" : ""}
+                        </TooltipContent>
+                      </Tooltip>
+                    );
+                  })}
+                  {extraCount > 0 && (
+                    <div className="w-9 h-9 rounded-full bg-muted border-2 border-card shadow-sm flex items-center justify-center">
+                      <span className="text-[10px] font-bold text-muted-foreground">+{extraCount}</span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
