@@ -25,7 +25,7 @@ interface CustomLink {
   sort_order: number;
 }
 
-const navItems: NavItem[] = [
+const baseNavItems: NavItem[] = [
 { label: "Home", path: "/home", icon: Home },
 { label: "Mural", path: "/mural", icon: Megaphone },
 { label: "Fórum", path: "/forum", icon: MessageSquare },
