@@ -57,6 +57,7 @@ export default function AdminPage() {
 
         {tab === "notices" && <AdminNotices />}
         {tab === "banners" && <AdminBanners />}
+        {tab === "lives" && <AdminLives />}
         {tab === "materials" && <AdminMaterials />}
         {tab === "videos" && <AdminVideos />}
         {tab === "playlists" && <AdminPlaylists />}
