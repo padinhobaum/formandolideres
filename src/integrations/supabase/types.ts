@@ -302,6 +302,42 @@ export type Database = {
           },
         ]
       }
+      live_streams: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          platform: string
+          stream_url: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          platform?: string
+          stream_url: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          platform?: string
+          stream_url?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       materials: {
         Row: {
           category: string

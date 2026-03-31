@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio } from "lucide-react";
 import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
@@ -73,6 +73,8 @@ export default function DashboardPage() {
   const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [hasActiveLive, setHasActiveLive] = useState(false);
+  const [activeLiveTitle, setActiveLiveTitle] = useState("");
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
@@ -90,12 +92,13 @@ export default function DashboardPage() {
     const fetchData = async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       const now = new Date().toISOString();
-      const [noticesRes, forumRes, presenceRes, videosRes, bannersRes] = await Promise.all([
+      const [noticesRes, forumRes, presenceRes, videosRes, bannersRes, liveRes] = await Promise.all([
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
       supabase.from("forum_topics").select("id, title, author_name, author_avatar_url, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
       supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4),
       supabase.from("banners").select("*").lte("starts_at", now).order("created_at", { ascending: false }),
+      supabase.from("live_streams").select("id, title").eq("is_active", true).limit(1),
       ]);
 
       // Collect author IDs for avatar lookup
@@ -119,6 +122,12 @@ export default function DashboardPage() {
       if (bannersRes.data) {
         const activeBanners = bannersRes.data.filter((b: any) => !b.ends_at || new Date(b.ends_at) > new Date());
         setBanners(activeBanners as Banner[]);
+      }
+      if (liveRes.data && liveRes.data.length > 0) {
+        setHasActiveLive(true);
+        setActiveLiveTitle((liveRes.data[0] as any).title);
+      } else {
+        setHasActiveLive(false);
       }
     };
     fetchData();
@@ -310,6 +319,23 @@ export default function DashboardPage() {
               </>
             )}
           </div>
+        )}
+
+        {/* Live banner */}
+        {hasActiveLive && (
+          <button
+            onClick={() => navigate("/ao-vivo")}
+            className="w-full mb-6 border-2 border-red-500/30 bg-red-500/5 hover:bg-red-500/10 rounded-xl p-4 flex items-center gap-3 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center animate-pulse flex-shrink-0">
+              <Radio className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-left flex-1 min-w-0">
+              <p className="font-heading font-bold text-sm text-red-600">🔴 TRANSMISSÃO AO VIVO</p>
+              <p className="text-sm text-muted-foreground truncate">{activeLiveTitle}</p>
+            </div>
+            <span className="text-xs text-red-500 font-medium group-hover:underline flex-shrink-0">Assistir →</span>
+          </button>
         )}
 
         {/* Quick stats */}

@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound } from "lucide-react";
+import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePresence } from "@/hooks/usePresence";
@@ -25,7 +25,7 @@ interface CustomLink {
   sort_order: number;
 }
 
-const navItems: NavItem[] = [
+const baseNavItems: NavItem[] = [
 { label: "Home", path: "/home", icon: Home },
 { label: "Mural", path: "/mural", icon: Megaphone },
 { label: "Fórum", path: "/forum", icon: MessageSquare },
@@ -42,12 +42,24 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
   const location = useLocation();
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [hasActiveLive, setHasActiveLive] = useState(false);
 
   useEffect(() => {
     supabase.from("custom_links").select("*").order("sort_order").then(({ data }) => {
       if (data) setCustomLinks(data as CustomLink[]);
     });
+    supabase.from("live_streams").select("id").eq("is_active", true).limit(1).then(({ data }) => {
+      setHasActiveLive(!!(data && data.length > 0));
+    });
   }, []);
+
+  const navItems: NavItem[] = hasActiveLive
+    ? [
+        ...baseNavItems.slice(0, 1),
+        { label: "Ao Vivo", path: "/ao-vivo", icon: Radio, badge: "LIVE" },
+        ...baseNavItems.slice(1),
+      ]
+    : baseNavItems;
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
 
@@ -82,7 +94,9 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
                 <item.icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                 <span className="text-lg">{item.label}</span>
                 {item.badge &&
-                <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded text-primary-foreground leading-none bg-accent">
+                <span className={`ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none ${
+                  item.badge === "LIVE" ? "bg-red-500 text-white animate-pulse" : "text-primary-foreground bg-accent"
+                }`}>
                     {item.badge}
                   </span>
                 }

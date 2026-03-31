@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video } from "lucide-react";
+import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password" | "banners";
+type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password" | "banners" | "lives";
 
 interface CtaButton {
   text: string;
@@ -24,6 +24,7 @@ export default function AdminPage() {
   const tabs: { key: Tab; label: string }[] = [
     { key: "notices", label: "Avisos" },
     { key: "banners", label: "Banners" },
+    { key: "lives", label: "Ao Vivo" },
     { key: "materials", label: "Materiais" },
     { key: "videos", label: "Videoaulas" },
     { key: "playlists", label: "Playlists" },
@@ -56,6 +57,7 @@ export default function AdminPage() {
 
         {tab === "notices" && <AdminNotices />}
         {tab === "banners" && <AdminBanners />}
+        {tab === "lives" && <AdminLives />}
         {tab === "materials" && <AdminMaterials />}
         {tab === "videos" && <AdminVideos />}
         {tab === "playlists" && <AdminPlaylists />}
@@ -1144,6 +1146,128 @@ function AdminChangePassword() {
           {loading ? "Alterando..." : "Alterar Senha"}
         </Button>
       </form>
+    </div>
+  );
+}
+
+/* ───── Lives ───── */
+function AdminLives() {
+  const { user } = useAuth();
+  const [streams, setStreams] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [streamUrl, setStreamUrl] = useState("");
+  const [platform, setPlatform] = useState<"youtube" | "twitch">("youtube");
+  const [saving, setSaving] = useState(false);
+
+  const fetchStreams = async () => {
+    const { data } = await supabase.from("live_streams").select("*").order("created_at", { ascending: false });
+    if (data) setStreams(data);
+  };
+  useEffect(() => { fetchStreams(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !streamUrl.trim()) return;
+    setSaving(true);
+    const { error } = await supabase.from("live_streams").insert({
+      title: title.trim(),
+      description: description.trim() || null,
+      stream_url: streamUrl.trim(),
+      platform,
+      is_active: false,
+      created_by: user!.id,
+    } as any);
+    setSaving(false);
+    if (error) { toast.error("Erro ao criar live."); return; }
+    toast.success("Live criada! Ative-a quando estiver pronta.");
+    setTitle(""); setDescription(""); setStreamUrl(""); setPlatform("youtube");
+    fetchStreams();
+  };
+
+  const toggleActive = async (id: string, currentActive: boolean) => {
+    // If activating, deactivate all others first
+    if (!currentActive) {
+      await supabase.from("live_streams").update({ is_active: false } as any).neq("id", id);
+    }
+    const { error } = await supabase.from("live_streams").update({ is_active: !currentActive } as any).eq("id", id);
+    if (error) { toast.error("Erro ao atualizar."); return; }
+    toast.success(!currentActive ? "Live ativada! Os membros podem acessar agora." : "Live desativada.");
+    fetchStreams();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("live_streams").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir."); return; }
+    toast.success("Live excluída.");
+    fetchStreams();
+  };
+
+  return (
+    <div>
+      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
+        <h3 className="font-heading font-bold text-sm mb-2 flex items-center gap-2">
+          <Radio className="w-4 h-4" /> Nova Transmissão
+        </h3>
+        <div>
+          <Label className="text-sm">Título da Live</Label>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required placeholder="Ex: Aula ao vivo - Liderança" />
+        </div>
+        <div>
+          <Label className="text-sm">Descrição (opcional)</Label>
+          <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" placeholder="Descrição breve da transmissão" />
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <Label className="text-sm">Plataforma</Label>
+            <select
+              value={platform}
+              onChange={(e) => setPlatform(e.target.value as "youtube" | "twitch")}
+              className="mt-1 w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+            >
+              <option value="youtube">YouTube</option>
+              <option value="twitch">Twitch</option>
+            </select>
+          </div>
+          <div>
+            <Label className="text-sm">Link da Transmissão</Label>
+            <Input value={streamUrl} onChange={(e) => setStreamUrl(e.target.value)} className="mt-1" required placeholder={platform === "youtube" ? "https://youtube.com/watch?v=..." : "https://twitch.tv/canal"} />
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">Cole o link completo da live do YouTube ou do canal da Twitch.</p>
+        <Button type="submit" size="sm" disabled={saving}>
+          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
+          {saving ? "Salvando..." : "Criar Live"}
+        </Button>
+      </form>
+
+      <div className="space-y-2">
+        {streams.map((s) => (
+          <div key={s.id} className="border bg-card p-4 rounded-xl flex items-center gap-3">
+            <div className={`w-3 h-3 rounded-full flex-shrink-0 ${s.is_active ? "bg-red-500 animate-pulse" : "bg-muted-foreground/30"}`} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-body font-medium truncate">{s.title}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {s.platform === "youtube" ? "YouTube" : "Twitch"} · {s.is_active ? "Ativa" : "Inativa"}
+              </p>
+            </div>
+            <div className="flex items-center gap-1 flex-shrink-0">
+              <Button
+                size="sm"
+                variant={s.is_active ? "destructive" : "default"}
+                onClick={() => toggleActive(s.id, s.is_active)}
+                className="text-xs h-8"
+              >
+                {s.is_active ? "Desativar" : "Ativar"}
+              </Button>
+              <button onClick={() => handleDelete(s.id)} className="text-destructive hover:text-destructive/80 p-1">
+                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+            </div>
+          </div>
+        ))}
+        {streams.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma live criada.</p>}
+      </div>
     </div>
   );
 }
