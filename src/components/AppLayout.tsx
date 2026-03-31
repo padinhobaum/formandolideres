@@ -94,7 +94,9 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
                 <item.icon className="w-[20px] h-[20px]" strokeWidth={1.5} />
                 <span className="text-lg">{item.label}</span>
                 {item.badge &&
-                <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded text-primary-foreground leading-none bg-accent">
+                <span className={`ml-auto text-[10px] font-semibold px-1.5 py-0.5 rounded leading-none ${
+                  item.badge === "LIVE" ? "bg-red-500 text-white animate-pulse" : "text-primary-foreground bg-accent"
+                }`}>
                     {item.badge}
                   </span>
                 }
