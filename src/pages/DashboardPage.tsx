@@ -321,6 +321,23 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Live banner */}
+        {hasActiveLive && (
+          <button
+            onClick={() => navigate("/ao-vivo")}
+            className="w-full mb-6 border-2 border-red-500/30 bg-red-500/5 hover:bg-red-500/10 rounded-xl p-4 flex items-center gap-3 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center animate-pulse flex-shrink-0">
+              <Radio className="w-5 h-5 text-white" />
+            </div>
+            <div className="text-left flex-1 min-w-0">
+              <p className="font-heading font-bold text-sm text-red-600">🔴 TRANSMISSÃO AO VIVO</p>
+              <p className="text-sm text-muted-foreground truncate">{activeLiveTitle}</p>
+            </div>
+            <span className="text-xs text-red-500 font-medium group-hover:underline flex-shrink-0">Assistir →</span>
+          </button>
+        )}
+
         {/* Quick stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
           {/* Sala do Líder - full width on mobile */}
