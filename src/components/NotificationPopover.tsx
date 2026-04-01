@@ -210,6 +210,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     material: "Material",
     forum_reply: "Resposta",
     video_reply: "Resposta",
+    live: "Ao Vivo",
   };
 
   const typeColor: Record<string, string> = {
@@ -219,6 +220,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     material: "bg-secondary-foreground",
     forum_reply: "bg-accent",
     video_reply: "bg-destructive",
+    live: "bg-red-500",
   };
 
   const formatDate = (d: string) =>
