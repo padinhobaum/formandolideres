@@ -2,6 +2,7 @@ import { ReactNode, useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -51,7 +52,39 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     supabase.from("live_streams").select("id").eq("is_active", true).limit(1).then(({ data }) => {
       setHasActiveLive(!!(data && data.length > 0));
     });
-  }, []);
+
+    // Realtime listener for live stream activations
+    const channel = supabase
+      .channel("live-stream-changes")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "live_streams" },
+        (payload: any) => {
+          const newRow = payload.new;
+          if (newRow.is_active) {
+            setHasActiveLive(true);
+            toast("🔴 Transmissão ao vivo!", {
+              description: newRow.title,
+              action: {
+                label: "Assistir",
+                onClick: () => navigate("/ao-vivo"),
+              },
+              duration: 10000,
+            });
+          } else {
+            // Check if any other streams are still active
+            supabase.from("live_streams").select("id").eq("is_active", true).limit(1).then(({ data }) => {
+              setHasActiveLive(!!(data && data.length > 0));
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [navigate]);
 
   const navItems: NavItem[] = hasActiveLive
     ? [
