@@ -204,14 +204,15 @@ export default function LivePage() {
               {/* Chat */}
               {chatUrl && (
                 <div className="lg:w-[360px] w-full flex-shrink-0">
-                  <div className="rounded-2xl overflow-hidden border-2 border-accent/10 shadow-xl bg-card h-[400px] lg:h-full lg:min-h-[480px] transition-shadow duration-300 hover:shadow-2xl hover:border-accent/20">
-                    <div className="bg-accent/10 px-4 py-2 border-b flex items-center gap-2">
+                <div className="rounded-2xl overflow-hidden border-2 border-accent/10 shadow-xl bg-card h-[400px] lg:h-full lg:min-h-[480px] flex flex-col transition-shadow duration-300 hover:shadow-2xl hover:border-accent/20">
+                    <div className="bg-accent/10 px-4 py-2 border-b flex items-center gap-2 flex-shrink-0">
                       <div className="w-2 h-2 bg-accent rounded-full animate-pulse" />
                       <span className="text-xs font-heading font-semibold text-accent">Chat ao Vivo</span>
                     </div>
                     <iframe
                       src={chatUrl}
-                      className="w-full h-[calc(100%-36px)]"
+                      className="w-full flex-1 border-0 block"
+                      style={{ margin: 0, padding: 0 }}
                       title="Live Chat"
                     />
                   </div>

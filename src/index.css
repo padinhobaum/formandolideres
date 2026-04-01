@@ -65,16 +65,6 @@
   }
 }
 
-/* Custom cursor (desktop only) */
-@media (pointer: fine) {
-  * {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Cpath d='M3 2l12 7.5L9 12l-2.5 6L3 2z' fill='%23006ab5' stroke='%23003d66' stroke-width='0.8'/%3E%3C/svg%3E") 3 2, auto;
-  }
-  a, button, [role="button"], input[type="submit"], select, label[for] {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%23006ab5' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%23006ab5'/%3E%3C/svg%3E") 12 12, pointer;
-  }
-}
-
 /* Custom scrollbar (desktop) */
 @media (pointer: fine) {
   ::-webkit-scrollbar {
@@ -86,16 +76,16 @@
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb {
-    background: hsl(145 65% 33% / 0.4);
+    background: hsl(145 65% 33%);
     border-radius: 4px;
     transition: background 0.2s;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: hsl(145 65% 33% / 0.7);
+    background: hsl(145 65% 25%);
   }
   * {
     scrollbar-width: thin;
-    scrollbar-color: hsl(145 65% 33% / 0.4) transparent;
+    scrollbar-color: hsl(145 65% 33%) transparent;
   }
 }
 
