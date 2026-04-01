@@ -26,6 +26,7 @@ function getNotificationRoute(item: NotificationItem): string {
     case "material": return "/materiais";
     case "forum_reply": return item.route || "/forum";
     case "video_reply": return item.route || "/videoaulas";
+    case "live": return "/ao-vivo";
     default: return "/home";
   }
 }
