@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NotificationItem {
   id: string;
-  type: "notice" | "topic" | "video" | "material" | "forum_reply" | "video_reply";
+  type: "notice" | "topic" | "video" | "material" | "forum_reply" | "video_reply" | "live";
   title: string;
   created_at: string;
   route?: string;
