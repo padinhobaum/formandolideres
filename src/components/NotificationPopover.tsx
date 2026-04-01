@@ -140,11 +140,21 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       (profiles || []).forEach((p: any) => { avatarMap[p.user_id] = { avatar_url: p.avatar_url, full_name: p.full_name }; });
     }
 
+    // Fetch active/recent live streams for notifications
+    const { data: liveStreams } = await supabase.from("live_streams").select("id, title, created_at, is_active, created_by").eq("is_active", true).order("created_at", { ascending: false }).limit(5);
+    const liveAuthorIds = (liveStreams || []).map((l: any) => l.created_by).filter(Boolean);
+    let liveAvatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
+    if (liveAuthorIds.length > 0) {
+      const { data: liveProfiles } = await supabase.from("profiles").select("user_id, avatar_url, full_name").in("user_id", liveAuthorIds);
+      (liveProfiles || []).forEach((p: any) => { liveAvatarMap[p.user_id] = { avatar_url: p.avatar_url, full_name: p.full_name }; });
+    }
+
     let all: NotificationItem[] = [
       ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const, author_avatar_url: avatarMap[n.author_id]?.avatar_url, author_name: n.author_name })),
       ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const, author_avatar_url: t.author_avatar_url, author_name: t.author_name })),
       ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })),
       ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const, author_avatar_url: avatarMap[m.uploaded_by]?.avatar_url, author_name: avatarMap[m.uploaded_by]?.full_name })),
+      ...(liveStreams || []).map((l: any) => ({ id: l.id, title: `🔴 Ao Vivo: ${l.title}`, created_at: l.created_at, type: "live" as const, route: "/ao-vivo", author_avatar_url: liveAvatarMap[l.created_by]?.avatar_url, author_name: liveAvatarMap[l.created_by]?.full_name })),
       ...myForumReplyNotifs,
       ...myVideoReplyNotifs,
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
