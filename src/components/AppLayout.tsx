@@ -52,7 +52,39 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     supabase.from("live_streams").select("id").eq("is_active", true).limit(1).then(({ data }) => {
       setHasActiveLive(!!(data && data.length > 0));
     });
-  }, []);
+
+    // Realtime listener for live stream activations
+    const channel = supabase
+      .channel("live-stream-changes")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "live_streams" },
+        (payload: any) => {
+          const newRow = payload.new;
+          if (newRow.is_active) {
+            setHasActiveLive(true);
+            toast("🔴 Transmissão ao vivo!", {
+              description: newRow.title,
+              action: {
+                label: "Assistir",
+                onClick: () => navigate("/ao-vivo"),
+              },
+              duration: 10000,
+            });
+          } else {
+            // Check if any other streams are still active
+            supabase.from("live_streams").select("id").eq("is_active", true).limit(1).then(({ data }) => {
+              setHasActiveLive(!!(data && data.length > 0));
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [navigate]);
 
   const navItems: NavItem[] = hasActiveLive
     ? [
