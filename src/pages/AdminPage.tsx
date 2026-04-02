@@ -5,12 +5,19 @@ import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
-import { Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio } from "lucide-react";
+import {
+  Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio,
+  Megaphone, LayoutDashboard, Users, Link2, Tag, ListVideo, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
+  FileText, Search, ToggleLeft, ToggleRight, Info,
+} from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Tab = "users" | "notices" | "materials" | "videos" | "links" | "forum-categories" | "playlists" | "password" | "banners" | "lives";
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password";
 
 interface CtaButton {
   text: string;
@@ -18,59 +25,185 @@ interface CtaButton {
   newTab: boolean;
 }
 
+const tabGroups = [
+  {
+    label: "Conteúdo",
+    tabs: [
+      { key: "notices" as Tab, label: "Avisos", icon: Megaphone, desc: "Publicar e gerenciar avisos" },
+      { key: "banners" as Tab, label: "Banners", icon: BannerIcon, desc: "Banners da página inicial" },
+      { key: "lives" as Tab, label: "Ao Vivo", icon: Radio, desc: "Transmissões ao vivo" },
+    ],
+  },
+  {
+    label: "Aprendizado",
+    tabs: [
+      { key: "materials" as Tab, label: "Materiais", icon: FileText, desc: "Materiais de apoio" },
+      { key: "videos" as Tab, label: "Videoaulas", icon: Video, desc: "Videoaulas e conteúdos" },
+      { key: "playlists" as Tab, label: "Playlists", icon: ListVideo, desc: "Organizar videoaulas" },
+    ],
+  },
+  {
+    label: "Configuração",
+    tabs: [
+      { key: "forum-categories" as Tab, label: "Categorias", icon: Tag, desc: "Categorias do fórum" },
+      { key: "links" as Tab, label: "Links", icon: Link2, desc: "Links do menu lateral" },
+      { key: "users" as Tab, label: "Usuários", icon: Users, desc: "Cadastrar e gerenciar" },
+      { key: "password" as Tab, label: "Senha", icon: KeyRound, desc: "Alterar sua senha" },
+    ],
+  },
+];
+
 export default function AdminPage() {
   const [tab, setTab] = useState<Tab>("notices");
-
-  const tabs: { key: Tab; label: string }[] = [
-    { key: "notices", label: "Avisos" },
-    { key: "banners", label: "Banners" },
-    { key: "lives", label: "Ao Vivo" },
-    { key: "materials", label: "Materiais" },
-    { key: "videos", label: "Videoaulas" },
-    { key: "playlists", label: "Playlists" },
-    { key: "forum-categories", label: "Categorias Fórum" },
-    { key: "links", label: "Links Menu" },
-    { key: "users", label: "Usuários" },
-    { key: "password", label: "Alterar Senha" },
-  ];
+  const activeTabInfo = tabGroups.flatMap((g) => g.tabs).find((t) => t.key === tab);
 
   return (
     <AppLayout>
-      <div className="w-full">
-        <h2 className="font-heading font-bold mb-6 text-4xl text-accent">Painel Administrativo</h2>
-
-        <div className="flex gap-1 mb-6 border-b overflow-x-auto">
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`px-4 py-2 text-sm font-body border-b-2 transition-colors whitespace-nowrap ${
-                tab === t.key
-                  ? "border-primary text-primary font-medium"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+      <div className="w-full max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <LayoutDashboard className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="font-heading font-bold text-2xl sm:text-3xl text-foreground">Painel Administrativo</h1>
+              <p className="text-sm text-muted-foreground">Gerencie todo o conteúdo e configurações da plataforma</p>
+            </div>
+          </div>
         </div>
 
-        {tab === "notices" && <AdminNotices />}
-        {tab === "banners" && <AdminBanners />}
-        {tab === "lives" && <AdminLives />}
-        {tab === "materials" && <AdminMaterials />}
-        {tab === "videos" && <AdminVideos />}
-        {tab === "playlists" && <AdminPlaylists />}
-        {tab === "links" && <AdminLinks />}
-        {tab === "forum-categories" && <AdminForumCategories />}
-        {tab === "users" && <AdminUsers />}
-        {tab === "password" && <AdminChangePassword />}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Sidebar nav */}
+          <aside className="lg:w-56 flex-shrink-0">
+            <nav className="lg:sticky lg:top-8 space-y-4">
+              {tabGroups.map((group) => (
+                <div key={group.label}>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/60 mb-1.5 px-2">{group.label}</p>
+                  <div className="space-y-0.5">
+                    {group.tabs.map((t) => {
+                      const active = tab === t.key;
+                      return (
+                        <button
+                          key={t.key}
+                          onClick={() => setTab(t.key)}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm rounded-lg transition-all duration-150 ${
+                            active
+                              ? "bg-primary text-primary-foreground font-medium shadow-sm"
+                              : "text-muted-foreground hover:bg-secondary hover:text-foreground"
+                          }`}
+                        >
+                          <t.icon className="w-4 h-4 flex-shrink-0" strokeWidth={1.5} />
+                          <span className="truncate">{t.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </nav>
+
+            {/* Mobile horizontal tabs */}
+            <div className="lg:hidden flex gap-1.5 overflow-x-auto pb-2 -mx-4 px-4 mt-4">
+              {tabGroups.flatMap((g) => g.tabs).map((t) => {
+                const active = tab === t.key;
+                return (
+                  <button
+                    key={t.key}
+                    onClick={() => setTab(t.key)}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full whitespace-nowrap transition-all ${
+                      active
+                        ? "bg-primary text-primary-foreground font-medium"
+                        : "bg-secondary text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    <t.icon className="w-3.5 h-3.5" strokeWidth={1.5} />
+                    {t.label}
+                  </button>
+                );
+              })}
+            </div>
+          </aside>
+
+          {/* Main content */}
+          <div className="flex-1 min-w-0">
+            {/* Section header */}
+            {activeTabInfo && (
+              <div className="flex items-center gap-2 mb-5">
+                <activeTabInfo.icon className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                <h2 className="font-heading font-bold text-lg">{activeTabInfo.label}</h2>
+                <span className="text-xs text-muted-foreground">— {activeTabInfo.desc}</span>
+              </div>
+            )}
+
+            {tab === "notices" && <AdminNotices />}
+            {tab === "banners" && <AdminBanners />}
+            {tab === "lives" && <AdminLives />}
+            {tab === "materials" && <AdminMaterials />}
+            {tab === "videos" && <AdminVideos />}
+            {tab === "playlists" && <AdminPlaylists />}
+            {tab === "links" && <AdminLinks />}
+            {tab === "forum-categories" && <AdminForumCategories />}
+            {tab === "users" && <AdminUsers />}
+            {tab === "password" && <AdminChangePassword />}
+          </div>
+        </div>
       </div>
     </AppLayout>
   );
 }
 
-/* ───── Notices ───── */
+/* ═══════════════════════ Shared Components ═══════════════════════ */
+
+function FormCard({ title, children, onSubmit, submitLabel, loading, icon: Icon }: {
+  title: string;
+  children: React.ReactNode;
+  onSubmit: (e: React.FormEvent) => void;
+  submitLabel: string;
+  loading?: boolean;
+  icon?: React.ElementType;
+}) {
+  return (
+    <Card className="mb-6 border-dashed border-primary/20 bg-card/80">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm font-heading font-bold flex items-center gap-2">
+          {Icon && <Icon className="w-4 h-4 text-primary" strokeWidth={1.5} />}
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={onSubmit} className="space-y-4">
+          {children}
+          <Button type="submit" size="sm" disabled={loading} className="gap-1.5">
+            <Plus className="w-4 h-4" strokeWidth={1.5} />
+            {loading ? "Processando..." : submitLabel}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
+
+function ItemCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <Card className={`transition-all duration-150 hover:shadow-md hover:border-primary/10 ${className}`}>
+      <CardContent className="p-4">
+        {children}
+      </CardContent>
+    </Card>
+  );
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="text-center py-8 text-muted-foreground">
+      <Info className="w-8 h-8 mx-auto mb-2 opacity-30" />
+      <p className="text-sm">{message}</p>
+    </div>
+  );
+}
+
+/* ═══════════════════════ Notices ═══════════════════════ */
 function AdminNotices() {
   const { user, profile } = useAuth();
   const [notices, setNotices] = useState<any[]>([]);
@@ -166,8 +299,7 @@ function AdminNotices() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Novo Aviso</h3>
+      <FormCard title="Novo Aviso" onSubmit={handleCreate} submitLabel={uploading ? "Publicando..." : "Publicar"} loading={uploading} icon={Megaphone}>
         <div>
           <Label className="text-sm">Título</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
@@ -187,28 +319,29 @@ function AdminNotices() {
           }} className="mt-1 block w-full text-sm font-body" />
           <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, GIF · Máx: 10MB</p>
         </div>
-        <label className="flex items-center gap-2 text-sm">
-          <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} />
-          Fixar aviso
+        <label className="flex items-center gap-2 text-sm cursor-pointer group">
+          <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} className="rounded" />
+          <Pin className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.5} />
+          Fixar aviso no topo
         </label>
 
-        {/* Send type selector */}
+        {/* Send type */}
         <div className="space-y-2">
-          <Label className="text-sm">Tipo de envio</Label>
+          <Label className="text-sm">Destinatários</Label>
           <div className="flex gap-4">
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="radio" name="sendType" checked={sendType === "global"} onChange={() => setSendType("global")} />
-              Envio global (todos)
+              Todos os usuários
             </label>
-            <label className="flex items-center gap-2 text-sm">
+            <label className="flex items-center gap-2 text-sm cursor-pointer">
               <input type="radio" name="sendType" checked={sendType === "specific"} onChange={() => setSendType("specific")} />
-              Usuários específicos
+              Selecionar usuários
             </label>
           </div>
           {sendType === "specific" && (
-            <div className="border bg-background rounded p-3 max-h-48 overflow-y-auto space-y-1">
+            <div className="border bg-background rounded-lg p-3 max-h-48 overflow-y-auto space-y-1">
               {allUsers.map((u: any) => (
-                <label key={u.user_id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-secondary/50 p-1 rounded">
+                <label key={u.user_id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-secondary/50 p-1.5 rounded-lg transition-colors">
                   <input
                     type="checkbox"
                     checked={selectedUserIds.includes(u.user_id)}
@@ -223,7 +356,8 @@ function AdminNotices() {
                       {u.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
                     </AvatarFallback>
                   </Avatar>
-                  {u.full_name} {u.class_name && <span className="text-muted-foreground text-xs">({u.class_name})</span>}
+                  <span>{u.full_name}</span>
+                  {u.class_name && <span className="text-muted-foreground text-xs">({u.class_name})</span>}
                 </label>
               ))}
               {allUsers.length === 0 && <p className="text-xs text-muted-foreground">Nenhum usuário encontrado.</p>}
@@ -231,17 +365,18 @@ function AdminNotices() {
           )}
         </div>
 
+        {/* CTA buttons */}
         <div className="space-y-2">
-          <Label className="text-sm">Botões de Ação (CTA)</Label>
+          <Label className="text-sm">Botões de Ação</Label>
           {ctaButtons.map((cta, i) => (
-            <div key={i} className="flex flex-wrap items-center gap-2 border bg-background p-2 rounded">
-              <Input placeholder="Texto do botão" value={cta.text} onChange={(e) => updateCta(i, "text", e.target.value)} className="flex-1 min-w-[120px] h-8 text-xs" />
-              <Input placeholder="https://..." value={cta.url} onChange={(e) => updateCta(i, "url", e.target.value)} className="flex-1 min-w-[150px] h-8 text-xs" />
-              <label className="flex items-center gap-1 text-xs whitespace-nowrap">
+            <div key={i} className="flex flex-wrap items-center gap-2 border bg-background p-2.5 rounded-lg">
+              <Input placeholder="Texto" value={cta.text} onChange={(e) => updateCta(i, "text", e.target.value)} className="flex-1 min-w-[100px] h-8 text-xs" />
+              <Input placeholder="https://..." value={cta.url} onChange={(e) => updateCta(i, "url", e.target.value)} className="flex-1 min-w-[130px] h-8 text-xs" />
+              <label className="flex items-center gap-1 text-xs whitespace-nowrap cursor-pointer">
                 <input type="checkbox" checked={cta.newTab} onChange={(e) => updateCta(i, "newTab", e.target.checked)} />
                 Nova aba
               </label>
-              <button type="button" onClick={() => removeCta(i)} className="text-destructive p-1">
+              <button type="button" onClick={() => removeCta(i)} className="text-destructive hover:text-destructive/80 p-1 transition-colors">
                 <Trash2 className="w-3.5 h-3.5" strokeWidth={1.5} />
               </button>
             </div>
@@ -252,52 +387,61 @@ function AdminNotices() {
             </button>
           )}
         </div>
-
-        <Button type="submit" size="sm" disabled={uploading}>
-          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
-          {uploading ? "Publicando..." : "Publicar"}
-        </Button>
-      </form>
+      </FormCard>
 
       <div className="space-y-2">
         {notices.map((n) => (
-          <div key={n.id} className="border bg-card p-4 rounded-xl">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3">
-                {n.image_url && <img src={n.image_url} alt="" className="w-12 h-12 object-cover rounded flex-shrink-0" />}
-                <div>
-                  <p className="text-sm font-heading font-medium">{n.title}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{new Date(n.created_at).toLocaleDateString("pt-BR")}</p>
+          <ItemCard key={n.id}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                {n.image_url && <img src={n.image_url} alt="" className="w-12 h-12 object-cover rounded-lg flex-shrink-0" />}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <p className="text-sm font-heading font-semibold">{n.title}</p>
+                    {n.is_pinned && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-1"><Pin className="w-2.5 h-2.5" />Fixado</Badge>}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">{new Date(n.created_at).toLocaleDateString("pt-BR")}</p>
                 </div>
               </div>
-              <div className="flex items-center gap-1">
-                {n.is_pinned && (
-                  <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-medium mr-1">Fixado</span>
-                )}
-                <button
-                  onClick={async () => {
-                    await supabase.from("notices").update({ is_pinned: !n.is_pinned } as any).eq("id", n.id);
-                    toast.success(n.is_pinned ? "Aviso desafixado." : "Aviso fixado.");
-                    fetchNotices();
-                  }}
-                  className="text-muted-foreground hover:text-primary p-1"
-                  title={n.is_pinned ? "Desafixar" : "Fixar"}
-                >
-                  <Pin className={`w-4 h-4 ${n.is_pinned ? "text-primary fill-primary" : ""}`} strokeWidth={1.5} />
-                </button>
-                <button onClick={() => fetchReads(n.id)} className="text-muted-foreground hover:text-foreground p-1" title="Ver quem leu">
-                  <Eye className="w-4 h-4" strokeWidth={1.5} />
-                </button>
-                <button onClick={() => handleDelete(n.id)} className="text-destructive hover:text-destructive/80 p-1">
-                  <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-                </button>
+              <div className="flex items-center gap-0.5 flex-shrink-0">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={async () => {
+                        await supabase.from("notices").update({ is_pinned: !n.is_pinned } as any).eq("id", n.id);
+                        toast.success(n.is_pinned ? "Desafixado." : "Fixado!");
+                        fetchNotices();
+                      }}
+                      className="text-muted-foreground hover:text-primary p-1.5 rounded-lg hover:bg-secondary transition-colors"
+                    >
+                      <Pin className={`w-4 h-4 ${n.is_pinned ? "text-primary fill-primary" : ""}`} strokeWidth={1.5} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>{n.is_pinned ? "Desafixar" : "Fixar"}</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={() => fetchReads(n.id)} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                      <Eye className="w-4 h-4" strokeWidth={1.5} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Ver quem leu</TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={() => handleDelete(n.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                      <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>Excluir</TooltipContent>
+                </Tooltip>
               </div>
             </div>
             {viewingReads === n.id && (
-              <div className="mt-3 border-t pt-2">
-                <p className="text-xs font-medium mb-1">Lido por ({noticeReads.length}):</p>
+              <div className="mt-3 border-t pt-3">
+                <p className="text-xs font-semibold mb-1.5 text-muted-foreground">Lido por {noticeReads.length} pessoa(s):</p>
                 {noticeReads.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">Ninguém leu este aviso ainda.</p>
+                  <p className="text-xs text-muted-foreground italic">Ninguém leu este aviso ainda.</p>
                 ) : (
                   <div className="space-y-1">
                     {noticeReads.map((r: any) => (
@@ -309,14 +453,15 @@ function AdminNotices() {
                 )}
               </div>
             )}
-          </div>
+          </ItemCard>
         ))}
+        {notices.length === 0 && <EmptyState message="Nenhum aviso criado ainda." />}
       </div>
     </div>
   );
 }
 
-/* ───── Banners ───── */
+/* ═══════════════════════ Banners ═══════════════════════ */
 function AdminBanners() {
   const { user } = useAuth();
   const [banners, setBanners] = useState<any[]>([]);
@@ -379,8 +524,7 @@ function AdminBanners() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Novo Banner</h3>
+      <FormCard title="Novo Banner" onSubmit={handleCreate} submitLabel={uploading ? "Enviando..." : "Publicar Banner"} loading={uploading} icon={BannerIcon}>
         <div>
           <Label className="text-sm">Título do Banner</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
@@ -390,9 +534,7 @@ function AdminBanners() {
           <div><Label className="text-sm">Link do botão (opcional)</Label><Input value={buttonUrl} onChange={(e) => setButtonUrl(e.target.value)} className="mt-1" placeholder="https://..." /></div>
         </div>
         <div>
-          <Label className="text-sm flex items-center gap-1">
-            <ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem ou Vídeo
-          </Label>
+          <Label className="text-sm flex items-center gap-1"><ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Imagem ou Vídeo</Label>
           <input type="file" accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm" onChange={(e) => {
             const file = e.target.files?.[0];
             if (file && file.size > 20 * 1024 * 1024) { toast.error("Arquivo muito grande. Máximo: 20MB."); e.target.value = ""; return; }
@@ -406,60 +548,58 @@ function AdminBanners() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label className="text-sm">Categoria (opcional)</Label>
-            <Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" placeholder="Ex: Evento, Novidade, Importante" />
+            <Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" placeholder="Ex: Evento, Novidade" />
           </div>
           <div>
             <Label className="text-sm">Cor de destaque</Label>
             <div className="flex items-center gap-2 mt-1">
-              <input type="color" value={highlightColor} onChange={(e) => setHighlightColor(e.target.value)} className="w-10 h-10 rounded-md border border-input cursor-pointer p-0.5" />
+              <input type="color" value={highlightColor} onChange={(e) => setHighlightColor(e.target.value)} className="w-10 h-10 rounded-lg border border-input cursor-pointer p-0.5" />
               <Input value={highlightColor} onChange={(e) => setHighlightColor(e.target.value)} className="flex-1 font-mono text-xs" maxLength={7} />
             </div>
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <Label className="text-sm">Data de início</Label>
-            <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="mt-1" />
-          </div>
-          <div>
-            <Label className="text-sm">Data de fim (opcional)</Label>
-            <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="mt-1" />
-          </div>
+          <div><Label className="text-sm">Data de início</Label><Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="mt-1" /></div>
+          <div><Label className="text-sm">Data de fim (opcional)</Label><Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="mt-1" /></div>
         </div>
-        <Button type="submit" size="sm" disabled={uploading}>
-          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
-          {uploading ? "Enviando..." : "Publicar Banner"}
-        </Button>
-      </form>
+      </FormCard>
+
       <div className="space-y-2">
         {banners.map((b) => (
-          <div key={b.id} className="border bg-card p-4 rounded-xl flex items-center gap-3">
-            {b.media_type === "video" ? (
-              <div className="w-16 h-10 bg-muted rounded flex items-center justify-center flex-shrink-0">
-                <Video className="w-5 h-5 text-muted-foreground" />
+          <ItemCard key={b.id}>
+            <div className="flex items-center gap-3">
+              {b.media_type === "video" ? (
+                <div className="w-16 h-10 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Video className="w-5 h-5 text-muted-foreground" />
+                </div>
+              ) : (
+                <img src={b.media_url} alt="" className="w-16 h-10 object-cover rounded-lg flex-shrink-0" />
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-heading font-semibold truncate">{b.title}</p>
+                  {b.category && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">{b.category}</Badge>}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {formatDate(b.starts_at)}{b.ends_at ? ` → ${formatDate(b.ends_at)}` : " → Sem prazo"}
+                </p>
               </div>
-            ) : (
-              <img src={b.media_url} alt="" className="w-16 h-10 object-cover rounded flex-shrink-0" />
-            )}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-body font-medium truncate">{b.title}</p>
-              <p className="text-xs text-muted-foreground">
-                {formatDate(b.starts_at)}
-                {b.ends_at ? ` → ${formatDate(b.ends_at)}` : " → Sem prazo"}
-              </p>
+              <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="w-4 h-4 rounded-full border flex-shrink-0" style={{ backgroundColor: b.highlight_color || "#006ab5" }} />
+                <button onClick={() => handleDelete(b.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                  <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                </button>
+              </div>
             </div>
-            <button onClick={() => handleDelete(b.id)} className="text-destructive hover:text-destructive/80 p-1 flex-shrink-0">
-              <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-            </button>
-          </div>
+          </ItemCard>
         ))}
-        {banners.length === 0 && <p className="text-sm text-muted-foreground">Nenhum banner criado.</p>}
+        {banners.length === 0 && <EmptyState message="Nenhum banner criado." />}
       </div>
     </div>
   );
 }
 
-/* ───── Links ───── */
+/* ═══════════════════════ Links ═══════════════════════ */
 function AdminLinks() {
   const [links, setLinks] = useState<any[]>([]);
   const [label, setLabel] = useState("");
@@ -516,14 +656,13 @@ function AdminLinks() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Novo Link do Menu</h3>
+      <FormCard title="Novo Link do Menu" onSubmit={handleCreate} submitLabel={uploading ? "Salvando..." : "Adicionar"} loading={uploading} icon={Link2}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><Label className="text-sm">Nome do botão</Label><Input value={label} onChange={(e) => setLabel(e.target.value)} className="mt-1" required /></div>
+          <div><Label className="text-sm">Nome</Label><Input value={label} onChange={(e) => setLabel(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">URL</Label><Input value={url} onChange={(e) => setUrl(e.target.value)} className="mt-1" placeholder="https://..." required /></div>
         </div>
         <div>
-          <Label className="text-sm">Ícone (imagem, opcional)</Label>
+          <Label className="text-sm">Ícone (opcional)</Label>
           <input type="file" accept="image/jpeg,image/png,image/webp,image/svg+xml" onChange={(e) => {
             const file = e.target.files?.[0];
             if (file && file.size > 2 * 1024 * 1024) { toast.error("Ícone muito grande. Máximo: 2MB."); e.target.value = ""; return; }
@@ -531,92 +670,33 @@ function AdminLinks() {
           }} className="mt-1 block w-full text-sm font-body" />
           <p className="text-xs text-muted-foreground mt-1">Formatos: JPG, PNG, WEBP, SVG · Máx: 2MB</p>
         </div>
-        <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Salvando..." : "Adicionar"}</Button>
-      </form>
+      </FormCard>
       <div className="space-y-2">
         {links.map((l, idx) => (
-          <div key={l.id} className="border bg-card p-4 flex items-center gap-3 rounded-xl">
-            <div className="flex flex-col gap-0.5">
-              <button onClick={() => moveLink(l.id, "up")} disabled={idx === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs">▲</button>
-              <button onClick={() => moveLink(l.id, "down")} disabled={idx === links.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-30 text-xs">▼</button>
+          <ItemCard key={l.id}>
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col gap-0.5">
+                <button onClick={() => moveLink(l.id, "up")} disabled={idx === 0} className="text-muted-foreground hover:text-foreground disabled:opacity-20 text-xs transition-colors p-0.5">▲</button>
+                <button onClick={() => moveLink(l.id, "down")} disabled={idx === links.length - 1} className="text-muted-foreground hover:text-foreground disabled:opacity-20 text-xs transition-colors p-0.5">▼</button>
+              </div>
+              {l.icon_url ? <img src={l.icon_url} alt="" className="w-5 h-5 object-contain flex-shrink-0" /> : <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-heading font-semibold truncate">{l.label}</p>
+                <p className="text-xs text-muted-foreground truncate">{l.url}</p>
+              </div>
+              <button onClick={() => handleDelete(l.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+              </button>
             </div>
-            {l.icon_url ? <img src={l.icon_url} alt="" className="w-5 h-5 object-contain flex-shrink-0" /> : <ExternalLink className="w-5 h-5 text-muted-foreground flex-shrink-0" strokeWidth={1.5} />}
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-body font-medium truncate">{l.label}</p>
-              <p className="text-xs text-muted-foreground truncate">{l.url}</p>
-            </div>
-            <button onClick={() => handleDelete(l.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
-          </div>
+          </ItemCard>
         ))}
+        {links.length === 0 && <EmptyState message="Nenhum link adicionado." />}
       </div>
     </div>
   );
 }
 
-/* ───── Students ───── */
-function AdminStudents() {
-  const [students, setStudents] = useState<any[]>([]);
-  const [fullName, setFullName] = useState("");
-  const [callNumber, setCallNumber] = useState("");
-  const [className, setClassName] = useState("");
-  const [guardianContact, setGuardianContact] = useState("");
-  const [notes, setNotes] = useState("");
-
-  const fetchStudents = async () => {
-    const { data } = await supabase.from("students").select("*").order("class_name").order("call_number");
-    if (data) setStudents(data);
-  };
-  useEffect(() => { fetchStudents(); }, []);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName.trim() || !className.trim()) return;
-    const { error } = await supabase.from("students").insert({
-      full_name: fullName.trim(), call_number: callNumber ? parseInt(callNumber) : null,
-      class_name: className.trim(), guardian_contact: guardianContact.trim() || null, notes: notes.trim() || null,
-    });
-    if (error) { toast.error("Erro ao cadastrar aluno."); return; }
-    toast.success("Aluno cadastrado.");
-    setFullName(""); setCallNumber(""); setClassName(""); setGuardianContact(""); setNotes("");
-    fetchStudents();
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("students").delete().eq("id", id);
-    if (error) { toast.error("Erro ao excluir."); return; }
-    toast.success("Aluno excluído.");
-    fetchStudents();
-  };
-
-  return (
-    <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Cadastrar Aluno</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><Label className="text-sm">Nome completo</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1" required /></div>
-          <div><Label className="text-sm">Turma</Label><Input value={className} onChange={(e) => setClassName(e.target.value)} className="mt-1" required /></div>
-          <div><Label className="text-sm">Nº Chamada</Label><Input type="number" value={callNumber} onChange={(e) => setCallNumber(e.target.value)} className="mt-1" /></div>
-          <div><Label className="text-sm">Contato responsável</Label><Input value={guardianContact} onChange={(e) => setGuardianContact(e.target.value)} className="mt-1" /></div>
-        </div>
-        <div>
-          <Label className="text-sm">Observações</Label>
-          <textarea value={notes} onChange={(e) => setNotes(e.target.value)} className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y" />
-        </div>
-        <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Cadastrar</Button>
-      </form>
-      <div className="space-y-2">
-        {students.map((s) => (
-          <div key={s.id} className="border bg-card p-4 flex items-center justify-between rounded-xl">
-            <div><p className="text-sm font-body font-medium">{s.full_name}</p><p className="text-xs text-muted-foreground">{s.class_name} · Nº {s.call_number ?? "—"}</p></div>
-            <button onClick={() => handleDelete(s.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ───── Materials ───── */
+/* ═══════════════════════ Materials ═══════════════════════ */
 function AdminMaterials() {
   const { user } = useAuth();
   const [materials, setMaterials] = useState<any[]>([]);
@@ -631,17 +711,12 @@ function AdminMaterials() {
   };
   useEffect(() => { fetchMaterials(); }, []);
 
-  const isValidDriveLink = (url: string) => {
-    return /^https:\/\/(drive\.google\.com|docs\.google\.com)\/.+/.test(url.trim());
-  };
+  const isValidDriveLink = (url: string) => /^https:\/\/(drive\.google\.com|docs\.google\.com)\/.+/.test(url.trim());
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !driveUrl.trim()) return;
-    if (!isValidDriveLink(driveUrl)) {
-      toast.error("Insira um link válido do Google Drive.");
-      return;
-    }
+    if (!isValidDriveLink(driveUrl)) { toast.error("Insira um link válido do Google Drive."); return; }
     setUploading(true);
     const { error } = await supabase.from("materials").insert({
       title: title.trim(), category: category.trim(), file_name: "Google Drive",
@@ -663,8 +738,7 @@ function AdminMaterials() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Novo Material (Google Drive)</h3>
+      <FormCard title="Novo Material (Google Drive)" onSubmit={handleCreate} submitLabel={uploading ? "Publicando..." : "Publicar"} loading={uploading} icon={FileText}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Categoria</Label><Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" /></div>
@@ -676,24 +750,31 @@ function AdminMaterials() {
             <p className="text-xs text-destructive mt-1">Link inválido. Use um link do Google Drive.</p>
           )}
         </div>
-        <Button type="submit" size="sm" disabled={uploading}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{uploading ? "Publicando..." : "Publicar"}</Button>
-      </form>
+      </FormCard>
       <div className="space-y-2">
         {materials.map((m) => (
-          <div key={m.id} className="border bg-card p-4 flex items-center justify-between rounded-xl">
-            <div><p className="text-sm font-body font-medium">{m.title}</p><p className="text-xs text-muted-foreground">{m.category}</p></div>
-            <div className="flex items-center gap-2">
-              <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1"><ExternalLink className="w-3.5 h-3.5" />Abrir</a>
-              <button onClick={() => handleDelete(m.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+          <ItemCard key={m.id}>
+            <div className="flex items-center justify-between">
+              <div className="min-w-0">
+                <p className="text-sm font-heading font-semibold">{m.title}</p>
+                <p className="text-xs text-muted-foreground">{m.category}</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <a href={m.file_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline text-xs flex items-center gap-1"><ExternalLink className="w-3.5 h-3.5" />Abrir</a>
+                <button onClick={() => handleDelete(m.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                  <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                </button>
+              </div>
             </div>
-          </div>
+          </ItemCard>
         ))}
+        {materials.length === 0 && <EmptyState message="Nenhum material publicado." />}
       </div>
     </div>
   );
 }
 
-/* ───── Videos ───── */
+/* ═══════════════════════ Videos ═══════════════════════ */
 function AdminVideos() {
   const { user } = useAuth();
   const [videos, setVideos] = useState<any[]>([]);
@@ -730,8 +811,7 @@ function AdminVideos() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Nova Videoaula</h3>
+      <FormCard title="Nova Videoaula" onSubmit={handleCreate} submitLabel="Publicar" icon={Video}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Categoria</Label><Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" /></div>
@@ -741,22 +821,32 @@ function AdminVideos() {
           <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." required />
           <p className="text-xs text-muted-foreground mt-1">Cole o link do YouTube ou Vimeo</p>
         </div>
-        <div><Label className="text-sm">Descrição (opcional)</Label><textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full border bg-background p-2 text-sm font-body rounded min-h-[60px] resize-y" /></div>
-        <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Publicar</Button>
-      </form>
+        <div>
+          <Label className="text-sm">Descrição (opcional)</Label>
+          <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full border border-input bg-background p-2 text-sm font-body rounded-lg min-h-[60px] resize-y" />
+        </div>
+      </FormCard>
       <div className="space-y-2">
         {videos.map((v) => (
-          <div key={v.id} className="border bg-card p-4 flex items-center justify-between rounded-xl">
-            <div><p className="text-sm font-body font-medium">{v.title}</p><p className="text-xs text-muted-foreground">{v.category} · {new Date(v.created_at).toLocaleDateString("pt-BR")}</p></div>
-            <button onClick={() => handleDelete(v.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
-          </div>
+          <ItemCard key={v.id}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-heading font-semibold">{v.title}</p>
+                <p className="text-xs text-muted-foreground">{v.category} · {new Date(v.created_at).toLocaleDateString("pt-BR")}</p>
+              </div>
+              <button onClick={() => handleDelete(v.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+            </div>
+          </ItemCard>
         ))}
+        {videos.length === 0 && <EmptyState message="Nenhuma videoaula adicionada." />}
       </div>
     </div>
   );
 }
 
-/* ───── Playlists ───── */
+/* ═══════════════════════ Playlists ═══════════════════════ */
 function AdminPlaylists() {
   const { user } = useAuth();
   const [playlists, setPlaylists] = useState<any[]>([]);
@@ -820,47 +910,49 @@ function AdminPlaylists() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Nova Playlist</h3>
+      <FormCard title="Nova Playlist" onSubmit={handleCreate} submitLabel="Criar" icon={ListVideo}>
         <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
-        <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Criar</Button>
-      </form>
+      </FormCard>
       <div className="space-y-2">
         {playlists.map((p: any) => (
-          <div key={p.id} className="border bg-card rounded-xl overflow-hidden">
+          <Card key={p.id} className="overflow-hidden transition-all duration-150 hover:shadow-md">
             <div className="p-4 flex items-center justify-between">
-              <button onClick={() => toggleExpand(p.id)} className="flex items-center gap-2 text-sm font-body font-medium">
+              <button onClick={() => toggleExpand(p.id)} className="flex items-center gap-2 text-sm font-heading font-semibold hover:text-primary transition-colors">
                 {expandedId === p.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                 {p.title}
               </button>
-              <button onClick={() => handleDelete(p.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+              <button onClick={() => handleDelete(p.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+              </button>
             </div>
             {expandedId === p.id && (
-              <div className="border-t p-4 space-y-2">
+              <div className="border-t p-4 space-y-2 bg-secondary/20">
                 {(playlistVideos[p.id] || []).map((pv: any) => (
-                  <div key={pv.id} className="flex items-center justify-between text-sm bg-muted/30 p-2 rounded">
-                    <span>{pv.video_lessons?.title || "Vídeo"}</span>
-                    <button onClick={() => removeVideoFromPlaylist(pv.id, p.id)} className="text-destructive"><Trash2 className="w-3 h-3" /></button>
+                  <div key={pv.id} className="flex items-center justify-between text-sm bg-card p-2.5 rounded-lg border">
+                    <span className="truncate">{pv.video_lessons?.title || "Vídeo"}</span>
+                    <button onClick={() => removeVideoFromPlaylist(pv.id, p.id)} className="text-destructive hover:text-destructive/80 p-1">
+                      <Trash2 className="w-3 h-3" />
+                    </button>
                   </div>
                 ))}
                 <div className="flex gap-2">
-                  <select value={selectedVideoId} onChange={(e) => setSelectedVideoId(e.target.value)} className="flex-1 border bg-background px-2 py-1.5 text-sm rounded">
+                  <select value={selectedVideoId} onChange={(e) => setSelectedVideoId(e.target.value)} className="flex-1 border border-input bg-background px-2.5 py-1.5 text-sm rounded-lg">
                     <option value="">Selecionar vídeo...</option>
                     {videos.map((v) => <option key={v.id} value={v.id}>{v.title}</option>)}
                   </select>
-                  <Button size="sm" onClick={() => addVideoToPlaylist(p.id)}><Plus className="w-3 h-3" /></Button>
+                  <Button size="sm" onClick={() => addVideoToPlaylist(p.id)} className="gap-1"><Plus className="w-3 h-3" /></Button>
                 </div>
               </div>
             )}
-          </div>
+          </Card>
         ))}
-        {playlists.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma playlist criada.</p>}
+        {playlists.length === 0 && <EmptyState message="Nenhuma playlist criada." />}
       </div>
     </div>
   );
 }
 
-/* ───── Users ───── */
+/* ═══════════════════════ Users ═══════════════════════ */
 function AdminUsers() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -870,6 +962,7 @@ function AdminUsers() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [creating, setCreating] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchUsers = async () => {
     const { data: profilesData } = await supabase.from("profiles").select("*");
@@ -913,10 +1006,16 @@ function AdminUsers() {
     fetchUsers();
   };
 
+  const filteredUsers = searchQuery.trim()
+    ? users.filter((u) =>
+        u.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        u.class_name?.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : users;
+
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Cadastrar Usuário</h3>
+      <FormCard title="Cadastrar Usuário" onSubmit={handleCreate} submitLabel={creating ? "Criando..." : "Cadastrar"} loading={creating} icon={Users}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div><Label className="text-sm">Nome completo</Label><Input value={fullName} onChange={(e) => setFullName(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">E-mail</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1" required /></div>
@@ -924,7 +1023,7 @@ function AdminUsers() {
           <div><Label className="text-sm">Sala do Líder</Label><Input value={className} onChange={(e) => setClassName(e.target.value)} className="mt-1" required placeholder="Ex: 3º Ano A" /></div>
           <div>
             <Label className="text-sm">Papel</Label>
-            <select value={role} onChange={(e) => setRole(e.target.value as "admin" | "leader")} className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10">
+            <select value={role} onChange={(e) => setRole(e.target.value as "admin" | "leader")} className="mt-1 w-full border border-input bg-background px-3 py-2 text-sm font-body rounded-lg h-10">
               <option value="leader">Líder de Classe</option>
               <option value="admin">Administrador</option>
             </select>
@@ -934,24 +1033,50 @@ function AdminUsers() {
           <Label className="text-sm flex items-center gap-1"><ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Foto de perfil (opcional)</Label>
           <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
         </div>
-        <Button type="submit" size="sm" disabled={creating}><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />{creating ? "Criando..." : "Cadastrar"}</Button>
-      </form>
+      </FormCard>
+
+      {/* Search */}
+      <div className="relative mb-3">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="Buscar por nome ou sala..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-9"
+        />
+      </div>
+
       <div className="space-y-2">
-        {users.map((u) => (
-          <div key={u.id} className="border bg-card p-4 rounded-xl">
-            <p className="text-sm font-body font-medium">{u.full_name}</p>
-            <p className="text-xs text-muted-foreground">
-              {u.class_name && <span>{u.class_name} · </span>}
-              {(u.roles as string[])?.map((r: string) => r === "admin" ? "Administrador" : "Líder").join(", ") || "Sem papel"}
-            </p>
-          </div>
+        {filteredUsers.map((u) => (
+          <ItemCard key={u.id}>
+            <div className="flex items-center gap-3">
+              <Avatar className="w-9 h-9 flex-shrink-0">
+                <AvatarImage src={u.avatar_url || undefined} />
+                <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
+                  {u.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0">
+                <p className="text-sm font-heading font-semibold">{u.full_name}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {u.class_name && <span className="text-xs text-muted-foreground">{u.class_name}</span>}
+                  {(u.roles as string[])?.map((r: string) => (
+                    <Badge key={r} variant={r === "admin" ? "default" : "secondary"} className="text-[10px] px-1.5 py-0 h-4">
+                      {r === "admin" ? "Admin" : "Líder"}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </ItemCard>
         ))}
+        {filteredUsers.length === 0 && <EmptyState message={searchQuery ? "Nenhum resultado encontrado." : "Nenhum usuário cadastrado."} />}
       </div>
     </div>
   );
 }
 
-/* ───── Forum Categories ───── */
+/* ═══════════════════════ Forum Categories ═══════════════════════ */
 function AdminForumCategories() {
   const [categories, setCategories] = useState<any[]>([]);
   const [name, setName] = useState("");
@@ -999,31 +1124,28 @@ function AdminForumCategories() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2">Nova Categoria do Fórum</h3>
+      <FormCard title="Nova Categoria do Fórum" onSubmit={handleCreate} submitLabel="Criar Categoria" icon={Tag}>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div><Label className="text-sm">Nome</Label><Input value={name} onChange={(e) => setName(e.target.value)} className="mt-1" required /></div>
           <div><Label className="text-sm">Descrição (opcional)</Label><Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" /></div>
           <div>
             <Label className="text-sm">Cor</Label>
             <div className="flex items-center gap-2 mt-1">
-              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-10 rounded border cursor-pointer" />
+              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="w-10 h-10 rounded-lg border cursor-pointer" />
               <Input value={color} onChange={(e) => setColor(e.target.value)} className="flex-1 h-10 text-sm font-mono" />
             </div>
           </div>
         </div>
-        <Button type="submit" size="sm"><Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />Criar Categoria</Button>
-      </form>
+      </FormCard>
       <div className="space-y-2">
         {categories.map((cat) => (
-          <div key={cat.id} className="border bg-card p-4 rounded-xl">
+          <ItemCard key={cat.id}>
             {editingId === cat.id ? (
-              <div className="space-y-2">
-                <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nome" className="h-8 text-sm" />
-                <Input value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Descrição" className="h-8 text-sm" />
+              <div className="space-y-3">
+                <Input value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="Nome" className="h-9 text-sm" />
+                <Input value={editDescription} onChange={(e) => setEditDescription(e.target.value)} placeholder="Descrição" className="h-9 text-sm" />
                 <div className="flex items-center gap-2">
-                  <Label className="text-sm">Cor</Label>
-                  <input type="color" value={editColor} onChange={(e) => setEditColor(e.target.value)} className="w-8 h-8 rounded border cursor-pointer" />
+                  <input type="color" value={editColor} onChange={(e) => setEditColor(e.target.value)} className="w-8 h-8 rounded-lg border cursor-pointer" />
                   <Input value={editColor} onChange={(e) => setEditColor(e.target.value)} className="w-28 h-8 text-sm font-mono" />
                 </div>
                 <div className="flex gap-2">
@@ -1034,27 +1156,41 @@ function AdminForumCategories() {
             ) : (
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-4 h-4 rounded-full border flex-shrink-0" style={{ backgroundColor: cat.color || "#3b82f6" }} />
+                  <div className="w-5 h-5 rounded-full border-2 flex-shrink-0 shadow-sm" style={{ backgroundColor: cat.color || "#3b82f6" }} />
                   <div>
-                    <p className="text-sm font-body font-medium">{cat.name}</p>
+                    <p className="text-sm font-heading font-semibold">{cat.name}</p>
                     {cat.description && <p className="text-xs text-muted-foreground">{cat.description}</p>}
                   </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => startEdit(cat)} className="text-muted-foreground hover:text-foreground p-1"><Pencil className="w-4 h-4" strokeWidth={1.5} /></button>
-                  <button onClick={() => handleDelete(cat.id)} className="text-destructive hover:text-destructive/80 p-1"><Trash2 className="w-4 h-4" strokeWidth={1.5} /></button>
+                <div className="flex items-center gap-0.5">
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={() => startEdit(cat)} className="text-muted-foreground hover:text-foreground p-1.5 rounded-lg hover:bg-secondary transition-colors">
+                        <Pencil className="w-4 h-4" strokeWidth={1.5} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Editar</TooltipContent>
+                  </Tooltip>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button onClick={() => handleDelete(cat.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                        <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent>Excluir</TooltipContent>
+                  </Tooltip>
                 </div>
               </div>
             )}
-          </div>
+          </ItemCard>
         ))}
-        {categories.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma categoria criada ainda.</p>}
+        {categories.length === 0 && <EmptyState message="Nenhuma categoria criada." />}
       </div>
     </div>
   );
 }
 
-/* ───── Change Password ───── */
+/* ═══════════════════════ Change Password ═══════════════════════ */
 function AdminChangePassword() {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -1063,94 +1199,48 @@ function AdminChangePassword() {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (newPassword.length < 6) {
-      toast.error("A nova senha deve ter pelo menos 6 caracteres.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      toast.error("A nova senha e a confirmação não coincidem.");
-      return;
-    }
+    if (newPassword.length < 6) { toast.error("A nova senha deve ter pelo menos 6 caracteres."); return; }
+    if (newPassword !== confirmPassword) { toast.error("A nova senha e a confirmação não coincidem."); return; }
     setLoading(true);
 
-    // Verify current password by re-authenticating
     const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!currentUser?.email) {
-      toast.error("Erro ao obter dados do usuário.");
-      setLoading(false);
-      return;
-    }
+    if (!currentUser?.email) { toast.error("Erro ao obter dados do usuário."); setLoading(false); return; }
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: currentUser.email,
       password: currentPassword,
     });
-
-    if (signInError) {
-      toast.error("Senha atual incorreta.");
-      setLoading(false);
-      return;
-    }
+    if (signInError) { toast.error("Senha atual incorreta."); setLoading(false); return; }
 
     const { error } = await supabase.auth.updateUser({ password: newPassword });
     setLoading(false);
-
-    if (error) {
-      toast.error("Erro ao alterar a senha: " + error.message);
-      return;
-    }
+    if (error) { toast.error("Erro ao alterar a senha: " + error.message); return; }
 
     toast.success("Senha alterada com sucesso!");
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    setCurrentPassword(""); setNewPassword(""); setConfirmPassword("");
   };
 
   return (
-    <div>
-      <form onSubmit={handleChangePassword} className="border bg-card p-5 mb-6 space-y-4 rounded-xl max-w-md">
-        <h3 className="font-heading font-bold text-sm mb-2">Alterar Senha</h3>
+    <div className="max-w-md">
+      <FormCard title="Alterar Senha" onSubmit={handleChangePassword} submitLabel={loading ? "Alterando..." : "Alterar Senha"} loading={loading} icon={KeyRound}>
         <div>
           <Label className="text-sm">Senha atual</Label>
-          <Input
-            type="password"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            className="mt-1"
-            required
-          />
+          <Input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="mt-1" required />
         </div>
         <div>
           <Label className="text-sm">Nova senha</Label>
-          <Input
-            type="password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            className="mt-1"
-            required
-            minLength={6}
-          />
+          <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="mt-1" required minLength={6} />
         </div>
         <div>
           <Label className="text-sm">Confirmar nova senha</Label>
-          <Input
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            className="mt-1"
-            required
-            minLength={6}
-          />
+          <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="mt-1" required minLength={6} />
         </div>
-        <Button type="submit" size="sm" disabled={loading}>
-          {loading ? "Alterando..." : "Alterar Senha"}
-        </Button>
-      </form>
+      </FormCard>
     </div>
   );
 }
 
-/* ───── Lives ───── */
+/* ═══════════════════════ Lives ═══════════════════════ */
 function AdminLives() {
   const { user } = useAuth();
   const [streams, setStreams] = useState<any[]>([]);
@@ -1171,28 +1261,23 @@ function AdminLives() {
     if (!title.trim() || !streamUrl.trim()) return;
     setSaving(true);
     const { error } = await supabase.from("live_streams").insert({
-      title: title.trim(),
-      description: description.trim() || null,
-      stream_url: streamUrl.trim(),
-      platform,
-      is_active: false,
-      created_by: user!.id,
+      title: title.trim(), description: description.trim() || null,
+      stream_url: streamUrl.trim(), platform, is_active: false, created_by: user!.id,
     } as any);
     setSaving(false);
     if (error) { toast.error("Erro ao criar live."); return; }
-    toast.success("Live criada! Ative-a quando estiver pronta.");
+    toast.success("Live criada! Ative quando estiver pronta.");
     setTitle(""); setDescription(""); setStreamUrl(""); setPlatform("youtube");
     fetchStreams();
   };
 
   const toggleActive = async (id: string, currentActive: boolean) => {
-    // If activating, deactivate all others first
     if (!currentActive) {
       await supabase.from("live_streams").update({ is_active: false } as any).neq("id", id);
     }
     const { error } = await supabase.from("live_streams").update({ is_active: !currentActive } as any).eq("id", id);
     if (error) { toast.error("Erro ao atualizar."); return; }
-    toast.success(!currentActive ? "Live ativada! Os membros podem acessar agora." : "Live desativada.");
+    toast.success(!currentActive ? "Live ativada!" : "Live desativada.");
     fetchStreams();
   };
 
@@ -1205,26 +1290,19 @@ function AdminLives() {
 
   return (
     <div>
-      <form onSubmit={handleCreate} className="border bg-card p-5 mb-6 space-y-3 rounded-xl">
-        <h3 className="font-heading font-bold text-sm mb-2 flex items-center gap-2">
-          <Radio className="w-4 h-4" /> Nova Transmissão
-        </h3>
+      <FormCard title="Nova Transmissão" onSubmit={handleCreate} submitLabel={saving ? "Salvando..." : "Criar Live"} loading={saving} icon={Radio}>
         <div>
           <Label className="text-sm">Título da Live</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required placeholder="Ex: Aula ao vivo - Liderança" />
         </div>
         <div>
           <Label className="text-sm">Descrição (opcional)</Label>
-          <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" placeholder="Descrição breve da transmissão" />
+          <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" placeholder="Descrição breve" />
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <Label className="text-sm">Plataforma</Label>
-            <select
-              value={platform}
-              onChange={(e) => setPlatform(e.target.value as "youtube" | "twitch")}
-              className="mt-1 w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
-            >
+            <select value={platform} onChange={(e) => setPlatform(e.target.value as "youtube" | "twitch")} className="mt-1 w-full h-10 rounded-lg border border-input bg-background px-3 text-sm">
               <option value="youtube">YouTube</option>
               <option value="twitch">Twitch</option>
             </select>
@@ -1234,39 +1312,46 @@ function AdminLives() {
             <Input value={streamUrl} onChange={(e) => setStreamUrl(e.target.value)} className="mt-1" required placeholder={platform === "youtube" ? "https://youtube.com/watch?v=..." : "https://twitch.tv/canal"} />
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">Cole o link completo da live do YouTube ou do canal da Twitch.</p>
-        <Button type="submit" size="sm" disabled={saving}>
-          <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
-          {saving ? "Salvando..." : "Criar Live"}
-        </Button>
-      </form>
+        <p className="text-xs text-muted-foreground flex items-center gap-1"><Info className="w-3 h-3" />Cole o link completo da live do YouTube ou canal da Twitch.</p>
+      </FormCard>
 
       <div className="space-y-2">
         {streams.map((s) => (
-          <div key={s.id} className="border bg-card p-4 rounded-xl flex items-center gap-3">
-            <div className={`w-3 h-3 rounded-full flex-shrink-0 ${s.is_active ? "bg-red-500 animate-pulse" : "bg-muted-foreground/30"}`} />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-body font-medium truncate">{s.title}</p>
-              <p className="text-xs text-muted-foreground truncate">
-                {s.platform === "youtube" ? "YouTube" : "Twitch"} · {s.is_active ? "Ativa" : "Inativa"}
-              </p>
+          <ItemCard key={s.id}>
+            <div className="flex items-center gap-3">
+              <div className={`w-3 h-3 rounded-full flex-shrink-0 ${s.is_active ? "bg-destructive animate-pulse" : "bg-muted-foreground/20"}`} />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-heading font-semibold truncate">{s.title}</p>
+                  <Badge variant={s.is_active ? "destructive" : "secondary"} className="text-[10px] px-1.5 py-0 h-4">
+                    {s.is_active ? "Ativa" : "Inativa"}
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">{s.platform === "youtube" ? "YouTube" : "Twitch"}</p>
+              </div>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={s.is_active ? "destructive" : "default"}
+                      onClick={() => toggleActive(s.id, s.is_active)}
+                      className="text-xs h-8 gap-1"
+                    >
+                      {s.is_active ? <ToggleRight className="w-3.5 h-3.5" /> : <ToggleLeft className="w-3.5 h-3.5" />}
+                      {s.is_active ? "Desativar" : "Ativar"}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{s.is_active ? "Desativar a transmissão" : "Ativar e notificar todos"}</TooltipContent>
+                </Tooltip>
+                <button onClick={() => handleDelete(s.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                  <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                </button>
+              </div>
             </div>
-            <div className="flex items-center gap-1 flex-shrink-0">
-              <Button
-                size="sm"
-                variant={s.is_active ? "destructive" : "default"}
-                onClick={() => toggleActive(s.id, s.is_active)}
-                className="text-xs h-8"
-              >
-                {s.is_active ? "Desativar" : "Ativar"}
-              </Button>
-              <button onClick={() => handleDelete(s.id)} className="text-destructive hover:text-destructive/80 p-1">
-                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-              </button>
-            </div>
-          </div>
+          </ItemCard>
         ))}
-        {streams.length === 0 && <p className="text-sm text-muted-foreground">Nenhuma live criada.</p>}
+        {streams.length === 0 && <EmptyState message="Nenhuma live criada." />}
       </div>
     </div>
   );
