@@ -154,50 +154,81 @@ export default function ForumPage() {
     }
   };
 
-  const fetchOnlineUsers = async () => {
-    const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    const { data: presenceData } = await supabase.
-    from("user_presence").
-    select("user_id").
-    eq("is_online", true).
-    gte("last_seen", fiveMinAgo);
-
-    if (!presenceData || presenceData.length === 0) {
-      setOnlineUsers([]);
-      return;
-    }
-
-    const userIds = presenceData.map((p: any) => p.user_id);
-    const [profilesRes, rolesRes] = await Promise.all([
-    supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").in("user_id", userIds),
-    supabase.from("user_roles").select("user_id, role").in("user_id", userIds)]
-    );
-
-    const rolesMap: Record<string, string> = {};
-    rolesRes.data?.forEach((r: any) => {rolesMap[r.user_id] = r.role;});
-
-    if (profilesRes.data) {
-      setOnlineUsers(profilesRes.data.map((p: any) => ({
-        ...p,
-        role: rolesMap[p.user_id] || "leader"
-      })));
-    }
-  };
-
+  // Realtime presence using Supabase channels (same approach as LivePage)
   useEffect(() => {
-    fetchTopics();
-    fetchCategories();
-    fetchOnlineUsers();
+    if (!user || !profile) return;
 
-    const channel = supabase.
-    channel("presence-changes").
-    on("postgres_changes", { event: "*", schema: "public", table: "user_presence" }, () => {
-      fetchOnlineUsers();
-    }).
-    subscribe();
+    const channel = supabase.channel("forum-presence", {
+      config: { presence: { key: user.id } },
+    });
 
-    return () => {supabase.removeChannel(channel);};
-  }, []);
+    channel
+      .on("presence", { event: "sync" }, async () => {
+        const state = channel.presenceState<{
+          user_id: string;
+          full_name: string;
+          avatar_url: string | null;
+          class_name: string | null;
+        }>();
+
+        const userIds: string[] = [];
+        const baseList: { user_id: string; full_name: string; avatar_url: string | null; class_name: string | null }[] = [];
+        const seen = new Set<string>();
+
+        for (const key of Object.keys(state)) {
+          const presences = state[key];
+          if (presences && presences.length > 0) {
+            const p = presences[0];
+            if (!seen.has(p.user_id)) {
+              seen.add(p.user_id);
+              userIds.push(p.user_id);
+              baseList.push(p);
+            }
+          }
+        }
+
+        if (userIds.length === 0) {
+          setOnlineUsers([]);
+          return;
+        }
+
+        // Fetch roles for all present users
+        const { data: rolesData } = await supabase
+          .from("user_roles")
+          .select("user_id, role")
+          .in("user_id", userIds);
+
+        const rolesMap: Record<string, string> = {};
+        rolesData?.forEach((r: any) => {
+          rolesMap[r.user_id] = r.role;
+        });
+
+        setOnlineUsers(
+          baseList.map((p) => ({
+            user_id: p.user_id,
+            full_name: p.full_name,
+            avatar_url: p.avatar_url,
+            class_name: p.class_name,
+            role: rolesMap[p.user_id] || "leader",
+          }))
+        );
+      })
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({
+            user_id: user.id,
+            full_name: profile.full_name,
+            avatar_url: profile.avatar_url,
+            class_name: profile.class_name,
+          });
+        }
+      });
+
+    return () => {
+      channel.untrack();
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id, profile?.full_name]);
 
   // Deep-link: auto-expand topic from URL param
   useEffect(() => {
