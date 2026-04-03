@@ -376,6 +376,25 @@ function AdminNotices() {
           )}
         </div>
 
+        {/* Event link */}
+        <div>
+          <Label className="text-sm flex items-center gap-1">
+            <CalendarDays className="w-3.5 h-3.5" strokeWidth={1.5} /> Vincular a Evento (opcional)
+          </Label>
+          <select
+            value={selectedEventId}
+            onChange={(e) => setSelectedEventId(e.target.value)}
+            className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10"
+          >
+            <option value="">Nenhum evento</option>
+            {events.map((ev: any) => (
+              <option key={ev.id} value={ev.id}>
+                {ev.title} — {new Date(ev.event_date + "T12:00:00").toLocaleDateString("pt-BR")}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* CTA buttons */}
         <div className="space-y-2">
           <Label className="text-sm">Botões de Ação</Label>
