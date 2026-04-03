@@ -171,6 +171,7 @@ export default function NoticesPage() {
               <div className="font-heading text-base leading-relaxed whitespace-pre-wrap mb-6">
                 <RichText content={focusedNotice.content} />
               </div>
+              {renderEventBadge(focusedNotice.event)}
               {renderCtaButtons(focusedNotice.cta_buttons)}
               <p className="text-xs text-muted-foreground mt-4">
                 {focusedNotice.author_name} · {formatDate(focusedNotice.created_at)}
