@@ -145,6 +145,7 @@ export default function NoticesPage() {
                   <div className="text-sm font-body text-foreground line-clamp-3 mb-3">
                     <RichText content={n.content} />
                   </div>
+                  {renderEventBadge(n.event)}
                   {renderCtaButtons(n.cta_buttons)}
                   <p className="text-xs text-muted-foreground mt-auto pt-3">
                     {n.author_name} · {formatDate(n.created_at)}
