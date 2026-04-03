@@ -368,6 +368,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* Calendário de Eventos */}
+        <EventCalendar />
+
         {/* Últimos Avisos */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-primary rounded-xl">
