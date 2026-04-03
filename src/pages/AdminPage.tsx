@@ -279,12 +279,13 @@ function AdminNotices() {
       image_url: imageUrl,
       cta_buttons: validCtas,
       target_user_ids: sendType === "specific" && selectedUserIds.length > 0 ? selectedUserIds : null,
+      event_id: selectedEventId || null,
     } as any);
 
     setUploading(false);
     if (error) { toast.error("Erro ao criar aviso."); return; }
     toast.success(sendType === "specific" ? `Aviso enviado para ${selectedUserIds.length} usuário(s).` : "Aviso global criado.");
-    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]);
+    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId("");
     fetchNotices();
   };
 
