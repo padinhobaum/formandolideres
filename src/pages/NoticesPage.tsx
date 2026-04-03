@@ -37,21 +37,22 @@ export default function NoticesPage() {
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase.
-      from("notices").
-      select("*").
-      order("is_pinned", { ascending: false }).
-      order("created_at", { ascending: false });
+        from("notices").
+        select("*, events(id, title, event_date, event_time)").
+        order("is_pinned", { ascending: false }).
+        order("created_at", { ascending: false });
       if (data) {
         const filtered = data.filter((n: any) => !n.target_user_ids || user && n.target_user_ids.includes(user.id));
         setNotices(filtered.map((d: any) => ({
           ...d,
-          cta_buttons: Array.isArray(d.cta_buttons) ? d.cta_buttons : []
+          cta_buttons: Array.isArray(d.cta_buttons) ? d.cta_buttons : [],
+          event: d.events || null,
         })));
       }
     };
-    fetch();
+    fetchData();
   }, [user]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
