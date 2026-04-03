@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio,
   Megaphone, LayoutDashboard, Users, Link2, Tag, ListVideo, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
-  FileText, Search, ToggleLeft, ToggleRight, Info,
+  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays,
 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
