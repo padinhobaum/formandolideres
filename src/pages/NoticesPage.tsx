@@ -12,6 +12,13 @@ interface CtaButton {
   newTab: boolean;
 }
 
+interface NoticeEvent {
+  id: string;
+  title: string;
+  event_date: string;
+  event_time: string | null;
+}
+
 interface Notice {
   id: string;
   title: string;
@@ -21,6 +28,7 @@ interface Notice {
   created_at: string;
   image_url: string | null;
   cta_buttons: CtaButton[];
+  event: NoticeEvent | null;
 }
 
 export default function NoticesPage() {
