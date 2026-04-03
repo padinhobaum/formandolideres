@@ -147,6 +147,7 @@ export default function AdminPage() {
             {tab === "forum-categories" && <AdminForumCategories />}
             {tab === "users" && <AdminUsers />}
             {tab === "password" && <AdminChangePassword />}
+            {tab === "events" && <AdminEvents />}
           </div>
         </div>
       </div>
