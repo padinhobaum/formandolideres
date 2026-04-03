@@ -233,7 +233,13 @@ function AdminNotices() {
     if (data) setAllUsers(data);
   };
 
-  useEffect(() => { fetchNotices(); fetchAllUsers(); }, []);
+  useEffect(() => {
+    fetchNotices();
+    fetchAllUsers();
+    supabase.from("events").select("id, title, event_date").order("event_date").then(({ data }) => {
+      if (data) setEvents(data);
+    });
+  }, []);
 
   const addCta = () => {
     if (ctaButtons.length >= 3) return;
