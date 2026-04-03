@@ -230,6 +230,12 @@ export default function ForumPage() {
     };
   }, [user?.id, profile?.full_name]);
 
+  // Fetch categories and topics on mount
+  useEffect(() => {
+    fetchCategories();
+    fetchTopics();
+  }, []);
+
   // Deep-link: auto-expand topic from URL param
   useEffect(() => {
     const topicId = searchParams.get("topic");

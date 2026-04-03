@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
-import { Pin, Maximize2, ExternalLink } from "lucide-react";
+import { Pin, Maximize2, ExternalLink, CalendarDays, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichText } from "@/components/RichTextEditor";
 
@@ -10,6 +10,13 @@ interface CtaButton {
   text: string;
   url: string;
   newTab: boolean;
+}
+
+interface NoticeEvent {
+  id: string;
+  title: string;
+  event_date: string;
+  event_time: string | null;
 }
 
 interface Notice {
@@ -21,6 +28,7 @@ interface Notice {
   created_at: string;
   image_url: string | null;
   cta_buttons: CtaButton[];
+  event: NoticeEvent | null;
 }
 
 export default function NoticesPage() {
@@ -29,21 +37,22 @@ export default function NoticesPage() {
   const [focusedId, setFocusedId] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       const { data } = await supabase.
-      from("notices").
-      select("*").
-      order("is_pinned", { ascending: false }).
-      order("created_at", { ascending: false });
+        from("notices").
+        select("*, events(id, title, event_date, event_time)").
+        order("is_pinned", { ascending: false }).
+        order("created_at", { ascending: false });
       if (data) {
         const filtered = data.filter((n: any) => !n.target_user_ids || user && n.target_user_ids.includes(user.id));
         setNotices(filtered.map((d: any) => ({
           ...d,
-          cta_buttons: Array.isArray(d.cta_buttons) ? d.cta_buttons : []
+          cta_buttons: Array.isArray(d.cta_buttons) ? d.cta_buttons : [],
+          event: d.events || null,
         })));
       }
     };
-    fetch();
+    fetchData();
   }, [user]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -75,7 +84,35 @@ export default function NoticesPage() {
           </a>
         )}
       </div>);
+  };
 
+  const renderEventBadge = (event: NoticeEvent | null) => {
+    if (!event) return null;
+    const date = new Date(event.event_date + "T12:00:00");
+    const day = date.toLocaleDateString("pt-BR", { day: "2-digit" });
+    const month = date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
+    const time = event.event_time ? event.event_time.slice(0, 5) : null;
+    return (
+      <div className="mt-3 border border-primary/20 bg-primary/5 rounded-xl p-3 flex items-center gap-3">
+        <div className="w-11 h-11 rounded-lg bg-primary/10 flex flex-col items-center justify-center flex-shrink-0">
+          <span className="text-sm font-heading font-bold text-primary leading-none">{day}</span>
+          <span className="text-[9px] font-bold text-primary/70">{month}</span>
+        </div>
+        <div className="min-w-0">
+          <div className="flex items-center gap-1.5">
+            <CalendarDays className="w-3 h-3 text-primary" strokeWidth={1.5} />
+            <span className="text-xs font-bold text-primary">Evento</span>
+          </div>
+          <p className="text-xs font-medium text-foreground line-clamp-1">{event.title}</p>
+          {time && (
+            <div className="flex items-center gap-1 mt-0.5">
+              <Clock className="w-2.5 h-2.5 text-muted-foreground" strokeWidth={1.5} />
+              <span className="text-[10px] text-muted-foreground">{time}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -108,6 +145,7 @@ export default function NoticesPage() {
                   <div className="text-sm font-body text-foreground line-clamp-3 mb-3">
                     <RichText content={n.content} />
                   </div>
+                  {renderEventBadge(n.event)}
                   {renderCtaButtons(n.cta_buttons)}
                   <p className="text-xs text-muted-foreground mt-auto pt-3">
                     {n.author_name} · {formatDate(n.created_at)}
@@ -133,6 +171,7 @@ export default function NoticesPage() {
               <div className="font-heading text-base leading-relaxed whitespace-pre-wrap mb-6">
                 <RichText content={focusedNotice.content} />
               </div>
+              {renderEventBadge(focusedNotice.event)}
               {renderCtaButtons(focusedNotice.cta_buttons)}
               <p className="text-xs text-muted-foreground mt-4">
                 {focusedNotice.author_name} · {formatDate(focusedNotice.created_at)}

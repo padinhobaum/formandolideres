@@ -12,12 +12,12 @@ import { toast } from "sonner";
 import {
   Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio,
   Megaphone, LayoutDashboard, Users, Link2, Tag, ListVideo, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
-  FileText, Search, ToggleLeft, ToggleRight, Info,
+  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays,
 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password";
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events";
 
 interface CtaButton {
   text: string;
@@ -32,6 +32,7 @@ const tabGroups = [
       { key: "notices" as Tab, label: "Avisos", icon: Megaphone, desc: "Publicar e gerenciar avisos" },
       { key: "banners" as Tab, label: "Banners", icon: BannerIcon, desc: "Banners da página inicial" },
       { key: "lives" as Tab, label: "Ao Vivo", icon: Radio, desc: "Transmissões ao vivo" },
+      { key: "events" as Tab, label: "Eventos", icon: CalendarDays, desc: "Calendário de eventos" },
     ],
   },
   {
@@ -146,6 +147,7 @@ export default function AdminPage() {
             {tab === "forum-categories" && <AdminForumCategories />}
             {tab === "users" && <AdminUsers />}
             {tab === "password" && <AdminChangePassword />}
+            {tab === "events" && <AdminEvents />}
           </div>
         </div>
       </div>
@@ -218,6 +220,8 @@ function AdminNotices() {
   const [sendType, setSendType] = useState<"global" | "specific">("global");
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [events, setEvents] = useState<any[]>([]);
+  const [selectedEventId, setSelectedEventId] = useState<string>("");
 
   const fetchNotices = async () => {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
@@ -229,7 +233,13 @@ function AdminNotices() {
     if (data) setAllUsers(data);
   };
 
-  useEffect(() => { fetchNotices(); fetchAllUsers(); }, []);
+  useEffect(() => {
+    fetchNotices();
+    fetchAllUsers();
+    supabase.from("events").select("id, title, event_date").order("event_date").then(({ data }) => {
+      if (data) setEvents(data);
+    });
+  }, []);
 
   const addCta = () => {
     if (ctaButtons.length >= 3) return;
@@ -269,12 +279,13 @@ function AdminNotices() {
       image_url: imageUrl,
       cta_buttons: validCtas,
       target_user_ids: sendType === "specific" && selectedUserIds.length > 0 ? selectedUserIds : null,
+      event_id: selectedEventId || null,
     } as any);
 
     setUploading(false);
     if (error) { toast.error("Erro ao criar aviso."); return; }
     toast.success(sendType === "specific" ? `Aviso enviado para ${selectedUserIds.length} usuário(s).` : "Aviso global criado.");
-    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]);
+    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId("");
     fetchNotices();
   };
 
@@ -363,6 +374,25 @@ function AdminNotices() {
               {allUsers.length === 0 && <p className="text-xs text-muted-foreground">Nenhum usuário encontrado.</p>}
             </div>
           )}
+        </div>
+
+        {/* Event link */}
+        <div>
+          <Label className="text-sm flex items-center gap-1">
+            <CalendarDays className="w-3.5 h-3.5" strokeWidth={1.5} /> Vincular a Evento (opcional)
+          </Label>
+          <select
+            value={selectedEventId}
+            onChange={(e) => setSelectedEventId(e.target.value)}
+            className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10"
+          >
+            <option value="">Nenhum evento</option>
+            {events.map((ev: any) => (
+              <option key={ev.id} value={ev.id}>
+                {ev.title} — {new Date(ev.event_date + "T12:00:00").toLocaleDateString("pt-BR")}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* CTA buttons */}
@@ -1352,6 +1382,105 @@ function AdminLives() {
           </ItemCard>
         ))}
         {streams.length === 0 && <EmptyState message="Nenhuma live criada." />}
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════════ Events ═══════════════════════ */
+function AdminEvents() {
+  const { user } = useAuth();
+  const [events, setEvents] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("");
+
+  const fetchEvents = async () => {
+    const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
+    if (data) setEvents(data);
+  };
+
+  useEffect(() => { fetchEvents(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !eventDate) return;
+    const { error } = await supabase.from("events").insert({
+      title: title.trim(),
+      description: description.trim() || null,
+      event_date: eventDate,
+      event_time: eventTime || null,
+      created_by: user!.id,
+    } as any);
+    if (error) { toast.error("Erro ao criar evento."); return; }
+    toast.success("Evento criado!");
+    setTitle(""); setDescription(""); setEventDate(""); setEventTime("");
+    fetchEvents();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("events").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir."); return; }
+    toast.success("Evento excluído.");
+    fetchEvents();
+  };
+
+  const formatDate = (d: string) =>
+    new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+
+  return (
+    <div>
+      <FormCard title="Novo Evento" onSubmit={handleCreate} submitLabel="Criar Evento" icon={CalendarDays}>
+        <div>
+          <Label className="text-sm">Título</Label>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
+        </div>
+        <div>
+          <Label className="text-sm">Descrição (opcional)</Label>
+          <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-sm">Data</Label>
+            <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="mt-1" required />
+          </div>
+          <div>
+            <Label className="text-sm">Horário (opcional)</Label>
+            <Input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)} className="mt-1" />
+          </div>
+        </div>
+      </FormCard>
+
+      <div className="space-y-2">
+        {events.map((ev) => (
+          <ItemCard key={ev.id}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-heading font-bold text-primary leading-none">
+                    {new Date(ev.event_date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit" })}
+                  </span>
+                  <span className="text-[9px] font-bold text-primary/70 uppercase">
+                    {new Date(ev.event_date + "T12:00:00").toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-heading font-semibold">{ev.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formatDate(ev.event_date)}
+                    {ev.event_time && ` · ${ev.event_time.slice(0, 5)}`}
+                  </p>
+                  {ev.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</p>}
+                </div>
+              </div>
+              <button onClick={() => handleDelete(ev.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+            </div>
+          </ItemCard>
+        ))}
+        {events.length === 0 && <EmptyState message="Nenhum evento criado ainda." />}
       </div>
     </div>
   );

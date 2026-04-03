@@ -171,6 +171,39 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          event_date: string
+          event_time: string | null
+          id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          event_date: string
+          event_time?: string | null
+          id?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          event_date?: string
+          event_time?: string | null
+          id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       forum_categories: {
         Row: {
           color: string | null
@@ -407,6 +440,7 @@ export type Database = {
           content: string
           created_at: string
           cta_buttons: Json | null
+          event_id: string | null
           id: string
           image_url: string | null
           is_pinned: boolean
@@ -420,6 +454,7 @@ export type Database = {
           content: string
           created_at?: string
           cta_buttons?: Json | null
+          event_id?: string | null
           id?: string
           image_url?: string | null
           is_pinned?: boolean
@@ -433,6 +468,7 @@ export type Database = {
           content?: string
           created_at?: string
           cta_buttons?: Json | null
+          event_id?: string | null
           id?: string
           image_url?: string | null
           is_pinned?: boolean
@@ -440,7 +476,15 @@ export type Database = {
           title?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notices_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_last_read: {
         Row: {

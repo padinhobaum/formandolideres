@@ -12,6 +12,7 @@ import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLin
 import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
+import EventCalendar from "@/components/EventCalendar";
 
 interface Banner {
   id: string;
@@ -366,6 +367,9 @@ export default function DashboardPage() {
             </button>
           </div>
         </div>
+
+        {/* Calendário de Eventos */}
+        <EventCalendar />
 
         {/* Últimos Avisos */}
         <section className="mb-8">
