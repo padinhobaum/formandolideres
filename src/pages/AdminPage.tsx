@@ -1386,3 +1386,102 @@ function AdminLives() {
     </div>
   );
 }
+
+/* ═══════════════════════ Events ═══════════════════════ */
+function AdminEvents() {
+  const { user } = useAuth();
+  const [events, setEvents] = useState<any[]>([]);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [eventTime, setEventTime] = useState("");
+
+  const fetchEvents = async () => {
+    const { data } = await supabase.from("events").select("*").order("event_date", { ascending: true });
+    if (data) setEvents(data);
+  };
+
+  useEffect(() => { fetchEvents(); }, []);
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!title.trim() || !eventDate) return;
+    const { error } = await supabase.from("events").insert({
+      title: title.trim(),
+      description: description.trim() || null,
+      event_date: eventDate,
+      event_time: eventTime || null,
+      created_by: user!.id,
+    } as any);
+    if (error) { toast.error("Erro ao criar evento."); return; }
+    toast.success("Evento criado!");
+    setTitle(""); setDescription(""); setEventDate(""); setEventTime("");
+    fetchEvents();
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("events").delete().eq("id", id);
+    if (error) { toast.error("Erro ao excluir."); return; }
+    toast.success("Evento excluído.");
+    fetchEvents();
+  };
+
+  const formatDate = (d: string) =>
+    new Date(d + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" });
+
+  return (
+    <div>
+      <FormCard title="Novo Evento" onSubmit={handleCreate} submitLabel="Criar Evento" icon={CalendarDays}>
+        <div>
+          <Label className="text-sm">Título</Label>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
+        </div>
+        <div>
+          <Label className="text-sm">Descrição (opcional)</Label>
+          <Input value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1" />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <Label className="text-sm">Data</Label>
+            <Input type="date" value={eventDate} onChange={(e) => setEventDate(e.target.value)} className="mt-1" required />
+          </div>
+          <div>
+            <Label className="text-sm">Horário (opcional)</Label>
+            <Input type="time" value={eventTime} onChange={(e) => setEventTime(e.target.value)} className="mt-1" />
+          </div>
+        </div>
+      </FormCard>
+
+      <div className="space-y-2">
+        {events.map((ev) => (
+          <ItemCard key={ev.id}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex flex-col items-center justify-center flex-shrink-0">
+                  <span className="text-sm font-heading font-bold text-primary leading-none">
+                    {new Date(ev.event_date + "T12:00:00").toLocaleDateString("pt-BR", { day: "2-digit" })}
+                  </span>
+                  <span className="text-[9px] font-bold text-primary/70 uppercase">
+                    {new Date(ev.event_date + "T12:00:00").toLocaleDateString("pt-BR", { month: "short" }).replace(".", "")}
+                  </span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-heading font-semibold">{ev.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {formatDate(ev.event_date)}
+                    {ev.event_time && ` · ${ev.event_time.slice(0, 5)}`}
+                  </p>
+                  {ev.description && <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{ev.description}</p>}
+                </div>
+              </div>
+              <button onClick={() => handleDelete(ev.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
+                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+              </button>
+            </div>
+          </ItemCard>
+        ))}
+        {events.length === 0 && <EmptyState message="Nenhum evento criado ainda." />}
+      </div>
+    </div>
+  );
+}
