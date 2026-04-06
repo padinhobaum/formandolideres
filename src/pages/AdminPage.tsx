@@ -286,6 +286,9 @@ function AdminNotices() {
     setUploading(false);
     if (error) { toast.error("Erro ao criar aviso."); return; }
     toast.success(sendType === "specific" ? `Aviso enviado para ${selectedUserIds.length} usuário(s).` : "Aviso global criado.");
+    if (sendType === "global") {
+      sendPushNotification("📢 Novo Aviso", title.trim(), "/mural");
+    }
     setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId("");
     fetchNotices();
   };
