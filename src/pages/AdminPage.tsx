@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { sendPushNotification } from "@/lib/sendPushNotification";
 
 type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events";
 
@@ -285,6 +286,9 @@ function AdminNotices() {
     setUploading(false);
     if (error) { toast.error("Erro ao criar aviso."); return; }
     toast.success(sendType === "specific" ? `Aviso enviado para ${selectedUserIds.length} usuário(s).` : "Aviso global criado.");
+    if (sendType === "global") {
+      sendPushNotification("📢 Novo Aviso", title.trim(), "/mural");
+    }
     setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId("");
     fetchNotices();
   };
@@ -1308,6 +1312,10 @@ function AdminLives() {
     const { error } = await supabase.from("live_streams").update({ is_active: !currentActive } as any).eq("id", id);
     if (error) { toast.error("Erro ao atualizar."); return; }
     toast.success(!currentActive ? "Live ativada!" : "Live desativada.");
+    if (!currentActive) {
+      const stream = streams.find((s: any) => s.id === id);
+      sendPushNotification("🔴 Transmissão ao Vivo!", stream?.title || "Uma live começou!", "/ao-vivo");
+    }
     fetchStreams();
   };
 
