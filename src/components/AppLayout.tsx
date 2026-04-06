@@ -9,6 +9,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { usePresence } from "@/hooks/usePresence";
 import NotificationPopover from "@/components/NotificationPopover";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
+import { usePushSubscription } from "@/hooks/usePushSubscription";
 
 interface NavItem {
   label: string;
