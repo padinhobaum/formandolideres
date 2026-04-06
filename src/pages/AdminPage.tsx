@@ -1312,6 +1312,10 @@ function AdminLives() {
     const { error } = await supabase.from("live_streams").update({ is_active: !currentActive } as any).eq("id", id);
     if (error) { toast.error("Erro ao atualizar."); return; }
     toast.success(!currentActive ? "Live ativada!" : "Live desativada.");
+    if (!currentActive) {
+      const stream = streams.find((s: any) => s.id === id);
+      sendPushNotification("🔴 Transmissão ao Vivo!", stream?.title || "Uma live começou!", "/ao-vivo");
+    }
     fetchStreams();
   };
 

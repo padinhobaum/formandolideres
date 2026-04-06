@@ -40,6 +40,7 @@ const baseNavItems: NavItem[] = [
 export default function AppLayout({ children }: {children: ReactNode;}) {
   const { profile, isAdmin, signOut } = useAuth();
   usePresence();
+  usePushSubscription();
   const navigate = useNavigate();
   const location = useLocation();
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
