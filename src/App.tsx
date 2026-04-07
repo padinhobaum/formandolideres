@@ -15,6 +15,7 @@ import AdminPage from "@/pages/AdminPage";
 import LiderAIPage from "@/pages/LiderAIPage";
 import LivePage from "@/pages/LivePage";
 import NotFound from "@/pages/NotFound";
+import LoadingScreen from "@/components/LoadingScreen";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Sonner />
+      <LoadingScreen />
       <BrowserRouter>
         <AuthProvider>
           <Routes>
