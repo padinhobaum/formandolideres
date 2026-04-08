@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import RichTextEditor, { RichText } from "@/components/RichTextEditor";
 import SalaBadge from "@/components/SalaBadge";
 import ForumRanking from "@/components/ForumRanking";
+import { sendPushNotification } from "@/lib/sendPushNotification";
 
 interface ForumCategory {
   id: string;
@@ -288,6 +289,15 @@ export default function ForumPage() {
     toast.success("Tópico criado!");
     // Award 20 XP for creating a topic
     if (topicData) await awardXp("create_topic", (topicData as any).id, 20);
+    if (topicData) {
+      await sendPushNotification({
+        title: "💬 Novo tópico no fórum",
+        body: newTitle.trim(),
+        url: `/forum?topic=${(topicData as any).id}`,
+        contentType: "forum_topic",
+        referenceId: (topicData as any).id,
+      });
+    }
     setNewTitle("");setNewContent("");setNewImage(null);setIsPoll(false);setPollOptions(["", ""]);setNewCategoryId("");setShowNewTopic(false);
     fetchTopics();
   };

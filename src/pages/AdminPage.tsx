@@ -271,7 +271,7 @@ function AdminNotices() {
 
     const validCtas = ctaButtons.filter((c) => c.text.trim() && c.url.trim());
 
-    const { error } = await supabase.from("notices").insert({
+    const { data: noticeData, error } = await supabase.from("notices").insert({
       title: title.trim(),
       content: content.trim(),
       author_id: user!.id,
@@ -281,13 +281,20 @@ function AdminNotices() {
       cta_buttons: validCtas,
       target_user_ids: sendType === "specific" && selectedUserIds.length > 0 ? selectedUserIds : null,
       event_id: selectedEventId || null,
-    } as any);
+    } as any).select("id").single();
 
     setUploading(false);
     if (error) { toast.error("Erro ao criar aviso."); return; }
     toast.success(sendType === "specific" ? `Aviso enviado para ${selectedUserIds.length} usuário(s).` : "Aviso global criado.");
-    if (sendType === "global") {
-      sendPushNotification("📢 Novo Aviso", title.trim(), "/mural");
+    if (noticeData) {
+      await sendPushNotification({
+        title: "📢 Novo Aviso",
+        body: title.trim(),
+        url: "/mural",
+        contentType: "notice",
+        referenceId: (noticeData as any).id,
+        targetUserIds: sendType === "specific" ? selectedUserIds : undefined,
+      });
     }
     setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId("");
     fetchNotices();
@@ -752,13 +759,22 @@ function AdminMaterials() {
     if (!title.trim() || !driveUrl.trim()) return;
     if (!isValidDriveLink(driveUrl)) { toast.error("Insira um link válido do Google Drive."); return; }
     setUploading(true);
-    const { error } = await supabase.from("materials").insert({
+    const { data: materialData, error } = await supabase.from("materials").insert({
       title: title.trim(), category: category.trim(), file_name: "Google Drive",
       file_url: driveUrl.trim(), file_size: null, uploaded_by: user!.id,
-    });
+    }).select("id").single();
     setUploading(false);
     if (error) { toast.error("Erro ao registrar material."); return; }
     toast.success("Material publicado.");
+    if (materialData) {
+      await sendPushNotification({
+        title: "📚 Novo material disponível",
+        body: title.trim(),
+        url: "/materiais",
+        contentType: "material",
+        referenceId: (materialData as any).id,
+      });
+    }
     setTitle(""); setCategory("Geral"); setDriveUrl("");
     fetchMaterials();
   };
@@ -826,12 +842,21 @@ function AdminVideos() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !videoUrl.trim()) return;
-    const { error } = await supabase.from("video_lessons").insert({
+    const { data: videoData, error } = await supabase.from("video_lessons").insert({
       title: title.trim(), description: description.trim() || null,
       video_url: videoUrl.trim(), category: category.trim(), created_by: user!.id,
-    });
+    }).select("id").single();
     if (error) { toast.error("Erro ao adicionar videoaula."); return; }
     toast.success("Videoaula adicionada.");
+    if (videoData) {
+      await sendPushNotification({
+        title: "🎥 Nova videoaula disponível",
+        body: title.trim(),
+        url: "/videoaulas",
+        contentType: "video",
+        referenceId: (videoData as any).id,
+      });
+    }
     setTitle(""); setDescription(""); setVideoUrl(""); setCategory("Geral");
     fetchVideos();
   };
@@ -1314,7 +1339,13 @@ function AdminLives() {
     toast.success(!currentActive ? "Live ativada!" : "Live desativada.");
     if (!currentActive) {
       const stream = streams.find((s: any) => s.id === id);
-      sendPushNotification("🔴 Transmissão ao Vivo!", stream?.title || "Uma live começou!", "/ao-vivo");
+      await sendPushNotification({
+        title: "🔴 Transmissão ao Vivo!",
+        body: stream?.title || "Uma live começou!",
+        url: "/ao-vivo",
+        contentType: "live",
+        referenceId: id,
+      });
     }
     fetchStreams();
   };

@@ -3,13 +3,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio } from "lucide-react";
+import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio, BellRing } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePresence } from "@/hooks/usePresence";
 import NotificationPopover from "@/components/NotificationPopover";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
+import { Button } from "@/components/ui/button";
 
 interface NavItem {
   label: string;
@@ -40,7 +41,7 @@ const baseNavItems: NavItem[] = [
 export default function AppLayout({ children }: {children: ReactNode;}) {
   const { profile, isAdmin, signOut } = useAuth();
   usePresence();
-  usePushSubscription();
+  const push = usePushSubscription();
   const navigate = useNavigate();
   const location = useLocation();
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
@@ -97,6 +98,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     : baseNavItems;
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
+  const showPushBanner = push.supportsPush && (!push.isSubscribed || push.permission !== "granted" || push.requiresIosInstall);
 
   const handleSignOut = async () => {
     await signOut();
@@ -237,6 +239,38 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
             </Popover>
           </div>
         </header>
+        {showPushBanner && (
+          <div className="px-4 md:px-8 pt-4">
+            <section className="rounded-2xl border bg-card/95 shadow-sm p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div className="min-w-0">
+                <p className="font-heading font-semibold text-sm flex items-center gap-2 text-foreground">
+                  <BellRing className="w-4 h-4 text-primary" strokeWidth={1.75} />
+                  Ative as notificações do dispositivo
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {push.requiresIosInstall
+                    ? "No iPhone, instale o app na Tela de Início para liberar notificações push no sistema do aparelho."
+                    : push.permission === "denied"
+                      ? "As notificações estão bloqueadas neste dispositivo. Reative nas configurações do navegador ou do app instalado."
+                      : "Receba avisos, novos tópicos, materiais, videoaulas e lives mesmo com o app fechado."}
+                </p>
+                {push.errorMessage && <p className="text-xs text-destructive mt-2">{push.errorMessage}</p>}
+              </div>
+
+              {!push.requiresIosInstall && push.permission !== "denied" && (
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => void push.subscribe()}
+                  disabled={push.isLoading}
+                  className="self-start md:self-center"
+                >
+                  {push.isLoading ? "Ativando..." : "Ativar notificações"}
+                </Button>
+              )}
+            </section>
+          </div>
+        )}
         <div className="p-4 md:p-8 flex-1">{children}</div>
 
         {/* Footer */}
