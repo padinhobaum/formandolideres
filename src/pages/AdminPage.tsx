@@ -151,6 +151,7 @@ export default function AdminPage() {
             {tab === "users" && <AdminUsers />}
             {tab === "password" && <AdminChangePassword />}
             {tab === "events" && <AdminEvents />}
+            {tab === "surveys" && <AdminSurveys />}
           </div>
         </div>
       </div>
