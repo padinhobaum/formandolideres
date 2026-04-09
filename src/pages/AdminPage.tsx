@@ -12,13 +12,14 @@ import { toast } from "sonner";
 import {
   Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio,
   Megaphone, LayoutDashboard, Users, Link2, Tag, ListVideo, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
-  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays,
+  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList,
 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sendPushNotification } from "@/lib/sendPushNotification";
+import AdminSurveys from "@/components/AdminSurveys";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events";
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys";
 
 interface CtaButton {
   text: string;
@@ -34,6 +35,7 @@ const tabGroups = [
       { key: "banners" as Tab, label: "Banners", icon: BannerIcon, desc: "Banners da página inicial" },
       { key: "lives" as Tab, label: "Ao Vivo", icon: Radio, desc: "Transmissões ao vivo" },
       { key: "events" as Tab, label: "Eventos", icon: CalendarDays, desc: "Calendário de eventos" },
+      { key: "surveys" as Tab, label: "Pesquisas", icon: ClipboardList, desc: "Pesquisas de opinião" },
     ],
   },
   {
@@ -149,6 +151,7 @@ export default function AdminPage() {
             {tab === "users" && <AdminUsers />}
             {tab === "password" && <AdminChangePassword />}
             {tab === "events" && <AdminEvents />}
+            {tab === "surveys" && <AdminSurveys />}
           </div>
         </div>
       </div>

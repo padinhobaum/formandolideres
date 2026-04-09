@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio, BellRing } from "lucide-react";
+import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio, BellRing, ClipboardList } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePresence } from "@/hooks/usePresence";
@@ -35,6 +35,7 @@ const baseNavItems: NavItem[] = [
 { label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
 { label: "Videoaulas", path: "/videoaulas", icon: Video },
 { label: "Materiais", path: "/materiais", icon: Download },
+{ label: "Resultados", path: "/meus-resultados", icon: ClipboardList },
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
 
