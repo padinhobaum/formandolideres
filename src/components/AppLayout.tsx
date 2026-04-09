@@ -35,6 +35,7 @@ const baseNavItems: NavItem[] = [
 { label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
 { label: "Videoaulas", path: "/videoaulas", icon: Video },
 { label: "Materiais", path: "/materiais", icon: Download },
+{ label: "Resultados", path: "/meus-resultados", icon: ClipboardList },
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
 
