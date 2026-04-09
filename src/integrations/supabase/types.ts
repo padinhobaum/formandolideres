@@ -741,6 +741,124 @@ export type Database = {
         }
         Relationships: []
       }
+      survey_leaders: {
+        Row: {
+          created_at: string
+          id: string
+          leader_user_id: string
+          survey_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          leader_user_id: string
+          survey_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          leader_user_id?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_leaders_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      survey_responses: {
+        Row: {
+          comments: string | null
+          contributes_environment: boolean
+          created_at: string
+          id: string
+          keeps_informed: boolean
+          opens_space: boolean
+          score_communication: number
+          score_general: number
+          student_name: string
+          student_rm: string
+          survey_id: string
+        }
+        Insert: {
+          comments?: string | null
+          contributes_environment: boolean
+          created_at?: string
+          id?: string
+          keeps_informed: boolean
+          opens_space: boolean
+          score_communication: number
+          score_general: number
+          student_name: string
+          student_rm: string
+          survey_id: string
+        }
+        Update: {
+          comments?: string | null
+          contributes_environment?: boolean
+          created_at?: string
+          id?: string
+          keeps_informed?: boolean
+          opens_space?: boolean
+          score_communication?: number
+          score_general?: number
+          student_name?: string
+          student_rm?: string
+          survey_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "survey_responses_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      surveys: {
+        Row: {
+          bimester: number
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          results_released: boolean
+          short_code: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          bimester: number
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          results_released?: boolean
+          short_code?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          bimester?: number
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          results_released?: boolean
+          short_code?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_presence: {
         Row: {
           is_online: boolean
