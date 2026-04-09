@@ -17,6 +17,7 @@ import {
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sendPushNotification } from "@/lib/sendPushNotification";
+import AdminSurveys from "@/components/AdminSurveys";
 
 type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events";
 
