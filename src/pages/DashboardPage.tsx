@@ -518,6 +518,19 @@ export default function DashboardPage() {
                 <div className="text-sm whitespace-pre-wrap leading-relaxed">
                   <RichText content={selectedNotice.content} />
                 </div>
+                {selectedNoticeEvent && (
+                  <div className="mt-3 border rounded-lg p-3 bg-muted/30 flex items-start gap-3">
+                    <CalendarDays className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-heading font-semibold text-foreground">{selectedNoticeEvent.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(selectedNoticeEvent.event_date + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                        {selectedNoticeEvent.event_time && ` às ${selectedNoticeEvent.event_time.slice(0, 5)}`}
+                      </p>
+                      {selectedNoticeEvent.description && <p className="text-xs text-muted-foreground mt-1">{selectedNoticeEvent.description}</p>}
+                    </div>
+                  </div>
+                )}
                 {selectedNotice.cta_buttons?.length > 0 &&
               <div className="flex flex-wrap gap-2 mt-2">
                     {selectedNotice.cta_buttons.map((cta: any, i: number) =>
