@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, QrCode, Link2, Eye, EyeOff, Download, Users, Copy, Check } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import SurveyPdfReport from "@/components/SurveyPdfReport";
 
 const BIMESTERS = [1, 2, 3, 4] as const;
 
@@ -114,7 +115,7 @@ export default function AdminSurveys() {
   const exportCsv = async (surveyId: string, surveyTitle: string) => {
     const { data } = await supabase.from("survey_responses").select("*").eq("survey_id", surveyId);
     if (!data || data.length === 0) { toast.error("Nenhuma resposta para exportar."); return; }
-    const headers = ["score_general", "score_communication", "contributes_environment", "keeps_informed", "opens_space", "comments", "created_at"];
+    const headers = ["student_name", "student_rm", "score_general", "score_communication", "contributes_environment", "keeps_informed", "opens_space", "comments", "created_at"];
     const csvRows = [headers.join(",")];
     data.forEach((r: any) => {
       csvRows.push(headers.map(h => {
@@ -145,6 +146,10 @@ export default function AdminSurveys() {
 
   return (
     <div>
+      {/* Actions bar */}
+      <div className="flex items-center justify-end mb-4">
+        <SurveyPdfReport />
+      </div>
       {/* Create form */}
       <Card className="mb-6 border-dashed border-primary/20 bg-card/80">
         <CardHeader className="pb-3">

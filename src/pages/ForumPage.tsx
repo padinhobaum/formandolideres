@@ -288,7 +288,7 @@ export default function ForumPage() {
 
     toast.success("Tópico criado!");
     // Award 20 XP for creating a topic
-    if (topicData) await awardXp("create_topic", (topicData as any).id, 20);
+    if (topicData && !isAdmin) await awardXp("create_topic", (topicData as any).id, 20);
     if (topicData) {
       await sendPushNotification({
         title: "💬 Novo tópico no fórum",
@@ -399,7 +399,7 @@ export default function ForumPage() {
     } as any);
     if (error) {toast.error("Erro ao responder.");return;}
     // Award 10 XP for replying
-    await awardXp("reply_topic", `${topicId}_${Date.now()}`, 10);
+    if (!isAdmin) await awardXp("reply_topic", `${topicId}_${Date.now()}`, 10);
     setReplyText("");
     setReplyImage(null);
     setReplyingTo(null);
@@ -485,7 +485,7 @@ export default function ForumPage() {
             respondendo a <span className="text-primary font-medium">{replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}</span>
           </p>
       }
-        <div className="font-heading mt-1 text-xs sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
+        <div className="font-heading mt-1 text-sm sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
         {reply.image_url &&
       <img src={reply.image_url} alt="" className="mt-2 max-w-full sm:max-w-xs max-h-48 rounded-xl object-cover" loading="lazy" />
       }
@@ -716,7 +716,7 @@ export default function ForumPage() {
                   {isExpanded &&
                   <div className="px-3 sm:px-4 pb-3 sm:pb-4">
                       {/* Topic content */}
-                      <div className="font-heading text-xs whitespace-pre-wrap leading-relaxed pl-0 sm:pl-[52px] break-words sm:text-base py-[12px] pr-[20px]"><RichText content={topic.content} /></div>
+                      <div className="font-heading text-base whitespace-pre-wrap leading-relaxed pl-0 sm:pl-[52px] break-words sm:text-base py-[12px] pr-[20px]"><RichText content={topic.content} /></div>
                       {topic.image_url &&
                     <img src={topic.image_url} alt="" className="mb-3 sm:ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
                     }

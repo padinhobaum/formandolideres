@@ -35,12 +35,11 @@ const baseNavItems: NavItem[] = [
 { label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
 { label: "Videoaulas", path: "/videoaulas", icon: Video },
 { label: "Materiais", path: "/materiais", icon: Download },
-{ label: "Resultados", path: "/meus-resultados", icon: ClipboardList },
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
 
 export default function AppLayout({ children }: {children: ReactNode;}) {
-  const { profile, isAdmin, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   usePresence();
   const push = usePushSubscription();
   const navigate = useNavigate();
@@ -48,6 +47,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
   const [customLinks, setCustomLinks] = useState<CustomLink[]>([]);
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const [hasActiveLive, setHasActiveLive] = useState(false);
+  const [hasReleasedResults, setHasReleasedResults] = useState(false);
 
   useEffect(() => {
     supabase.from("custom_links").select("*").order("sort_order").then(({ data }) => {
@@ -56,6 +56,18 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     supabase.from("live_streams").select("id").eq("is_active", true).limit(1).then(({ data }) => {
       setHasActiveLive(!!(data && data.length > 0));
     });
+
+    // Check if current user (leader) has any released survey results
+    if (user) {
+      supabase
+        .from("survey_leaders")
+        .select("survey_id, surveys(results_released)")
+        .eq("leader_user_id", user.id)
+        .then(({ data }) => {
+          const hasReleased = (data || []).some((sl: any) => sl.surveys?.results_released);
+          setHasReleasedResults(hasReleased);
+        });
+    }
 
     // Realtime listener for live stream activations
     const channel = supabase
@@ -90,13 +102,24 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     };
   }, [navigate]);
 
+  // Build nav items dynamically
+  const dynamicNavItems: NavItem[] = [...baseNavItems];
+  
+  // Insert "Resultados" before Admin if user has released results
+  if (hasReleasedResults && !isAdmin) {
+    const adminIdx = dynamicNavItems.findIndex(i => i.path === "/admin");
+    dynamicNavItems.splice(adminIdx >= 0 ? adminIdx : dynamicNavItems.length, 0, 
+      { label: "Resultados", path: "/meus-resultados", icon: ClipboardList }
+    );
+  }
+
   const navItems: NavItem[] = hasActiveLive
     ? [
-        ...baseNavItems.slice(0, 1),
+        ...dynamicNavItems.slice(0, 1),
         { label: "Ao Vivo", path: "/ao-vivo", icon: Radio, badge: "LIVE" },
-        ...baseNavItems.slice(1),
+        ...dynamicNavItems.slice(1),
       ]
-    : baseNavItems;
+    : dynamicNavItems;
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
   const showPushBanner = push.supportsPush && (!push.isSubscribed || push.permission !== "granted" || push.requiresIosInstall);

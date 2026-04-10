@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio } from "lucide-react";
+import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays } from "lucide-react";
 import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
@@ -37,7 +37,16 @@ interface Notice {
   is_pinned: boolean;
   created_at: string;
   image_url: string | null;
+  event_id: string | null;
   cta_buttons: any[];
+}
+
+interface EventInfo {
+  id: string;
+  title: string;
+  event_date: string;
+  event_time: string | null;
+  description: string | null;
 }
 
 interface ForumTopic {
@@ -77,6 +86,8 @@ export default function DashboardPage() {
   const [hasActiveLive, setHasActiveLive] = useState(false);
   const [activeLiveTitle, setActiveLiveTitle] = useState("");
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+  const [selectedNoticeEvent, setSelectedNoticeEvent] = useState<EventInfo | null>(null);
+  const [hasReleasedResults, setHasReleasedResults] = useState(false);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
   const [showLevelUp, setShowLevelUp] = useState(false);
@@ -130,6 +141,16 @@ export default function DashboardPage() {
       } else {
         setHasActiveLive(false);
       }
+
+      // Check if leader has released results
+      if (user) {
+        const { data: leaderSurveys } = await supabase
+          .from("survey_leaders")
+          .select("survey_id, surveys(results_released)")
+          .eq("leader_user_id", user.id);
+        const hasReleased = (leaderSurveys || []).some((sl: any) => sl.surveys?.results_released);
+        setHasReleasedResults(hasReleased);
+      }
     };
     fetchData();
 
@@ -148,10 +169,15 @@ export default function DashboardPage() {
   // Track notice read when modal opens
   const handleOpenNotice = async (notice: Notice) => {
     setSelectedNotice(notice);
+    setSelectedNoticeEvent(null);
+    // Fetch linked event if exists
+    if (notice.event_id) {
+      const { data: evt } = await supabase.from("events").select("id, title, event_date, event_time, description").eq("id", notice.event_id).maybeSingle();
+      if (evt) setSelectedNoticeEvent(evt as EventInfo);
+    }
     if (user) {
       await supabase.from("notice_reads").upsert({ notice_id: notice.id, user_id: user.id } as any, { onConflict: "notice_id,user_id" });
-      // Award XP for reading a notice
-      await awardXp("read_notice", notice.id, 5);
+      if (!isAdmin) await awardXp("read_notice", notice.id, 5);
     }
   };
 
@@ -225,9 +251,11 @@ export default function DashboardPage() {
             <p className="text-muted-foreground text-lg">
               {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
             </p>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Nível {level} · <span className="text-accent font-medium">{totalXp} XP</span> / {nextLevelXp} XP
-            </p>
+            {!isAdmin && (
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Nível {level} · <span className="text-accent font-medium">{totalXp} XP</span> / {nextLevelXp} XP
+              </p>
+            )}
           </div>
           <div className="flex-1" />
           <Button
@@ -322,7 +350,23 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Live banner */}
+        {/* Results released card */}
+        {hasReleasedResults && !isAdmin && (
+          <button
+            onClick={() => navigate("/meus-resultados")}
+            className="w-full mb-6 border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 rounded-xl p-4 flex items-center gap-3 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+              <ClipboardList className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <div className="text-left flex-1 min-w-0">
+              <p className="font-heading font-bold text-sm text-primary">📊 Seus resultados já estão disponíveis!</p>
+              <p className="text-sm text-muted-foreground">Confira a avaliação dos alunos sobre sua liderança.</p>
+            </div>
+            <span className="text-xs text-primary font-medium group-hover:underline flex-shrink-0">Ver resultados →</span>
+          </button>
+        )}
+
         {hasActiveLive && (
           <button
             onClick={() => navigate("/ao-vivo")}
@@ -476,6 +520,19 @@ export default function DashboardPage() {
                 <div className="text-sm whitespace-pre-wrap leading-relaxed">
                   <RichText content={selectedNotice.content} />
                 </div>
+                {selectedNoticeEvent && (
+                  <div className="mt-3 border rounded-lg p-3 bg-muted/30 flex items-start gap-3">
+                    <CalendarDays className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-heading font-semibold text-foreground">{selectedNoticeEvent.title}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {new Date(selectedNoticeEvent.event_date + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
+                        {selectedNoticeEvent.event_time && ` às ${selectedNoticeEvent.event_time.slice(0, 5)}`}
+                      </p>
+                      {selectedNoticeEvent.description && <p className="text-xs text-muted-foreground mt-1">{selectedNoticeEvent.description}</p>}
+                    </div>
+                  </div>
+                )}
                 {selectedNotice.cta_buttons?.length > 0 &&
               <div className="flex flex-wrap gap-2 mt-2">
                     {selectedNotice.cta_buttons.map((cta: any, i: number) =>

@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
-import { TrendingUp, TrendingDown, Star, MessageSquare, Users, ThumbsUp } from "lucide-react";
+import { TrendingUp, TrendingDown, Star, MessageSquare, Users, ThumbsUp, Sparkles } from "lucide-react";
 
 const PIE_COLORS = ["hsl(145, 65%, 40%)", "hsl(1, 79%, 55%)"];
 
@@ -189,6 +189,11 @@ export default function LeaderDashboardPage() {
                 <div className="grid md:grid-cols-2 gap-4 mb-6">
                   <Card className="border-green-200 bg-green-50/50">
                     <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted/80 rounded-full px-2 py-0.5">
+                          <Sparkles className="w-3 h-3" /> Fornecido pela LíderAI
+                        </span>
+                      </div>
                       <CardTitle className="text-sm font-heading flex items-center gap-2 text-green-700">
                         <TrendingUp className="w-4 h-4" /> Pontos Fortes
                       </CardTitle>
@@ -208,6 +213,11 @@ export default function LeaderDashboardPage() {
 
                   <Card className="border-amber-200 bg-amber-50/50">
                     <CardHeader className="pb-2">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground bg-muted/80 rounded-full px-2 py-0.5">
+                          <Sparkles className="w-3 h-3" /> Fornecido pela LíderAI
+                        </span>
+                      </div>
                       <CardTitle className="text-sm font-heading flex items-center gap-2 text-amber-700">
                         <TrendingDown className="w-4 h-4" /> Pontos de Melhoria
                       </CardTitle>
