@@ -17,16 +17,27 @@ export default function ForumRanking() {
 
   useEffect(() => {
     const fetch = async () => {
+      // Get admin user IDs to exclude
+      const { data: adminRoles } = await supabase
+        .from("user_roles")
+        .select("user_id")
+        .eq("role", "admin");
+      const adminIds = new Set((adminRoles || []).map((r: any) => r.user_id));
+
       const { data: xpRows } = await supabase
         .from("user_xp")
         .select("user_id, total_xp, level")
         .order("level", { ascending: false })
         .order("total_xp", { ascending: false })
-        .limit(10);
+        .limit(20);
 
       if (!xpRows || xpRows.length === 0) return;
 
-      const userIds = xpRows.map((r: any) => r.user_id);
+      // Filter out admins
+      const filtered = xpRows.filter((r: any) => !adminIds.has(r.user_id)).slice(0, 10);
+      if (filtered.length === 0) return;
+
+      const userIds = filtered.map((r: any) => r.user_id);
       const { data: profiles } = await supabase
         .from("profiles")
         .select("user_id, full_name, avatar_url")
@@ -38,7 +49,7 @@ export default function ForumRanking() {
       });
 
       setRanked(
-        xpRows.map((r: any) => ({
+        filtered.map((r: any) => ({
           ...r,
           full_name: profileMap[r.user_id]?.full_name || "Usuário",
           avatar_url: profileMap[r.user_id]?.avatar_url || null,
