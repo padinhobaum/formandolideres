@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { Plus, Trash2, QrCode, Link2, Eye, EyeOff, Download, Users, Copy, Check } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import SurveyPdfReport from "@/components/SurveyPdfReport";
 
 const BIMESTERS = [1, 2, 3, 4] as const;
 
@@ -145,6 +146,10 @@ export default function AdminSurveys() {
 
   return (
     <div>
+      {/* Actions bar */}
+      <div className="flex items-center justify-end mb-4">
+        <SurveyPdfReport />
+      </div>
       {/* Create form */}
       <Card className="mb-6 border-dashed border-primary/20 bg-card/80">
         <CardHeader className="pb-3">
