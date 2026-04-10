@@ -114,7 +114,7 @@ export default function AdminSurveys() {
   const exportCsv = async (surveyId: string, surveyTitle: string) => {
     const { data } = await supabase.from("survey_responses").select("*").eq("survey_id", surveyId);
     if (!data || data.length === 0) { toast.error("Nenhuma resposta para exportar."); return; }
-    const headers = ["score_general", "score_communication", "contributes_environment", "keeps_informed", "opens_space", "comments", "created_at"];
+    const headers = ["student_name", "student_rm", "score_general", "score_communication", "contributes_environment", "keeps_informed", "opens_space", "comments", "created_at"];
     const csvRows = [headers.join(",")];
     data.forEach((r: any) => {
       csvRows.push(headers.map(h => {
