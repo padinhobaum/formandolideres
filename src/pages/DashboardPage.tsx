@@ -348,7 +348,23 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Live banner */}
+        {/* Results released card */}
+        {hasReleasedResults && !isAdmin && (
+          <button
+            onClick={() => navigate("/meus-resultados")}
+            className="w-full mb-6 border-2 border-primary/30 bg-primary/5 hover:bg-primary/10 rounded-xl p-4 flex items-center gap-3 transition-colors group"
+          >
+            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+              <ClipboardList className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <div className="text-left flex-1 min-w-0">
+              <p className="font-heading font-bold text-sm text-primary">📊 Seus resultados já estão disponíveis!</p>
+              <p className="text-sm text-muted-foreground">Confira a avaliação dos alunos sobre sua liderança.</p>
+            </div>
+            <span className="text-xs text-primary font-medium group-hover:underline flex-shrink-0">Ver resultados →</span>
+          </button>
+        )}
+
         {hasActiveLive && (
           <button
             onClick={() => navigate("/ao-vivo")}
