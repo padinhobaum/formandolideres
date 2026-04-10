@@ -288,7 +288,7 @@ export default function ForumPage() {
 
     toast.success("Tópico criado!");
     // Award 20 XP for creating a topic
-    if (topicData) await awardXp("create_topic", (topicData as any).id, 20);
+    if (topicData && !isAdmin) await awardXp("create_topic", (topicData as any).id, 20);
     if (topicData) {
       await sendPushNotification({
         title: "💬 Novo tópico no fórum",
@@ -399,7 +399,7 @@ export default function ForumPage() {
     } as any);
     if (error) {toast.error("Erro ao responder.");return;}
     // Award 10 XP for replying
-    await awardXp("reply_topic", `${topicId}_${Date.now()}`, 10);
+    if (!isAdmin) await awardXp("reply_topic", `${topicId}_${Date.now()}`, 10);
     setReplyText("");
     setReplyImage(null);
     setReplyingTo(null);
