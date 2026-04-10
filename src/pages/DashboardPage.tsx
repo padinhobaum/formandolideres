@@ -141,6 +141,16 @@ export default function DashboardPage() {
       } else {
         setHasActiveLive(false);
       }
+
+      // Check if leader has released results
+      if (user) {
+        const { data: leaderSurveys } = await supabase
+          .from("survey_leaders")
+          .select("survey_id, surveys(results_released)")
+          .eq("leader_user_id", user.id);
+        const hasReleased = (leaderSurveys || []).some((sl: any) => sl.surveys?.results_released);
+        setHasReleasedResults(hasReleased);
+      }
     };
     fetchData();
 
@@ -159,10 +169,15 @@ export default function DashboardPage() {
   // Track notice read when modal opens
   const handleOpenNotice = async (notice: Notice) => {
     setSelectedNotice(notice);
+    setSelectedNoticeEvent(null);
+    // Fetch linked event if exists
+    if (notice.event_id) {
+      const { data: evt } = await supabase.from("events").select("id, title, event_date, event_time, description").eq("id", notice.event_id).maybeSingle();
+      if (evt) setSelectedNoticeEvent(evt as EventInfo);
+    }
     if (user) {
       await supabase.from("notice_reads").upsert({ notice_id: notice.id, user_id: user.id } as any, { onConflict: "notice_id,user_id" });
-      // Award XP for reading a notice
-      await awardXp("read_notice", notice.id, 5);
+      if (!isAdmin) await awardXp("read_notice", notice.id, 5);
     }
   };
 
