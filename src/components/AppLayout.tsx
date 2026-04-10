@@ -102,13 +102,24 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     };
   }, [navigate]);
 
+  // Build nav items dynamically
+  const dynamicNavItems: NavItem[] = [...baseNavItems];
+  
+  // Insert "Resultados" before Admin if user has released results
+  if (hasReleasedResults && !isAdmin) {
+    const adminIdx = dynamicNavItems.findIndex(i => i.path === "/admin");
+    dynamicNavItems.splice(adminIdx >= 0 ? adminIdx : dynamicNavItems.length, 0, 
+      { label: "Resultados", path: "/meus-resultados", icon: ClipboardList }
+    );
+  }
+
   const navItems: NavItem[] = hasActiveLive
     ? [
-        ...baseNavItems.slice(0, 1),
+        ...dynamicNavItems.slice(0, 1),
         { label: "Ao Vivo", path: "/ao-vivo", icon: Radio, badge: "LIVE" },
-        ...baseNavItems.slice(1),
+        ...dynamicNavItems.slice(1),
       ]
-    : baseNavItems;
+    : dynamicNavItems;
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
   const showPushBanner = push.supportsPush && (!push.isSubscribed || push.permission !== "granted" || push.requiresIosInstall);
