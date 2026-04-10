@@ -37,7 +37,16 @@ interface Notice {
   is_pinned: boolean;
   created_at: string;
   image_url: string | null;
+  event_id: string | null;
   cta_buttons: any[];
+}
+
+interface EventInfo {
+  id: string;
+  title: string;
+  event_date: string;
+  event_time: string | null;
+  description: string | null;
 }
 
 interface ForumTopic {
@@ -77,6 +86,8 @@ export default function DashboardPage() {
   const [hasActiveLive, setHasActiveLive] = useState(false);
   const [activeLiveTitle, setActiveLiveTitle] = useState("");
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
+  const [selectedNoticeEvent, setSelectedNoticeEvent] = useState<EventInfo | null>(null);
+  const [hasReleasedResults, setHasReleasedResults] = useState(false);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
   const [showLevelUp, setShowLevelUp] = useState(false);
