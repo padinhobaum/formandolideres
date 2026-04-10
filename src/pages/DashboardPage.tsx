@@ -251,9 +251,11 @@ export default function DashboardPage() {
             <p className="text-muted-foreground text-lg">
               {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
             </p>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Nível {level} · <span className="text-accent font-medium">{totalXp} XP</span> / {nextLevelXp} XP
-            </p>
+            {!isAdmin && (
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Nível {level} · <span className="text-accent font-medium">{totalXp} XP</span> / {nextLevelXp} XP
+              </p>
+            )}
           </div>
           <div className="flex-1" />
           <Button
