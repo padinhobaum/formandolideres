@@ -5,6 +5,7 @@ import AppLayout from "@/components/AppLayout";
 import { Pin, Maximize2, ExternalLink, CalendarDays, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichText } from "@/components/RichTextEditor";
+import NoticeRelayButton from "@/components/NoticeRelayButton";
 
 interface CtaButton {
   text: string;
@@ -29,6 +30,7 @@ interface Notice {
   image_url: string | null;
   cta_buttons: CtaButton[];
   event: NoticeEvent | null;
+  requires_relay: boolean;
 }
 
 export default function NoticesPage() {
@@ -146,6 +148,7 @@ export default function NoticesPage() {
                     <RichText content={n.content} />
                   </div>
                   {renderEventBadge(n.event)}
+                  <NoticeRelayButton noticeId={n.id} requiresRelay={n.requires_relay} />
                   {renderCtaButtons(n.cta_buttons)}
                   <p className="text-xs text-muted-foreground mt-auto pt-3">
                     {n.author_name} · {formatDate(n.created_at)}
@@ -172,6 +175,7 @@ export default function NoticesPage() {
                 <RichText content={focusedNotice.content} />
               </div>
               {renderEventBadge(focusedNotice.event)}
+              <NoticeRelayButton noticeId={focusedNotice.id} requiresRelay={focusedNotice.requires_relay} />
               {renderCtaButtons(focusedNotice.cta_buttons)}
               <p className="text-xs text-muted-foreground mt-4">
                 {focusedNotice.author_name} · {formatDate(focusedNotice.created_at)}

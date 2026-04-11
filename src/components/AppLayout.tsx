@@ -3,14 +3,14 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio, BellRing, ClipboardList } from "lucide-react";
+import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio, ClipboardList } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePresence } from "@/hooks/usePresence";
 import NotificationPopover from "@/components/NotificationPopover";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
-import { Button } from "@/components/ui/button";
+
 
 interface NavItem {
   label: string;
@@ -122,7 +122,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     : dynamicNavItems;
 
   const visibleItems = navItems.filter((item) => !item.adminOnly || isAdmin);
-  const showPushBanner = push.supportsPush && (!push.isSubscribed || push.permission !== "granted" || push.requiresIosInstall);
+  // Push banner removed - was not working reliably
 
   const handleSignOut = async () => {
     await signOut();
@@ -229,7 +229,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 pb-20 md:pb-0 overflow-y-auto flex flex-col min-h-screen">
+      <main className="flex-1 pb-24 md:pb-0 overflow-y-auto flex flex-col min-h-screen">
         {/* Mobile header */}
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
           <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-10 w-auto" />
@@ -263,38 +263,6 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
             </Popover>
           </div>
         </header>
-        {showPushBanner && (
-          <div className="px-4 md:px-8 pt-4">
-            <section className="rounded-2xl border bg-card/95 shadow-sm p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="min-w-0">
-                <p className="font-heading font-semibold text-sm flex items-center gap-2 text-foreground">
-                  <BellRing className="w-4 h-4 text-primary" strokeWidth={1.75} />
-                  Ative as notificações do dispositivo
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {push.requiresIosInstall
-                    ? "No iPhone, instale o app na Tela de Início para liberar notificações push no sistema do aparelho."
-                    : push.permission === "denied"
-                      ? "As notificações estão bloqueadas neste dispositivo. Reative nas configurações do navegador ou do app instalado."
-                      : "Receba avisos, novos tópicos, materiais, videoaulas e lives mesmo com o app fechado."}
-                </p>
-                {push.errorMessage && <p className="text-xs text-destructive mt-2">{push.errorMessage}</p>}
-              </div>
-
-              {!push.requiresIosInstall && push.permission !== "denied" && (
-                <Button
-                  type="button"
-                  size="sm"
-                  onClick={() => void push.subscribe()}
-                  disabled={push.isLoading}
-                  className="self-start md:self-center"
-                >
-                  {push.isLoading ? "Ativando..." : "Ativar notificações"}
-                </Button>
-              )}
-            </section>
-          </div>
-        )}
         <div className="p-4 md:p-8 flex-1">{children}</div>
 
         {/* Footer */}
@@ -324,7 +292,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       </main>
 
       {/* Mobile bottom nav */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around py-2 z-30">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around py-2 z-30" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
         {visibleItems.filter((i) => !i.adminOnly).slice(0, 5).map((item) => {
           const active = location.pathname === item.path;
           return (

@@ -13,6 +13,8 @@ import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
+import HelpDesk from "@/components/HelpDesk";
+import NoticeRelayButton from "@/components/NoticeRelayButton";
 
 interface Banner {
   id: string;
@@ -39,6 +41,7 @@ interface Notice {
   image_url: string | null;
   event_id: string | null;
   cta_buttons: any[];
+  requires_relay: boolean;
 }
 
 interface EventInfo {
@@ -451,7 +454,8 @@ export default function DashboardPage() {
                       </Avatar>
                       <p className="text-xs text-muted-foreground">{n.author_name} · {formatDate(n.created_at)}</p>
                     </div>
-                    <div className="mt-auto pt-2">
+                    <div className="mt-auto pt-2 space-y-2">
+                      <NoticeRelayButton noticeId={n.id} requiresRelay={n.requires_relay} />
                       <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenNotice(n)}>
                         Ler aviso completo
                       </Button>
@@ -545,10 +549,16 @@ export default function DashboardPage() {
                 )}
                   </div>
               }
+                <NoticeRelayButton noticeId={selectedNotice.id} requiresRelay={selectedNotice.requires_relay} />
               </>
             }
           </DialogContent>
         </Dialog>
+
+        {/* Help Desk */}
+        <section className="mb-8 border bg-card rounded-xl p-4 md:p-6">
+          <HelpDesk />
+        </section>
 
         {/* Tópicos Recentes do Fórum */}
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">

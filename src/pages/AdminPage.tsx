@@ -12,14 +12,16 @@ import { toast } from "sonner";
 import {
   Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio,
   Megaphone, LayoutDashboard, Users, Link2, Tag, ListVideo, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
-  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList,
+  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList, CheckCircle,
 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sendPushNotification } from "@/lib/sendPushNotification";
 import AdminSurveys from "@/components/AdminSurveys";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys";
+import HelpDesk from "@/components/HelpDesk";
+
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "tickets";
 
 interface CtaButton {
   text: string;
@@ -36,6 +38,7 @@ const tabGroups = [
       { key: "lives" as Tab, label: "Ao Vivo", icon: Radio, desc: "Transmissões ao vivo" },
       { key: "events" as Tab, label: "Eventos", icon: CalendarDays, desc: "Calendário de eventos" },
       { key: "surveys" as Tab, label: "Pesquisas", icon: ClipboardList, desc: "Pesquisas de opinião" },
+      { key: "tickets" as Tab, label: "Chamados", icon: CheckCircle, desc: "Help desk — chamados dos líderes" },
     ],
   },
   {
@@ -152,6 +155,7 @@ export default function AdminPage() {
             {tab === "password" && <AdminChangePassword />}
             {tab === "events" && <AdminEvents />}
             {tab === "surveys" && <AdminSurveys />}
+            {tab === "tickets" && <HelpDesk />}
           </div>
         </div>
       </div>
@@ -226,6 +230,7 @@ function AdminNotices() {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
+  const [requiresRelay, setRequiresRelay] = useState(false);
 
   const fetchNotices = async () => {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
@@ -284,6 +289,7 @@ function AdminNotices() {
       cta_buttons: validCtas,
       target_user_ids: sendType === "specific" && selectedUserIds.length > 0 ? selectedUserIds : null,
       event_id: selectedEventId || null,
+      requires_relay: requiresRelay,
     } as any).select("id").single();
 
     setUploading(false);
@@ -299,7 +305,7 @@ function AdminNotices() {
         targetUserIds: sendType === "specific" ? selectedUserIds : undefined,
       });
     }
-    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId("");
+    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId(""); setRequiresRelay(false);
     fetchNotices();
   };
 
@@ -348,6 +354,11 @@ function AdminNotices() {
           <input type="checkbox" checked={pinned} onChange={(e) => setPinned(e.target.checked)} className="rounded" />
           <Pin className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.5} />
           Fixar aviso no topo
+        </label>
+        <label className="flex items-center gap-2 text-sm cursor-pointer group">
+          <input type="checkbox" checked={requiresRelay} onChange={(e) => setRequiresRelay(e.target.checked)} className="rounded" />
+          <CheckCircle className="w-3.5 h-3.5 text-muted-foreground group-hover:text-accent transition-colors" strokeWidth={1.5} />
+          Este aviso deve ser repassado pelos líderes
         </label>
 
         {/* Send type */}

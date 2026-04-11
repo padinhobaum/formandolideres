@@ -95,6 +95,9 @@ export default function SurveyPdfReport() {
         `;
       }).filter(Boolean).join("");
 
+      const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
+      const logoLiceuUrl = window.location.origin + "/lovable-uploads/d52473b9-ea3a-4883-9166-d1045f638583.png";
+
       const html = `
         <html>
         <head>
@@ -108,14 +111,17 @@ export default function SurveyPdfReport() {
         </head>
         <body>
           <div style="padding:20px;">
-            <!-- Header -->
+            <!-- Header with logos -->
             <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #003d7a;padding-bottom:16px;margin-bottom:24px;">
-              <div>
+              <div style="display:flex;align-items:center;gap:16px;">
+                <img src="${logoFormandoUrl}" alt="Formando Líderes" style="height:48px;width:auto;" crossorigin="anonymous" />
+                <img src="${logoLiceuUrl}" alt="Liceu Jardim" style="height:48px;width:auto;" crossorigin="anonymous" />
+              </div>
+              <div style="text-align:center;flex:1;">
                 <h1 style="font-size:22px;font-weight:700;color:#003d7a;margin:0;">Relatório Consolidado</h1>
                 <p style="font-size:14px;color:#64748b;margin:4px 0 0;">Pesquisas de Opinião — Líderes de Sala</p>
               </div>
               <div style="text-align:right;">
-                <p style="font-size:20px;font-weight:700;color:#003d7a;">Formando Líderes</p>
                 <p style="font-size:11px;color:#94a3b8;">Gerado em ${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</p>
               </div>
             </div>
