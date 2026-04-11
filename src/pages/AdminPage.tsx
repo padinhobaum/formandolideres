@@ -19,7 +19,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sendPushNotification } from "@/lib/sendPushNotification";
 import AdminSurveys from "@/components/AdminSurveys";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys";
+import HelpDesk from "@/components/HelpDesk";
+
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "tickets";
 
 interface CtaButton {
   text: string;
@@ -36,6 +38,7 @@ const tabGroups = [
       { key: "lives" as Tab, label: "Ao Vivo", icon: Radio, desc: "Transmissões ao vivo" },
       { key: "events" as Tab, label: "Eventos", icon: CalendarDays, desc: "Calendário de eventos" },
       { key: "surveys" as Tab, label: "Pesquisas", icon: ClipboardList, desc: "Pesquisas de opinião" },
+      { key: "tickets" as Tab, label: "Chamados", icon: CheckCircle, desc: "Help desk — chamados dos líderes" },
     ],
   },
   {
@@ -152,6 +155,7 @@ export default function AdminPage() {
             {tab === "password" && <AdminChangePassword />}
             {tab === "events" && <AdminEvents />}
             {tab === "surveys" && <AdminSurveys />}
+            {tab === "tickets" && <HelpDesk />}
           </div>
         </div>
       </div>
