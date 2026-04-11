@@ -6,8 +6,6 @@ import { Pin, Maximize2, ExternalLink, CalendarDays, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button";
 import { RichText } from "@/components/RichTextEditor";
 import NoticeRelayButton from "@/components/NoticeRelayButton";
-import { Button } from "@/components/ui/button";
-import { RichText } from "@/components/RichTextEditor";
 
 interface CtaButton {
   text: string;
