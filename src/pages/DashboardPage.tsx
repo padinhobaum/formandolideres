@@ -454,7 +454,8 @@ export default function DashboardPage() {
                       </Avatar>
                       <p className="text-xs text-muted-foreground">{n.author_name} · {formatDate(n.created_at)}</p>
                     </div>
-                    <div className="mt-auto pt-2">
+                    <div className="mt-auto pt-2 space-y-2">
+                      <NoticeRelayButton noticeId={n.id} requiresRelay={n.requires_relay} />
                       <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenNotice(n)}>
                         Ler aviso completo
                       </Button>
