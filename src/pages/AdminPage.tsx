@@ -285,6 +285,7 @@ function AdminNotices() {
       cta_buttons: validCtas,
       target_user_ids: sendType === "specific" && selectedUserIds.length > 0 ? selectedUserIds : null,
       event_id: selectedEventId || null,
+      requires_relay: requiresRelay,
     } as any).select("id").single();
 
     setUploading(false);
