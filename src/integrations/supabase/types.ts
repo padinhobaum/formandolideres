@@ -335,6 +335,45 @@ export type Database = {
           },
         ]
       }
+      help_desk_tickets: {
+        Row: {
+          admin_response: string | null
+          category: Database["public"]["Enums"]["ticket_category"]
+          created_at: string
+          creator_id: string
+          description: string
+          id: string
+          status: Database["public"]["Enums"]["ticket_status"]
+          target_admin_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          admin_response?: string | null
+          category: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          creator_id: string
+          description: string
+          id?: string
+          status?: Database["public"]["Enums"]["ticket_status"]
+          target_admin_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          admin_response?: string | null
+          category?: Database["public"]["Enums"]["ticket_category"]
+          created_at?: string
+          creator_id?: string
+          description?: string
+          id?: string
+          status?: Database["public"]["Enums"]["ticket_status"]
+          target_admin_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       live_streams: {
         Row: {
           created_at: string
@@ -433,6 +472,35 @@ export type Database = {
           },
         ]
       }
+      notice_relays: {
+        Row: {
+          created_at: string
+          id: string
+          notice_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notice_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notice_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notice_relays_notice_id_fkey"
+            columns: ["notice_id"]
+            isOneToOne: false
+            referencedRelation: "notices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notices: {
         Row: {
           author_id: string
@@ -444,6 +512,7 @@ export type Database = {
           id: string
           image_url: string | null
           is_pinned: boolean
+          requires_relay: boolean
           target_user_ids: string[] | null
           title: string
           updated_at: string
@@ -458,6 +527,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_pinned?: boolean
+          requires_relay?: boolean
           target_user_ids?: string[] | null
           title: string
           updated_at?: string
@@ -472,6 +542,7 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_pinned?: boolean
+          requires_relay?: boolean
           target_user_ids?: string[] | null
           title?: string
           updated_at?: string
@@ -1043,6 +1114,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "leader"
+      ticket_category:
+        | "infrastructure"
+        | "conflicts"
+        | "performance"
+        | "meeting"
+      ticket_status: "open" | "deferred" | "denied" | "analyzing"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1171,6 +1248,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "leader"],
+      ticket_category: [
+        "infrastructure",
+        "conflicts",
+        "performance",
+        "meeting",
+      ],
+      ticket_status: ["open", "deferred", "denied", "analyzing"],
     },
   },
 } as const
