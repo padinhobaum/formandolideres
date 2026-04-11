@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio,
   Megaphone, LayoutDashboard, Users, Link2, Tag, ListVideo, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
-  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList,
+  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList, CheckCircle,
 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -226,6 +226,7 @@ function AdminNotices() {
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
+  const [requiresRelay, setRequiresRelay] = useState(false);
 
   const fetchNotices = async () => {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
