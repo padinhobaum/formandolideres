@@ -549,10 +549,16 @@ export default function DashboardPage() {
                 )}
                   </div>
               }
+                <NoticeRelayButton noticeId={selectedNotice.id} requiresRelay={selectedNotice.requires_relay} />
               </>
             }
           </DialogContent>
         </Dialog>
+
+        {/* Help Desk */}
+        <section className="mb-8 border bg-card rounded-xl p-4 md:p-6">
+          <HelpDesk />
+        </section>
 
         {/* Tópicos Recentes do Fórum */}
         <section className="px-[20px] py-[20px] rounded-xl bg-accent">
