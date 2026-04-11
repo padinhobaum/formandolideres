@@ -349,6 +349,11 @@ function AdminNotices() {
           <Pin className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors" strokeWidth={1.5} />
           Fixar aviso no topo
         </label>
+        <label className="flex items-center gap-2 text-sm cursor-pointer group">
+          <input type="checkbox" checked={requiresRelay} onChange={(e) => setRequiresRelay(e.target.checked)} className="rounded" />
+          <CheckCircle className="w-3.5 h-3.5 text-muted-foreground group-hover:text-accent transition-colors" strokeWidth={1.5} />
+          Este aviso deve ser repassado pelos líderes
+        </label>
 
         {/* Send type */}
         <div className="space-y-2">
