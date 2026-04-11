@@ -13,6 +13,8 @@ import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
+import HelpDesk from "@/components/HelpDesk";
+import NoticeRelayButton from "@/components/NoticeRelayButton";
 
 interface Banner {
   id: string;
@@ -39,6 +41,7 @@ interface Notice {
   image_url: string | null;
   event_id: string | null;
   cta_buttons: any[];
+  requires_relay: boolean;
 }
 
 interface EventInfo {
