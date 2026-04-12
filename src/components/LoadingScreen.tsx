@@ -1,14 +1,19 @@
 import { useEffect, useState } from "react";
 
-export default function LoadingScreen() {
+interface Props {
+  persistent?: boolean;
+}
+
+export default function LoadingScreen({ persistent }: Props) {
   const [visible, setVisible] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
+    if (persistent) return; // Don't auto-hide if persistent
     const timer = setTimeout(() => setFadeOut(true), 800);
     const remove = setTimeout(() => setVisible(false), 1200);
     return () => { clearTimeout(timer); clearTimeout(remove); };
-  }, []);
+  }, [persistent]);
 
   if (!visible) return null;
 
