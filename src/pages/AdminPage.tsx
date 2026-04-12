@@ -506,6 +506,8 @@ function AdminNotices() {
                     ))}
                   </div>
                 )}
+                {/* Relay info */}
+                {n.requires_relay && <AdminNoticeRelayInfo noticeId={n.id} />}
               </div>
             )}
           </ItemCard>
