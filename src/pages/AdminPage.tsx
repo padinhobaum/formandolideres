@@ -506,11 +506,66 @@ function AdminNotices() {
                     ))}
                   </div>
                 )}
+                {/* Relay info */}
+                {n.requires_relay && <AdminNoticeRelayInfo noticeId={n.id} />}
               </div>
             )}
           </ItemCard>
         ))}
         {notices.length === 0 && <EmptyState message="Nenhum aviso criado ainda." />}
+      </div>
+    </div>
+  );
+}
+
+function AdminNoticeRelayInfo({ noticeId }: { noticeId: string }) {
+  const [relayUsers, setRelayUsers] = useState<{ user_id: string; full_name: string; avatar_url: string | null; created_at: string }[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await supabase.from("notice_relays").select("user_id, created_at").eq("notice_id", noticeId);
+      if (data && data.length > 0) {
+        const ids = data.map((r: any) => r.user_id);
+        const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", ids);
+        const profileMap: Record<string, any> = {};
+        (profiles || []).forEach((p: any) => { profileMap[p.user_id] = p; });
+        setRelayUsers(data.map((r: any) => ({
+          user_id: r.user_id,
+          full_name: profileMap[r.user_id]?.full_name || "Usuário",
+          avatar_url: profileMap[r.user_id]?.avatar_url || null,
+          created_at: r.created_at,
+        })));
+      }
+    })();
+  }, [noticeId]);
+
+  if (relayUsers.length === 0) return (
+    <div className="mt-2">
+      <p className="text-xs font-semibold text-muted-foreground mb-1">Repasses: 0</p>
+      <p className="text-xs text-muted-foreground italic">Nenhum líder confirmou o repasse ainda.</p>
+    </div>
+  );
+
+  return (
+    <div className="mt-2">
+      <p className="text-xs font-semibold text-muted-foreground mb-1.5">
+        Repassado por {relayUsers.length} líder(es):
+      </p>
+      <div className="space-y-1">
+        {relayUsers.map((u) => (
+          <div key={u.user_id} className="flex items-center gap-2">
+            <Avatar className="w-5 h-5">
+              <AvatarImage src={u.avatar_url || undefined} />
+              <AvatarFallback className="text-[7px] font-bold bg-accent text-accent-foreground">
+                {u.full_name.split(" ").map(n => n[0]).slice(0, 2).join("").toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <span className="text-xs">{u.full_name}</span>
+            <span className="text-[10px] text-muted-foreground">
+              — {new Date(u.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

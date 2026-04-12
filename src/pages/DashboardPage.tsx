@@ -555,44 +555,50 @@ export default function DashboardPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Help Desk */}
-        <section className="mb-8 border bg-card rounded-xl p-4 md:p-6">
-          <HelpDesk />
-        </section>
+        {/* Chamados + Tópicos Recentes side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
+          {/* Help Desk */}
+          <section className="border bg-card rounded-xl p-4 md:p-6">
+            <HelpDesk compact />
+          </section>
 
-        {/* Tópicos Recentes do Fórum */}
-        <section className="px-[20px] py-[20px] rounded-xl bg-accent">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Tópicos Recentes</h3>
-            <button onClick={() => navigate("/forum")} className="text-xs hover:underline font-body text-primary-foreground">
-              Ver todos
-            </button>
-          </div>
-          {forumTopics.length === 0 ?
-          <p className="text-sm text-primary-foreground">Nenhum tópico disponível.</p> :
-          <div className="space-y-2">
-              {forumTopics.map((t) =>
-            <button
-              key={t.id}
-              onClick={() => navigate(`/forum?topic=${t.id}`)}
-              className="w-full border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-              <div className="flex items-center gap-3">
-                <Avatar className="w-8 h-8 flex-shrink-0">
-                  <AvatarImage src={t.author_avatar_url || undefined} />
-                  <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
-                    {t.author_name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <span className="font-body font-semibold line-clamp-1 text-accent text-base">{t.title}</span>
-                  <p className="text-xs text-muted-foreground">{t.author_name} · {formatDate(t.updated_at)}</p>
-                </div>
+          {/* Tópicos Recentes do Fórum */}
+          <section className="border bg-card rounded-xl p-4 md:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Megaphone className="w-5 h-5 text-primary" strokeWidth={1.5} />
+                <h3 className="font-heading font-bold text-xl text-foreground">Tópicos Recentes</h3>
               </div>
-            </button>
-            )}
+              <button onClick={() => navigate("/forum")} className="text-xs hover:underline font-body text-primary">
+                Ver todos
+              </button>
             </div>
-          }
-        </section>
+            {forumTopics.length === 0 ?
+            <p className="text-sm text-muted-foreground">Nenhum tópico disponível.</p> :
+            <div className="space-y-2">
+                {forumTopics.slice(0, 4).map((t) =>
+              <button
+                key={t.id}
+                onClick={() => navigate(`/forum?topic=${t.id}`)}
+                className="w-full border bg-card p-4 text-left hover:shadow-md transition-all rounded-xl">
+                <div className="flex items-center gap-3">
+                  <Avatar className="w-8 h-8 flex-shrink-0">
+                    <AvatarImage src={t.author_avatar_url || undefined} />
+                    <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
+                      {t.author_name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <span className="font-body font-semibold line-clamp-1 text-accent text-sm">{t.title}</span>
+                    <p className="text-xs text-muted-foreground">{t.author_name} · {formatDate(t.updated_at)}</p>
+                  </div>
+                </div>
+              </button>
+              )}
+              </div>
+            }
+          </section>
+        </div>
       </div>
       <LevelUpModal open={showLevelUp} onClose={() => setShowLevelUp(false)} newLevel={level} />
     </AppLayout>);

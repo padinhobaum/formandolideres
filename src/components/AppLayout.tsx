@@ -231,6 +231,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       {/* Main content */}
       <main className="flex-1 pb-24 md:pb-0 overflow-y-auto flex flex-col min-h-screen">
         {/* Mobile header */}
+        <div className="md:hidden bg-card" style={{ paddingTop: "env(safe-area-inset-top)" }} />
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
           <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-10 w-auto" />
           <div className="flex items-center gap-2">

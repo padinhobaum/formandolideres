@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { HelpCircle, Plus, MessageSquare, Clock, CheckCircle, XCircle, Search as SearchIcon } from "lucide-react";
+import { HelpCircle, Plus, MessageSquare, Clock, CheckCircle, XCircle, Search as SearchIcon, Trash2 } from "lucide-react";
 
 const CATEGORIES = [
   { value: "infrastructure", label: "Infraestrutura", emoji: "🏗️" },
@@ -37,7 +38,11 @@ interface Ticket {
   updated_at: string;
 }
 
-export default function HelpDesk() {
+interface Props {
+  compact?: boolean;
+}
+
+export default function HelpDesk({ compact }: Props) {
   const { user, isAdmin } = useAuth();
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [admins, setAdmins] = useState<{ user_id: string; full_name: string }[]>([]);
@@ -115,6 +120,14 @@ export default function HelpDesk() {
     fetchTickets();
   };
 
+  const handleDelete = async (ticketId: string) => {
+    const { error } = await supabase.from("help_desk_tickets").delete().eq("id", ticketId);
+    if (error) { toast.error("Erro ao excluir chamado."); return; }
+    toast.success("Chamado excluído.");
+    setDetailTicket(null);
+    fetchTickets();
+  };
+
   const [creatorNames, setCreatorNames] = useState<Record<string, string>>({});
   useEffect(() => {
     if (isAdmin && tickets.length > 0) {
@@ -128,6 +141,8 @@ export default function HelpDesk() {
   }, [tickets, isAdmin]);
 
   const categoryLabel = (c: string) => CATEGORIES.find(x => x.value === c);
+
+  const displayTickets = compact ? tickets.slice(0, 4) : tickets;
 
   return (
     <div>
@@ -196,14 +211,14 @@ export default function HelpDesk() {
         )}
       </div>
 
-      {tickets.length === 0 ? (
+      {displayTickets.length === 0 ? (
         <div className="text-center py-8 border rounded-xl bg-card">
           <MessageSquare className="w-10 h-10 mx-auto mb-2 text-muted-foreground/30" />
           <p className="text-sm text-muted-foreground">Nenhum chamado encontrado.</p>
         </div>
       ) : (
         <div className="space-y-2">
-          {tickets.map(ticket => {
+          {displayTickets.map(ticket => {
             const st = STATUS_MAP[ticket.status] || STATUS_MAP.open;
             const cat = categoryLabel(ticket.category);
             const StIcon = st.icon;
@@ -244,6 +259,7 @@ export default function HelpDesk() {
           {detailTicket && (() => {
             const st = STATUS_MAP[detailTicket.status] || STATUS_MAP.open;
             const cat = categoryLabel(detailTicket.category);
+            const canDelete = isAdmin || detailTicket.creator_id === user?.id;
             return (
               <>
                 <DialogHeader>
@@ -293,6 +309,33 @@ export default function HelpDesk() {
                     <Button onClick={handleAdminRespond} disabled={loading} className="w-full">
                       {loading ? "Enviando..." : "Enviar Resposta"}
                     </Button>
+                  </div>
+                )}
+
+                {canDelete && (
+                  <div className="border-t pt-3 mt-3">
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" size="sm" className="w-full gap-1.5">
+                          <Trash2 className="w-3.5 h-3.5" />
+                          Excluir chamado
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Excluir chamado?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta ação não pode ser desfeita. O chamado será permanentemente removido.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDelete(detailTicket.id)}>
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 )}
               </>

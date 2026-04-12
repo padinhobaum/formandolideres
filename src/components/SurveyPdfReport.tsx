@@ -96,7 +96,7 @@ export default function SurveyPdfReport() {
       }).filter(Boolean).join("");
 
       const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
-      const logoLiceuUrl = window.location.origin + "/lovable-uploads/d52473b9-ea3a-4883-9166-d1045f638583.png";
+      const logoLiceuUrl = window.location.origin + "/lovable-uploads/logolj.webp";
 
       const html = `
         <html>
@@ -117,12 +117,10 @@ export default function SurveyPdfReport() {
                 <img src="${logoFormandoUrl}" alt="Formando Líderes" style="height:48px;width:auto;" crossorigin="anonymous" />
                 <img src="${logoLiceuUrl}" alt="Liceu Jardim" style="height:48px;width:auto;" crossorigin="anonymous" />
               </div>
-              <div style="text-align:center;flex:1;">
-                <h1 style="font-size:22px;font-weight:700;color:#003d7a;margin:0;">Relatório Consolidado</h1>
-                <p style="font-size:14px;color:#64748b;margin:4px 0 0;">Pesquisas de Opinião — Líderes de Sala</p>
-              </div>
-              <div style="text-align:right;">
-                <p style="font-size:11px;color:#94a3b8;">Gerado em ${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</p>
+              <div style="flex:1;margin-left:24px;">
+                <h1 style="font-size:22px;font-weight:700;color:#003d7a;margin:0;text-align:left;">Relatório Consolidado</h1>
+                <p style="font-size:14px;color:#64748b;margin:4px 0 0;text-align:left;">Pesquisas de Opinião — Líderes de Sala</p>
+                <p style="font-size:11px;color:#94a3b8;margin:4px 0 0;text-align:left;">Gerado em ${new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}</p>
               </div>
             </div>
 
