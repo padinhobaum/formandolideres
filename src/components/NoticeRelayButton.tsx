@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CheckCircle } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 interface Props {
@@ -85,12 +86,17 @@ export default function NoticeRelayButton({ noticeId, requiresRelay }: Props) {
         <div className="flex items-center">
           <div className="flex -space-x-2">
             {relayUsers.slice(0, 6).map(u => (
-              <Avatar key={u.user_id} className="w-7 h-7 border-2 border-background">
-                <AvatarImage src={u.avatar_url || undefined} />
-                <AvatarFallback className="text-[8px] font-bold bg-accent text-accent-foreground">
-                  {getInitials(u.full_name)}
-                </AvatarFallback>
-              </Avatar>
+              <Tooltip key={u.user_id}>
+                <TooltipTrigger asChild>
+                  <Avatar className="w-7 h-7 border-2 border-background cursor-pointer transition-transform hover:scale-110">
+                    <AvatarImage src={u.avatar_url || undefined} />
+                    <AvatarFallback className="text-[8px] font-bold bg-accent text-accent-foreground">
+                      {getInitials(u.full_name)}
+                    </AvatarFallback>
+                  </Avatar>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">{u.full_name}</TooltipContent>
+              </Tooltip>
             ))}
           </div>
           {relayUsers.length > 6 && (

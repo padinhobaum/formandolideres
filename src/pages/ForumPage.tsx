@@ -486,8 +486,8 @@ export default function ForumPage() {
           </p>
       }
         <div className="font-heading mt-1 text-sm sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
-        {reply.image_url &&
-      <img src={reply.image_url} alt="" className="mt-2 max-w-full sm:max-w-xs max-h-48 rounded-xl object-cover" loading="lazy" />
+      {reply.image_url &&
+      <img src={reply.image_url} alt="" className="mt-2 max-w-full sm:max-w-xs max-h-48 rounded-xl object-contain" loading="lazy" />
       }
         <div className="flex items-center gap-3 sm:gap-4 mt-2">
           <button
@@ -717,8 +717,8 @@ export default function ForumPage() {
                   <div className="px-3 sm:px-4 pb-3 sm:pb-4">
                       {/* Topic content */}
                       <div className="font-heading text-base whitespace-pre-wrap leading-relaxed pl-0 sm:pl-[52px] break-words sm:text-base py-[12px] pr-[20px]"><RichText content={topic.content} /></div>
-                      {topic.image_url &&
-                    <img src={topic.image_url} alt="" className="mb-3 sm:ml-[52px] max-w-full max-h-72 object-cover rounded-xl" loading="lazy" />
+                    {topic.image_url &&
+                    <img src={topic.image_url} alt="" className="mb-3 sm:ml-[52px] max-w-full max-h-72 object-contain rounded-xl" loading="lazy" />
                     }
 
                       {/* Poll */}
