@@ -189,6 +189,12 @@ export default function NoticesPage() {
               {renderEventBadge(focusedNotice.event)}
               <NoticeRelayButton noticeId={focusedNotice.id} requiresRelay={focusedNotice.requires_relay} />
               {renderCtaButtons(focusedNotice.cta_buttons)}
+              <button
+                onClick={() => shareWhatsApp(focusedNotice)}
+                className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium mt-2 transition-colors"
+              >
+                <Share2 className="w-3.5 h-3.5" /> Compartilhar no WhatsApp
+              </button>
               <p className="text-xs text-muted-foreground mt-4">
                 {focusedNotice.author_name} · {formatDate(focusedNotice.created_at)}
               </p>
