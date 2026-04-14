@@ -13,7 +13,7 @@ import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
-import HelpDesk from "@/components/HelpDesk";
+
 import NoticeRelayButton from "@/components/NoticeRelayButton";
 
 interface Banner {
@@ -555,15 +555,8 @@ export default function DashboardPage() {
           </DialogContent>
         </Dialog>
 
-        {/* Chamados + Tópicos Recentes side by side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          {/* Help Desk */}
-          <section className="border bg-card rounded-xl p-4 md:p-6">
-            <HelpDesk compact />
-          </section>
-
-          {/* Tópicos Recentes do Fórum */}
-          <section className="border bg-card rounded-xl p-4 md:p-6">
+        {/* Tópicos Recentes do Fórum */}
+        <section className="mb-8 border bg-card rounded-xl p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Megaphone className="w-5 h-5 text-primary" strokeWidth={1.5} />
@@ -597,8 +590,7 @@ export default function DashboardPage() {
               )}
               </div>
             }
-          </section>
-        </div>
+        </section>
       </div>
       <LevelUpModal open={showLevelUp} onClose={() => setShowLevelUp(false)} newLevel={level} />
     </AppLayout>);
