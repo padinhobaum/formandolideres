@@ -59,6 +59,42 @@ export type Database = {
         }
         Relationships: []
       }
+      certificates: {
+        Row: {
+          body_text: string
+          created_at: string
+          created_by: string
+          id: string
+          issued_date: string
+          signatures: Json
+          title: string
+          user_id: string
+          verification_code: string
+        }
+        Insert: {
+          body_text: string
+          created_at?: string
+          created_by: string
+          id?: string
+          issued_date?: string
+          signatures?: Json
+          title: string
+          user_id: string
+          verification_code?: string
+        }
+        Update: {
+          body_text?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          issued_date?: string
+          signatures?: Json
+          title?: string
+          user_id?: string
+          verification_code?: string
+        }
+        Relationships: []
+      }
       chat_conversations: {
         Row: {
           created_at: string
@@ -334,45 +370,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      help_desk_tickets: {
-        Row: {
-          admin_response: string | null
-          category: Database["public"]["Enums"]["ticket_category"]
-          created_at: string
-          creator_id: string
-          description: string
-          id: string
-          status: Database["public"]["Enums"]["ticket_status"]
-          target_admin_id: string
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          admin_response?: string | null
-          category: Database["public"]["Enums"]["ticket_category"]
-          created_at?: string
-          creator_id: string
-          description: string
-          id?: string
-          status?: Database["public"]["Enums"]["ticket_status"]
-          target_admin_id: string
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          admin_response?: string | null
-          category?: Database["public"]["Enums"]["ticket_category"]
-          created_at?: string
-          creator_id?: string
-          description?: string
-          id?: string
-          status?: Database["public"]["Enums"]["ticket_status"]
-          target_admin_id?: string
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       live_streams: {
         Row: {
@@ -1114,12 +1111,6 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "leader"
-      ticket_category:
-        | "infrastructure"
-        | "conflicts"
-        | "performance"
-        | "meeting"
-      ticket_status: "open" | "deferred" | "denied" | "analyzing"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1248,13 +1239,6 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "leader"],
-      ticket_category: [
-        "infrastructure",
-        "conflicts",
-        "performance",
-        "meeting",
-      ],
-      ticket_status: ["open", "deferred", "denied", "analyzing"],
     },
   },
 } as const
