@@ -8,12 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays } from "lucide-react";
+import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays, Share2 } from "lucide-react";
 import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
-import HelpDesk from "@/components/HelpDesk";
+
 import NoticeRelayButton from "@/components/NoticeRelayButton";
 
 interface Banner {
@@ -550,20 +550,22 @@ export default function DashboardPage() {
                   </div>
               }
                 <NoticeRelayButton noticeId={selectedNotice.id} requiresRelay={selectedNotice.requires_relay} />
+                <button
+                  onClick={() => {
+                    const text = `📢 *${selectedNotice.title}*\n\n${selectedNotice.content.replace(/<[^>]*>/g, '').slice(0, 500)}`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium mt-2 transition-colors"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Compartilhar no WhatsApp
+                </button>
               </>
             }
           </DialogContent>
         </Dialog>
 
-        {/* Chamados + Tópicos Recentes side by side */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-          {/* Help Desk */}
-          <section className="border bg-card rounded-xl p-4 md:p-6">
-            <HelpDesk compact />
-          </section>
-
-          {/* Tópicos Recentes do Fórum */}
-          <section className="border bg-card rounded-xl p-4 md:p-6">
+        {/* Tópicos Recentes do Fórum */}
+        <section className="mb-8 border bg-card rounded-xl p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <Megaphone className="w-5 h-5 text-primary" strokeWidth={1.5} />
@@ -597,8 +599,7 @@ export default function DashboardPage() {
               )}
               </div>
             }
-          </section>
-        </div>
+        </section>
       </div>
       <LevelUpModal open={showLevelUp} onClose={() => setShowLevelUp(false)} newLevel={level} />
     </AppLayout>);

@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
-import { Pin, Maximize2, ExternalLink, CalendarDays, Clock } from "lucide-react";
+import { Pin, Maximize2, ExternalLink, CalendarDays, Clock, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RichText } from "@/components/RichTextEditor";
 import NoticeRelayButton from "@/components/NoticeRelayButton";
@@ -85,7 +85,13 @@ export default function NoticesPage() {
             </Button>
           </a>
         )}
-      </div>);
+    </div>);
+  };
+
+  const shareWhatsApp = (notice: Notice) => {
+    const text = `📢 *${notice.title}*\n\n${notice.content.replace(/<[^>]*>/g, '').slice(0, 500)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
   };
 
   const renderEventBadge = (event: NoticeEvent | null) => {
@@ -144,12 +150,18 @@ export default function NoticesPage() {
                       <Maximize2 className="w-4 h-4" strokeWidth={1.5} />
                     </button>
                   </div>
-                  <div className="text-sm font-body text-foreground line-clamp-3 mb-3">
+                  <div className="text-sm font-body text-foreground line-clamp-3 mb-3" style={{ fontFamily: "'Rawline', var(--font-body), sans-serif" }}>
                     <RichText content={n.content} />
                   </div>
                   {renderEventBadge(n.event)}
                   <NoticeRelayButton noticeId={n.id} requiresRelay={n.requires_relay} />
                   {renderCtaButtons(n.cta_buttons)}
+                  <button
+                    onClick={(e) => { e.stopPropagation(); shareWhatsApp(n); }}
+                    className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium mt-2 transition-colors"
+                  >
+                    <Share2 className="w-3.5 h-3.5" /> Compartilhar no WhatsApp
+                  </button>
                   <p className="text-xs text-muted-foreground mt-auto pt-3">
                     {n.author_name} · {formatDate(n.created_at)}
                   </p>
@@ -177,6 +189,12 @@ export default function NoticesPage() {
               {renderEventBadge(focusedNotice.event)}
               <NoticeRelayButton noticeId={focusedNotice.id} requiresRelay={focusedNotice.requires_relay} />
               {renderCtaButtons(focusedNotice.cta_buttons)}
+              <button
+                onClick={() => shareWhatsApp(focusedNotice)}
+                className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium mt-2 transition-colors"
+              >
+                <Share2 className="w-3.5 h-3.5" /> Compartilhar no WhatsApp
+              </button>
               <p className="text-xs text-muted-foreground mt-4">
                 {focusedNotice.author_name} · {formatDate(focusedNotice.created_at)}
               </p>

@@ -18,6 +18,7 @@ import NotFound from "@/pages/NotFound";
 import LoadingScreen from "@/components/LoadingScreen";
 import PublicSurveyPage from "@/pages/PublicSurveyPage";
 import LeaderDashboardPage from "@/pages/LeaderDashboardPage";
+import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/pesquisa/:code" element={<PublicSurveyPage />} />
+            <Route path="/verificar/:code" element={<CertificateVerifyPage />} />
             <Route path="/home" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
             <Route path="/alunos" element={<Navigate to="/forum" replace />} />
