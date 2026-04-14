@@ -550,6 +550,15 @@ export default function DashboardPage() {
                   </div>
               }
                 <NoticeRelayButton noticeId={selectedNotice.id} requiresRelay={selectedNotice.requires_relay} />
+                <button
+                  onClick={() => {
+                    const text = `📢 *${selectedNotice.title}*\n\n${selectedNotice.content.replace(/<[^>]*>/g, '').slice(0, 500)}`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+                  }}
+                  className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium mt-2 transition-colors"
+                >
+                  <Share2 className="w-3.5 h-3.5" /> Compartilhar no WhatsApp
+                </button>
               </>
             }
           </DialogContent>
