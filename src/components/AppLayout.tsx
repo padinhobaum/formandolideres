@@ -132,9 +132,9 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
   const isExternal = (url: string) => url.startsWith("http");
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row md:pl-72">
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex flex-col w-72 border-r bg-sidebar text-sidebar-foreground h-screen sticky top-0" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+      <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-72 flex-col border-r bg-sidebar text-sidebar-foreground" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="p-4 border-b border-sidebar-border flex items-center justify-center">
           <img alt="Formando Líderes" className="h-14 w-auto brightness-0 invert" src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png" />
         </div>
@@ -229,7 +229,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 pb-24 md:pb-0 overflow-y-auto flex flex-col min-h-screen">
+      <main className="flex-1 pb-24 md:pb-0 overflow-y-auto flex flex-col min-h-screen md:min-h-screen">
         {/* Mobile header */}
         <div className="md:hidden bg-card" style={{ paddingTop: "env(safe-area-inset-top)" }} />
         <header className="md:hidden flex items-center justify-between p-4 border-b bg-card">
