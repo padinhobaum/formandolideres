@@ -132,7 +132,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
   const isExternal = (url: string) => url.startsWith("http");
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+    <div className="min-h-screen flex flex-col md:flex-row">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex flex-col w-72 border-r bg-sidebar text-sidebar-foreground h-screen sticky top-0" style={{ paddingTop: "env(safe-area-inset-top)" }}>
         <div className="p-4 border-b border-sidebar-border flex items-center justify-center">
