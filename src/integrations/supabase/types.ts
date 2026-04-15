@@ -66,6 +66,7 @@ export type Database = {
           created_by: string
           id: string
           issued_date: string
+          show_liceu_logo: boolean
           signatures: Json
           title: string
           user_id: string
@@ -77,6 +78,7 @@ export type Database = {
           created_by: string
           id?: string
           issued_date?: string
+          show_liceu_logo?: boolean
           signatures?: Json
           title: string
           user_id: string
@@ -88,6 +90,7 @@ export type Database = {
           created_by?: string
           id?: string
           issued_date?: string
+          show_liceu_logo?: boolean
           signatures?: Json
           title?: string
           user_id?: string

@@ -1,0 +1,1 @@
+ALTER TABLE public.certificates ADD COLUMN show_liceu_logo boolean NOT NULL DEFAULT false;
