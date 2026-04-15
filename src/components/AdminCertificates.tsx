@@ -26,6 +26,7 @@ interface Certificate {
   issued_date: string;
   verification_code: string;
   created_at: string;
+  show_liceu_logo: boolean;
 }
 
 export default function AdminCertificates() {
@@ -35,6 +36,7 @@ export default function AdminCertificates() {
   const [title, setTitle] = useState("Certificado de Participação");
   const [bodyText, setBodyText] = useState("");
   const [selectedUserId, setSelectedUserId] = useState("");
+  const [showLiceuLogo, setShowLiceuLogo] = useState(false);
   const [signatures, setSignatures] = useState<Signature[]>([
     { name: "Arthur Scudeiro", role: "Fundador Formando Líderes" },
   ]);
@@ -78,6 +80,7 @@ export default function AdminCertificates() {
       body_text: bodyText.trim(),
       signatures: validSigs,
       created_by: user!.id,
+      show_liceu_logo: showLiceuLogo,
     } as any);
     setCreating(false);
     if (error) { toast.error("Erro ao criar certificado."); return; }
@@ -102,57 +105,73 @@ export default function AdminCertificates() {
     const dateStr = `Santo André, ${issuedDate.getDate()} de ${months[issuedDate.getMonth()]} de ${issuedDate.getFullYear()}`;
 
     const sigsHtml = (cert.signatures as Signature[]).map((s) => `
-      <div style="text-align:center;min-width:180px;">
-        <div style="border-top:2px solid #003d7a;width:200px;margin:0 auto 6px;"></div>
-        <p style="font-size:14px;font-weight:700;color:#003d7a;margin:0;">${s.name}</p>
+      <div style="text-align:center;min-width:160px;">
+        <div style="border-top:2px solid #003d7a;width:180px;margin:0 auto 8px;"></div>
+        <p style="font-size:13px;font-weight:700;color:#003d7a;margin:0;">${s.name}</p>
         <p style="font-size:11px;color:#64748b;margin:2px 0 0;">${s.role}</p>
       </div>
     `).join("");
+
+    const liceuLogoHtml = cert.show_liceu_logo ? `
+      <img src="${window.location.origin}/lovable-uploads/logolj-2.webp" alt="Liceu Jardim" style="height:50px;" crossorigin="anonymous" />
+    ` : '';
 
     const html = `<html>
 <head>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&display=swap');
+    @font-face {
+      font-family: 'Amithem';
+      src: url('https://fonts.cdnfonts.com/css/amithen') format('woff2');
+      font-weight: normal;
+      font-style: normal;
+    }
     * { margin:0; padding:0; box-sizing:border-box; }
     body { font-family:'Ubuntu',sans-serif; }
     @page { size:A4 landscape; margin:0; }
     @media print { body { -webkit-print-color-adjust:exact; print-color-adjust:exact; } }
   </style>
+  <link href="https://fonts.cdnfonts.com/css/amithen" rel="stylesheet">
 </head>
 <body>
-  <div style="width:297mm;height:210mm;position:relative;background:#fff;border:12px solid #003d7a;padding:40px 50px;display:flex;flex-direction:column;justify-content:space-between;">
-    <!-- Decorative corners -->
-    <div style="position:absolute;top:20px;left:20px;width:60px;height:60px;border-top:4px solid #d4a843;border-left:4px solid #d4a843;"></div>
-    <div style="position:absolute;top:20px;right:20px;width:60px;height:60px;border-top:4px solid #d4a843;border-right:4px solid #d4a843;"></div>
-    <div style="position:absolute;bottom:20px;left:20px;width:60px;height:60px;border-bottom:4px solid #d4a843;border-left:4px solid #d4a843;"></div>
-    <div style="position:absolute;bottom:20px;right:20px;width:60px;height:60px;border-bottom:4px solid #d4a843;border-right:4px solid #d4a843;"></div>
+  <div style="width:297mm;height:210mm;position:relative;background:#fff;padding:0;display:flex;flex-direction:column;">
+    <!-- Blue border frame -->
+    <div style="position:absolute;inset:8mm;border:3px solid #003d7a;border-radius:2px;pointer-events:none;"></div>
+    <div style="position:absolute;inset:11mm;border:1px solid #003d7a;border-radius:1px;pointer-events:none;"></div>
 
-    <!-- Header -->
-    <div style="text-align:center;">
-      <img src="${window.location.origin}/lovable-uploads/footer-logo.png" alt="Formando Líderes" style="height:56px;margin-bottom:12px;" crossorigin="anonymous" />
-      <h1 style="font-size:36px;font-weight:700;color:#003d7a;letter-spacing:3px;text-transform:uppercase;">${cert.title}</h1>
-      <div style="width:80px;height:3px;background:#d4a843;margin:12px auto;"></div>
-    </div>
+    <!-- Content -->
+    <div style="position:relative;z-index:1;padding:20mm 28mm 16mm;display:flex;flex-direction:column;align-items:center;justify-content:space-between;height:100%;">
+      
+      <!-- Header logos -->
+      <div style="display:flex;align-items:center;justify-content:center;gap:40px;margin-bottom:8px;">
+        <img src="${window.location.origin}/lovable-uploads/footer-logo.png" alt="Formando Líderes" style="height:70px;" crossorigin="anonymous" />
+        ${liceuLogoHtml}
+      </div>
 
-    <!-- Body -->
-    <div style="text-align:center;flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px 40px;">
-      <p style="font-size:16px;color:#64748b;margin-bottom:8px;">Conferido a</p>
-      <p style="font-size:32px;font-weight:700;color:#003d7a;margin-bottom:16px;border-bottom:2px solid #d4a843;display:inline-block;padding-bottom:4px;margin-left:auto;margin-right:auto;">${userName}</p>
-      <p style="font-size:15px;color:#334155;line-height:1.8;max-width:600px;margin:0 auto;">${cert.body_text}</p>
-    </div>
+      <!-- Title -->
+      <h1 style="font-size:52px;font-weight:900;color:#003d7a;letter-spacing:3px;text-transform:uppercase;font-style:italic;margin:8px 0 4px;text-decoration:underline;text-underline-offset:8px;text-decoration-thickness:3px;">CERTIFICADO</h1>
 
-    <!-- Date + Signatures -->
-    <div>
-      <p style="text-align:center;font-size:13px;color:#64748b;margin-bottom:24px;">${dateStr}</p>
-      <div style="display:flex;justify-content:center;gap:60px;flex-wrap:wrap;">
+      <!-- Student name -->
+      <p style="font-family:'Amithen','Brush Script MT','Segoe Script',cursive;font-size:48px;color:#4a7a3d;margin:12px 0 8px;line-height:1.2;">${userName}</p>
+
+      <!-- Body text -->
+      <div style="text-align:justify;max-width:580px;margin:0 auto;">
+        <p style="font-size:16px;color:#334155;line-height:1.9;">${cert.body_text}</p>
+      </div>
+
+      <!-- Date -->
+      <p style="text-align:right;width:100%;font-size:14px;color:#334155;margin:16px 0 8px;">${dateStr}</p>
+
+      <!-- Signatures -->
+      <div style="display:flex;justify-content:center;gap:50px;flex-wrap:wrap;margin-top:auto;">
         ${sigsHtml}
       </div>
-    </div>
 
-    <!-- QR Code + Verification -->
-    <div style="position:absolute;bottom:30px;right:40px;text-align:center;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(verifyUrl)}" alt="QR Code" style="width:70px;height:70px;" crossorigin="anonymous" />
-      <p style="font-size:8px;color:#94a3b8;margin-top:2px;">${cert.verification_code}</p>
+      <!-- QR Code -->
+      <div style="position:absolute;bottom:18mm;right:30mm;text-align:center;">
+        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(verifyUrl)}" alt="QR Code" style="width:100px;height:100px;" crossorigin="anonymous" />
+        <p style="font-size:8px;color:#94a3b8;margin-top:3px;">${cert.verification_code}</p>
+      </div>
     </div>
   </div>
 </body>
@@ -162,7 +181,7 @@ export default function AdminCertificates() {
     if (!printWindow) { toast.error("Permita pop-ups para gerar o PDF."); return; }
     printWindow.document.write(html);
     printWindow.document.close();
-    setTimeout(() => { printWindow.print(); }, 800);
+    setTimeout(() => { printWindow.print(); }, 1200);
     toast.success("Use 'Salvar como PDF' na janela de impressão.");
   };
 
@@ -200,12 +219,16 @@ export default function AdminCertificates() {
               <Textarea
                 value={bodyText}
                 onChange={(e) => setBodyText(e.target.value)}
-                placeholder="Ex: pela participação no Programa Formando Líderes..."
+                placeholder="Ex: Participou e contribuiu como Representante da classe..."
                 className="mt-1"
                 rows={3}
                 required
               />
             </div>
+            <label className="flex items-center gap-2 text-sm cursor-pointer group">
+              <input type="checkbox" checked={showLiceuLogo} onChange={(e) => setShowLiceuLogo(e.target.checked)} className="rounded" />
+              Exibir logo do Liceu Jardim no certificado
+            </label>
             <div className="space-y-2">
               <Label className="text-sm">Assinaturas</Label>
               {signatures.map((sig, i) => (
@@ -279,13 +302,17 @@ export default function AdminCertificates() {
             <DialogTitle className="font-heading">Preview do Certificado</DialogTitle>
           </DialogHeader>
           {previewCert && (
-            <div className="border rounded-xl p-6 bg-gradient-to-br from-primary/5 to-accent/5 text-center space-y-3">
-              <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-10 mx-auto" />
-              <h3 className="font-heading font-bold text-xl text-primary">{previewCert.title}</h3>
-              <div className="w-12 h-0.5 bg-accent mx-auto" />
-              <p className="text-xs text-muted-foreground">Conferido a</p>
-              <p className="font-heading font-bold text-lg text-primary">{getUserName(previewCert.user_id)}</p>
-              <p className="text-sm text-foreground">{previewCert.body_text}</p>
+            <div className="border-2 border-primary/30 rounded-xl p-6 bg-white text-center space-y-3 relative">
+              <div className="absolute inset-1 border border-primary/15 rounded-lg pointer-events-none" />
+              <div className="flex items-center justify-center gap-4">
+                <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-12" />
+                {previewCert.show_liceu_logo && (
+                  <img src="/lovable-uploads/logolj-2.webp" alt="Liceu Jardim" className="h-10" />
+                )}
+              </div>
+              <h3 className="font-heading font-black text-2xl text-primary italic underline underline-offset-4 decoration-2">{previewCert.title.toUpperCase()}</h3>
+              <p className="text-2xl text-green-700" style={{ fontFamily: "'Segoe Script', cursive" }}>{getUserName(previewCert.user_id)}</p>
+              <p className="text-sm text-foreground text-left">{previewCert.body_text}</p>
               <div className="flex justify-center gap-8 pt-4">
                 {(previewCert.signatures as Signature[]).map((s, i) => (
                   <div key={i} className="text-center">
