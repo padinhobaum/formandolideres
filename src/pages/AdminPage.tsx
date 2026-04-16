@@ -40,6 +40,7 @@ const tabGroups = [
       { key: "events" as Tab, label: "Eventos", icon: CalendarDays, desc: "Calendário de eventos" },
       { key: "surveys" as Tab, label: "Pesquisas", icon: ClipboardList, desc: "Pesquisas de opinião" },
       { key: "certificates" as Tab, label: "Certificados", icon: CheckCircle, desc: "Gerar certificados para líderes" },
+      { key: "edital" as Tab, label: "Edital", icon: ClipboardList, desc: "Edital de Propostas" },
     ],
   },
   {
