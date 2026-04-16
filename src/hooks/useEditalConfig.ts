@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface EditalConfig {
@@ -16,6 +16,7 @@ export function useEditalConfig() {
   const [config, setConfig] = useState<EditalConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   const fetchConfig = useCallback(async () => {
     try {
@@ -43,20 +44,23 @@ export function useEditalConfig() {
   useEffect(() => {
     fetchConfig();
 
-    const channelName = `edital-config-${Date.now()}`;
-    const channel = supabase
-      .channel(channelName)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "edital_config" },
-        (payload: any) => {
-          setConfig(payload.new as EditalConfig);
-        }
-      )
-      .subscribe();
+    // Create channel, register callback, THEN subscribe
+    const channel = supabase.channel("edital-config-live");
+    channel.on(
+      "postgres_changes",
+      { event: "UPDATE", schema: "public", table: "edital_config" },
+      (payload: any) => {
+        setConfig(payload.new as EditalConfig);
+      }
+    );
+    channel.subscribe();
+    channelRef.current = channel;
 
     return () => {
-      supabase.removeChannel(channel);
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
     };
   }, [fetchConfig]);
 
