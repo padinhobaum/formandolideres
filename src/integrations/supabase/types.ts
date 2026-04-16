@@ -990,6 +990,7 @@ export type Database = {
           estimated_effort: string
           expected_impact: string
           id: string
+          image_url: string | null
           score: number
           status: string
           target_audience: string | null
@@ -1008,6 +1009,7 @@ export type Database = {
           estimated_effort?: string
           expected_impact?: string
           id?: string
+          image_url?: string | null
           score?: number
           status?: string
           target_audience?: string | null
@@ -1026,6 +1028,7 @@ export type Database = {
           estimated_effort?: string
           expected_impact?: string
           id?: string
+          image_url?: string | null
           score?: number
           status?: string
           target_audience?: string | null
