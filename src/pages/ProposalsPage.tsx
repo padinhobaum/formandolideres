@@ -46,10 +46,22 @@ const PHASE_LABELS: Record<string, string> = {
 };
 
 export default function ProposalsPage() {
-  const { config, loading: configLoading } = useEditalConfig();
+  const { config, loading: configLoading, error: configError } = useEditalConfig();
   const navigate = useNavigate();
 
   if (configLoading) return <AppLayout><div className="flex items-center justify-center py-20"><div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" /></div></AppLayout>;
+
+  if (configError) {
+    return (
+      <AppLayout>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <Lock className="w-16 h-16 text-muted-foreground/30 mb-4" />
+          <h2 className="text-xl font-heading font-bold mb-2">Erro ao carregar o edital</h2>
+          <p className="text-muted-foreground">Tente novamente mais tarde.</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   if (!config?.is_active) {
     return (
