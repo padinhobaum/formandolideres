@@ -17,8 +17,12 @@ export function useEditalConfig() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const channelNameRef = useRef(`edital-config-live-${Math.random().toString(36).slice(2)}`);
 
   const fetchConfig = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
     try {
       const { data, error: fetchError } = await supabase
         .from("edital_config")
@@ -42,18 +46,29 @@ export function useEditalConfig() {
   }, []);
 
   useEffect(() => {
-    fetchConfig();
+    void fetchConfig();
 
-    // Create channel, register callback, THEN subscribe
-    const channel = supabase.channel("edital-config-live");
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+      channelRef.current = null;
+    }
+
+    const channel = supabase.channel(channelNameRef.current);
     channel.on(
       "postgres_changes",
       { event: "UPDATE", schema: "public", table: "edital_config" },
       (payload: any) => {
-        setConfig(payload.new as EditalConfig);
+        if (payload?.new) {
+          setConfig(payload.new as EditalConfig);
+          setError(null);
+        }
       }
     );
-    channel.subscribe();
+    channel.subscribe((status) => {
+      if (status === "CHANNEL_ERROR") {
+        console.error("Erro no canal realtime do edital_config");
+      }
+    });
     channelRef.current = channel;
 
     return () => {

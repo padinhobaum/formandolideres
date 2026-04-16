@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEditalConfig } from "@/hooks/useEditalConfig";
@@ -13,6 +13,7 @@ import ProposalDetail from "@/components/proposals/ProposalDetail";
 import CreateProposalDialog from "@/components/proposals/CreateProposalDialog";
 import ProposalSkeletons from "@/components/proposals/ProposalSkeletons";
 import ProposalEmptyState from "@/components/proposals/ProposalEmptyState";
+import ProposalPageErrorBoundary from "@/components/proposals/ProposalPageErrorBoundary";
 
 const PHASE_LABELS: Record<string, string> = {
   submission: "Submissão",
@@ -31,6 +32,14 @@ const PHASE_COLORS: Record<string, string> = {
 };
 
 export default function ProposalsPage() {
+  return (
+    <ProposalPageErrorBoundary>
+      <ProposalsPageContent />
+    </ProposalPageErrorBoundary>
+  );
+}
+
+function ProposalsPageContent() {
   const { config, loading: configLoading, error: configError, refetch } = useEditalConfig();
 
   if (configLoading) {
@@ -43,15 +52,15 @@ export default function ProposalsPage() {
     );
   }
 
-  if (configError) {
+  if (configError || !config) {
     return (
       <AppLayout>
         <div className="flex flex-col items-center justify-center py-20 text-center animate-fade-in">
           <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
             <Lock className="w-8 h-8 text-destructive/50" />
           </div>
-          <h2 className="text-xl font-heading font-bold mb-2">Erro ao carregar o edital</h2>
-          <p className="text-muted-foreground text-sm mb-4">Tente novamente mais tarde.</p>
+          <h2 className="text-xl font-heading font-bold mb-2">Erro ao carregar o edital. Tente novamente.</h2>
+          <p className="text-muted-foreground text-sm mb-4">Não foi possível carregar a configuração do edital agora.</p>
           <Button variant="outline" onClick={refetch} className="gap-1.5 rounded-xl">
             <RefreshCw className="w-4 h-4" /> Tentar novamente
           </Button>
@@ -90,39 +99,76 @@ function ProposalsFeed({ config }: { config: any }) {
   const [showCreate, setShowCreate] = useState(false);
   const [selectedProposal, setSelectedProposal] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [feedError, setFeedError] = useState<string | null>(null);
 
-  const fetchProposals = async () => {
+  const fetchProposals = useCallback(async () => {
+    setLoading(true);
+    setFeedError(null);
+
+    try {
     const orderCol = sortBy === "votes" ? "vote_count" : sortBy === "recent" ? "created_at" : "score";
-    const { data } = await supabase
-      .from("proposals")
-      .select("*")
-      .neq("status", "draft")
-      .order(orderCol, { ascending: false });
-    if (data) setProposals(data);
-    setLoading(false);
-  };
+      const { data, error } = await supabase
+        .from("proposals")
+        .select("*")
+        .neq("status", "draft")
+        .order(orderCol, { ascending: false });
 
-  const fetchMyVotes = async () => {
-    if (!user) return;
-    const { data } = await supabase.from("proposal_votes").select("proposal_id").eq("user_id", user.id);
-    if (data) {
-      setMyVotes(new Set(data.map((v: any) => v.proposal_id)));
-      setTotalVotesUsed(data.length);
+      if (error) {
+        throw error;
+      }
+
+      setProposals(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Erro ao buscar propostas:", error);
+      setProposals([]);
+      setFeedError("Erro ao carregar o edital. Tente novamente.");
+    } finally {
+      setLoading(false);
     }
-  };
+  }, [sortBy]);
+
+  const fetchMyVotes = useCallback(async () => {
+    if (!user) {
+      setMyVotes(new Set());
+      setTotalVotesUsed(0);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.from("proposal_votes").select("proposal_id").eq("user_id", user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      const voteIds = Array.isArray(data)
+        ? data.map((vote: any) => vote?.proposal_id).filter((proposalId: string | null | undefined): proposalId is string => Boolean(proposalId))
+        : [];
+
+      setMyVotes(new Set(voteIds));
+      setTotalVotesUsed(voteIds.length);
+    } catch (error) {
+      console.error("Erro ao buscar votos do usuário:", error);
+      setMyVotes(new Set());
+      setTotalVotesUsed(0);
+    }
+  }, [user]);
 
   useEffect(() => {
-    fetchProposals();
-    fetchMyVotes();
-  }, [sortBy]);
+    void fetchProposals();
+    void fetchMyVotes();
+  }, [fetchProposals, fetchMyVotes]);
 
   useEffect(() => {
     const channel = supabase
-      .channel(`proposals-feed-${Date.now()}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "proposals" }, () => fetchProposals())
+      .channel(`proposals-feed-${Date.now()}-${Math.random().toString(36).slice(2)}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "proposals" }, () => {
+        void fetchProposals();
+      })
       .subscribe();
+
     return () => { supabase.removeChannel(channel); };
-  }, [sortBy]);
+  }, [fetchProposals]);
 
   const handleVote = async (proposalId: string) => {
     if (!user) return;
@@ -151,7 +197,7 @@ function ProposalsFeed({ config }: { config: any }) {
       setTotalVotesUsed(prev => prev + 1);
       toast.success("Voto registrado! 👍");
     }
-    fetchProposals();
+    void fetchProposals();
   };
 
   if (selectedProposal) {
@@ -166,8 +212,11 @@ function ProposalsFeed({ config }: { config: any }) {
     );
   }
 
-  const canCreate = config.current_phase === "submission" || config.current_phase === "discussion";
-  const phaseColor = PHASE_COLORS[config.current_phase] || "";
+  const canCreate = config?.current_phase === "submission" || config?.current_phase === "discussion";
+  const phaseColor = PHASE_COLORS[config?.current_phase] || "";
+  const safePhaseLabel = PHASE_LABELS[config?.current_phase] || "Edital";
+  const safeMaxVotesPerUser = config?.max_votes_per_user ?? 0;
+  const safeProposals = proposals.filter((proposal): proposal is Record<string, any> => Boolean(proposal && typeof proposal === "object"));
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -179,10 +228,10 @@ function ProposalsFeed({ config }: { config: any }) {
         <div className="flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-2 flex-wrap">
             <Badge variant="outline" className={`text-xs rounded-full px-3 py-1 border ${phaseColor}`}>
-              {PHASE_LABELS[config.current_phase]}
+              {safePhaseLabel}
             </Badge>
             <span className="text-xs text-muted-foreground bg-secondary rounded-full px-3 py-1">
-              🗳️ {totalVotesUsed}/{config.max_votes_per_user} votos usados
+              🗳️ {totalVotesUsed}/{safeMaxVotesPerUser} votos usados
             </span>
           </div>
           {canCreate && (
@@ -217,17 +266,28 @@ function ProposalsFeed({ config }: { config: any }) {
       {/* Proposals list */}
       {loading ? (
         <ProposalSkeletons />
-      ) : proposals.length === 0 ? (
+      ) : feedError ? (
+        <div className="flex flex-col items-center justify-center py-16 px-4 text-center animate-fade-in">
+          <div className="w-16 h-16 rounded-full bg-destructive/10 flex items-center justify-center mb-4">
+            <Lock className="w-8 h-8 text-destructive/50" />
+          </div>
+          <h3 className="font-heading font-bold text-xl mb-2">Erro ao carregar o edital. Tente novamente.</h3>
+          <p className="text-muted-foreground text-sm mb-5">Não foi possível carregar as propostas agora.</p>
+          <Button variant="outline" onClick={() => void fetchProposals()} className="gap-1.5 rounded-xl">
+            <RefreshCw className="w-4 h-4" /> Tentar novamente
+          </Button>
+        </div>
+      ) : safeProposals.length === 0 ? (
         <ProposalEmptyState onCreateClick={() => setShowCreate(true)} canCreate={canCreate} />
       ) : (
         <div className="space-y-4">
-          {proposals.map((p, i) => (
+          {safeProposals.map((p, i) => (
             <ProposalCard
-              key={p.id}
+              key={p.id ?? `${p.title ?? "proposal"}-${i}`}
               proposal={p}
-              hasVoted={myVotes.has(p.id)}
-              onVote={() => handleVote(p.id)}
-              onClick={() => setSelectedProposal(p.id)}
+              hasVoted={p.id ? myVotes.has(p.id) : false}
+              onVote={() => p.id && handleVote(p.id)}
+              onClick={() => p.id && setSelectedProposal(p.id)}
               canVote={config.current_phase === "voting" || config.current_phase === "discussion"}
               rank={sortBy === "votes" ? i : undefined}
             />
@@ -238,7 +298,7 @@ function ProposalsFeed({ config }: { config: any }) {
       <CreateProposalDialog
         open={showCreate}
         onOpenChange={setShowCreate}
-        onCreated={() => { fetchProposals(); setShowCreate(false); }}
+        onCreated={() => { void fetchProposals(); setShowCreate(false); }}
       />
     </div>
   );
