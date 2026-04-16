@@ -115,6 +115,14 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     );
   }
 
+  // Insert "Propostas" before Admin if edital is active
+  if (editalConfig?.is_active) {
+    const adminIdx = dynamicNavItems.findIndex(i => i.path === "/admin");
+    dynamicNavItems.splice(adminIdx >= 0 ? adminIdx : dynamicNavItems.length, 0, 
+      { label: "Propostas", path: "/propostas", icon: FileEdit }
+    );
+  }
+
   const navItems: NavItem[] = hasActiveLive
     ? [
         ...dynamicNavItems.slice(0, 1),
