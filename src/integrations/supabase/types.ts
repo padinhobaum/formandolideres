@@ -723,6 +723,282 @@ export type Database = {
         }
         Relationships: []
       }
+      proposal_collaborators: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string
+          proposal_id: string
+          status: string
+          user_avatar_url: string | null
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by: string
+          proposal_id: string
+          status?: string
+          user_avatar_url?: string | null
+          user_id: string
+          user_name?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string
+          proposal_id?: string
+          status?: string
+          user_avatar_url?: string | null
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_collaborators_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_comments: {
+        Row: {
+          author_avatar_url: string | null
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          proposal_id: string
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_id: string
+          author_name?: string
+          content: string
+          created_at?: string
+          id?: string
+          proposal_id: string
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          proposal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_comments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_direction_feedback: {
+        Row: {
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          is_official: boolean
+          proposal_id: string
+        }
+        Insert: {
+          author_id: string
+          author_name?: string
+          content: string
+          created_at?: string
+          id?: string
+          is_official?: boolean
+          proposal_id: string
+        }
+        Update: {
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          is_official?: boolean
+          proposal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_direction_feedback_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_history: {
+        Row: {
+          changes: Json
+          created_at: string
+          edited_by: string
+          edited_by_name: string
+          id: string
+          proposal_id: string
+        }
+        Insert: {
+          changes?: Json
+          created_at?: string
+          edited_by: string
+          edited_by_name?: string
+          id?: string
+          proposal_id: string
+        }
+        Update: {
+          changes?: Json
+          created_at?: string
+          edited_by?: string
+          edited_by_name?: string
+          id?: string
+          proposal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_history_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_internal_comments: {
+        Row: {
+          author_avatar_url: string | null
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          proposal_id: string
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_id: string
+          author_name?: string
+          content: string
+          created_at?: string
+          id?: string
+          proposal_id: string
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          proposal_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_internal_comments_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposal_votes: {
+        Row: {
+          created_at: string
+          id: string
+          proposal_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          proposal_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          proposal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposal_votes_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "proposals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proposals: {
+        Row: {
+          author_avatar_url: string | null
+          author_id: string
+          author_name: string
+          category: string
+          comment_count: number
+          created_at: string
+          description: string
+          estimated_effort: string
+          expected_impact: string
+          id: string
+          score: number
+          status: string
+          target_audience: string | null
+          title: string
+          updated_at: string
+          vote_count: number
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_id: string
+          author_name?: string
+          category?: string
+          comment_count?: number
+          created_at?: string
+          description: string
+          estimated_effort?: string
+          expected_impact?: string
+          id?: string
+          score?: number
+          status?: string
+          target_audience?: string | null
+          title: string
+          updated_at?: string
+          vote_count?: number
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_id?: string
+          author_name?: string
+          category?: string
+          comment_count?: number
+          created_at?: string
+          description?: string
+          estimated_effort?: string
+          expected_impact?: string
+          id?: string
+          score?: number
+          status?: string
+          target_audience?: string | null
+          title?: string
+          updated_at?: string
+          vote_count?: number
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth: string
