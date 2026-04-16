@@ -19,6 +19,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import PublicSurveyPage from "@/pages/PublicSurveyPage";
 import LeaderDashboardPage from "@/pages/LeaderDashboardPage";
 import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
+import ProposalsPage from "@/pages/ProposalsPage";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/lider-ai" element={<ProtectedRoute><LiderAIPage /></ProtectedRoute>} />
             <Route path="/ao-vivo" element={<ProtectedRoute><LivePage /></ProtectedRoute>} />
             <Route path="/meus-resultados" element={<ProtectedRoute><LeaderDashboardPage /></ProtectedRoute>} />
+            <Route path="/propostas" element={<ProtectedRoute><ProposalsPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute adminOnly><AdminPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
