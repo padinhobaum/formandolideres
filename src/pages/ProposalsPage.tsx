@@ -93,7 +93,8 @@ function ProposalsPageContent() {
 function ProposalsFeed({ config }: { config: any }) {
   const { user } = useAuth();
   const [proposals, setProposals] = useState<any[]>([]);
-  const [myVotes, setMyVotes] = useState<Set<string>>(new Set());
+  // Map of proposalId -> vote_type (1 or -1)
+  const [myVotes, setMyVotes] = useState<Map<string, number>>(new Map());
   const [totalVotesUsed, setTotalVotesUsed] = useState(0);
   const [sortBy, setSortBy] = useState<"votes" | "recent" | "trending">("votes");
   const [showCreate, setShowCreate] = useState(false);
@@ -104,19 +105,14 @@ function ProposalsFeed({ config }: { config: any }) {
   const fetchProposals = useCallback(async () => {
     setLoading(true);
     setFeedError(null);
-
     try {
-    const orderCol = sortBy === "votes" ? "vote_count" : sortBy === "recent" ? "created_at" : "score";
+      const orderCol = sortBy === "votes" ? "vote_count" : sortBy === "recent" ? "created_at" : "score";
       const { data, error } = await supabase
         .from("proposals")
         .select("*")
         .neq("status", "draft")
         .order(orderCol, { ascending: false });
-
-      if (error) {
-        throw error;
-      }
-
+      if (error) throw error;
       setProposals(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Erro ao buscar propostas:", error);
@@ -129,27 +125,25 @@ function ProposalsFeed({ config }: { config: any }) {
 
   const fetchMyVotes = useCallback(async () => {
     if (!user) {
-      setMyVotes(new Set());
+      setMyVotes(new Map());
       setTotalVotesUsed(0);
       return;
     }
-
     try {
-      const { data, error } = await supabase.from("proposal_votes").select("proposal_id").eq("user_id", user.id);
-
-      if (error) {
-        throw error;
-      }
-
-      const voteIds = Array.isArray(data)
-        ? data.map((vote: any) => vote?.proposal_id).filter((proposalId: string | null | undefined): proposalId is string => Boolean(proposalId))
-        : [];
-
-      setMyVotes(new Set(voteIds));
-      setTotalVotesUsed(voteIds.length);
+      const { data, error } = await supabase
+        .from("proposal_votes")
+        .select("proposal_id, vote_type")
+        .eq("user_id", user.id);
+      if (error) throw error;
+      const voteMap = new Map<string, number>();
+      (data || []).forEach((v: any) => {
+        if (v.proposal_id) voteMap.set(v.proposal_id, v.vote_type ?? 1);
+      });
+      setMyVotes(voteMap);
+      setTotalVotesUsed(voteMap.size);
     } catch (error) {
-      console.error("Erro ao buscar votos do usuário:", error);
-      setMyVotes(new Set());
+      console.error("Erro ao buscar votos:", error);
+      setMyVotes(new Map());
       setTotalVotesUsed(0);
     }
   }, [user]);
@@ -166,36 +160,52 @@ function ProposalsFeed({ config }: { config: any }) {
         void fetchProposals();
       })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [fetchProposals]);
 
-  const handleVote = async (proposalId: string) => {
+  const handleVote = async (proposalId: string, voteType: number) => {
     if (!user) return;
     if (config.current_phase !== "voting" && config.current_phase !== "discussion") {
       toast.error("Votação não está aberta nesta fase.");
       return;
     }
 
-    if (myVotes.has(proposalId)) {
+    const existingVoteType = myVotes.get(proposalId);
+
+    if (existingVoteType === voteType) {
+      // Remove vote
       await supabase.from("proposal_votes").delete().eq("proposal_id", proposalId).eq("user_id", user.id);
-      setMyVotes(prev => { const s = new Set(prev); s.delete(proposalId); return s; });
+      setMyVotes(prev => { const m = new Map(prev); m.delete(proposalId); return m; });
       setTotalVotesUsed(prev => prev - 1);
       toast.success("Voto removido.");
+    } else if (existingVoteType !== undefined) {
+      // Change vote type (update)
+      await supabase
+        .from("proposal_votes")
+        .update({ vote_type: voteType } as any)
+        .eq("proposal_id", proposalId)
+        .eq("user_id", user.id);
+      setMyVotes(prev => new Map(prev).set(proposalId, voteType));
+      toast.success(voteType === 1 ? "Voto alterado para positivo! 👍" : "Voto alterado para negativo! 👎");
     } else {
+      // New vote
       if (totalVotesUsed >= config.max_votes_per_user) {
         toast.error(`Você já usou todos os seus ${config.max_votes_per_user} votos.`);
         return;
       }
-      const { error } = await supabase.from("proposal_votes").insert({ proposal_id: proposalId, user_id: user.id });
+      const { error } = await supabase.from("proposal_votes").insert({
+        proposal_id: proposalId,
+        user_id: user.id,
+        vote_type: voteType,
+      } as any);
       if (error) {
         if (error.code === "23505") toast.error("Você já votou nesta proposta.");
         else toast.error("Erro ao votar.");
         return;
       }
-      setMyVotes(prev => new Set(prev).add(proposalId));
+      setMyVotes(prev => new Map(prev).set(proposalId, voteType));
       setTotalVotesUsed(prev => prev + 1);
-      toast.success("Voto registrado! 👍");
+      toast.success(voteType === 1 ? "Voto positivo registrado! 👍" : "Voto negativo registrado! 👎");
     }
     void fetchProposals();
   };
@@ -206,8 +216,8 @@ function ProposalsFeed({ config }: { config: any }) {
         proposalId={selectedProposal}
         onBack={() => setSelectedProposal(null)}
         config={config}
-        onVote={handleVote}
-        hasVoted={myVotes.has(selectedProposal)}
+        onVote={(id, type) => handleVote(id, type)}
+        myVoteType={myVotes.get(selectedProposal) ?? null}
       />
     );
   }
@@ -220,7 +230,6 @@ function ProposalsFeed({ config }: { config: any }) {
 
   return (
     <div className="w-full max-w-3xl mx-auto">
-      {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-4">
           <img src="/lovable-uploads/edital-logo.png" alt="Edital de Propostas" className="h-14 sm:h-16 object-contain" />
@@ -242,7 +251,6 @@ function ProposalsFeed({ config }: { config: any }) {
         </div>
       </div>
 
-      {/* Sort tabs */}
       <div className="flex gap-1.5 mb-5 bg-secondary/50 rounded-xl p-1">
         {([
           { key: "votes" as const, icon: ArrowUp, label: "Mais votadas" },
@@ -263,7 +271,6 @@ function ProposalsFeed({ config }: { config: any }) {
         ))}
       </div>
 
-      {/* Proposals list */}
       {loading ? (
         <ProposalSkeletons />
       ) : feedError ? (
@@ -285,8 +292,8 @@ function ProposalsFeed({ config }: { config: any }) {
             <ProposalCard
               key={p.id ?? `${p.title ?? "proposal"}-${i}`}
               proposal={p}
-              hasVoted={p.id ? myVotes.has(p.id) : false}
-              onVote={() => p.id && handleVote(p.id)}
+              myVoteType={p.id ? (myVotes.get(p.id) ?? null) : null}
+              onVote={(type) => p.id && handleVote(p.id, type)}
               onClick={() => p.id && setSelectedProposal(p.id)}
               canVote={config.current_phase === "voting" || config.current_phase === "discussion"}
               rank={sortBy === "votes" ? i : undefined}
