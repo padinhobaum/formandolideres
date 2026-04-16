@@ -20,8 +20,9 @@ import { sendPushNotification } from "@/lib/sendPushNotification";
 import AdminSurveys from "@/components/AdminSurveys";
 
 import AdminCertificates from "@/components/AdminCertificates";
+import AdminEdital from "@/components/AdminEdital";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "certificates";
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "certificates" | "edital";
 
 interface CtaButton {
   text: string;
