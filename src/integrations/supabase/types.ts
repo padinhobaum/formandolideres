@@ -955,18 +955,21 @@ export type Database = {
           id: string
           proposal_id: string
           user_id: string
+          vote_type: number
         }
         Insert: {
           created_at?: string
           id?: string
           proposal_id: string
           user_id: string
+          vote_type?: number
         }
         Update: {
           created_at?: string
           id?: string
           proposal_id?: string
           user_id?: string
+          vote_type?: number
         }
         Relationships: [
           {
@@ -991,6 +994,8 @@ export type Database = {
           expected_impact: string
           id: string
           image_url: string | null
+          negative_vote_count: number
+          positive_vote_count: number
           score: number
           status: string
           target_audience: string | null
@@ -1010,6 +1015,8 @@ export type Database = {
           expected_impact?: string
           id?: string
           image_url?: string | null
+          negative_vote_count?: number
+          positive_vote_count?: number
           score?: number
           status?: string
           target_audience?: string | null
@@ -1029,6 +1036,8 @@ export type Database = {
           expected_impact?: string
           id?: string
           image_url?: string | null
+          negative_vote_count?: number
+          positive_vote_count?: number
           score?: number
           status?: string
           target_audience?: string | null
