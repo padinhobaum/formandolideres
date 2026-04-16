@@ -158,6 +158,7 @@ export default function AdminPage() {
             {tab === "events" && <AdminEvents />}
             {tab === "surveys" && <AdminSurveys />}
             {tab === "certificates" && <AdminCertificates />}
+            {tab === "edital" && <AdminEdital />}
           </div>
         </div>
       </div>
