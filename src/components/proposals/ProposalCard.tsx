@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ThumbsUp, MessageSquare, Sparkles } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageSquare, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
@@ -28,16 +28,17 @@ const CATEGORY_ICONS: Record<string, string> = {
 
 interface ProposalCardProps {
   proposal: any;
-  hasVoted: boolean;
-  onVote: () => void;
+  myVoteType: number | null; // 1, -1, or null
+  onVote: (type: number) => void;
   onClick: () => void;
   canVote: boolean;
   rank?: number;
 }
 
-export default function ProposalCard({ proposal: p, hasVoted, onVote, onClick, canVote, rank }: ProposalCardProps) {
+export default function ProposalCard({ proposal: p, myVoteType, onVote, onClick, canVote, rank }: ProposalCardProps) {
   const statusInfo = STATUS_LABELS[p.status] || STATUS_LABELS.submitted;
   const isTopProposal = rank !== undefined && rank < 3;
+  const score = (p.positive_vote_count ?? 0) - (p.negative_vote_count ?? 0);
 
   return (
     <div
@@ -48,7 +49,6 @@ export default function ProposalCard({ proposal: p, hasVoted, onVote, onClick, c
       )}
       onClick={onClick}
     >
-      {/* Top proposal badge */}
       {isTopProposal && (
         <div className="absolute top-3 right-3 z-10">
           <div className="flex items-center gap-1 bg-accent text-accent-foreground text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md">
@@ -58,19 +58,13 @@ export default function ProposalCard({ proposal: p, hasVoted, onVote, onClick, c
         </div>
       )}
 
-      {/* Image */}
       {p.image_url && (
         <div className="w-full h-44 overflow-hidden">
-          <img
-            src={p.image_url}
-            alt=""
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
+          <img src={p.image_url} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
         </div>
       )}
 
       <div className="p-4 sm:p-5">
-        {/* Category + Status row */}
         <div className="flex items-center gap-2 mb-2.5 flex-wrap">
           <span className="inline-flex items-center gap-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full px-2.5 py-0.5">
             {CATEGORY_ICONS[p.category] || "💡"} {p.category}
@@ -85,17 +79,14 @@ export default function ProposalCard({ proposal: p, hasVoted, onVote, onClick, c
           )}
         </div>
 
-        {/* Title */}
         <h3 className="font-heading font-bold text-base sm:text-lg leading-snug mb-1.5 group-hover:text-primary transition-colors line-clamp-2">
           {p.title}
         </h3>
 
-        {/* Description */}
         <p className="text-sm text-muted-foreground line-clamp-2 mb-3 leading-relaxed">
           {p.description}
         </p>
 
-        {/* Author + Stats */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Avatar className="w-7 h-7 ring-2 ring-background">
@@ -112,28 +103,51 @@ export default function ProposalCard({ proposal: p, hasVoted, onVote, onClick, c
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            {/* Comments count */}
+          <div className="flex items-center gap-2">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <MessageSquare className="w-3.5 h-3.5" />
               <span>{p.comment_count}</span>
             </div>
 
-            {/* Vote button */}
-            <button
-              onClick={e => { e.stopPropagation(); if (canVote) onVote(); }}
-              className={cn(
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-200",
-                hasVoted
-                  ? "bg-primary text-primary-foreground shadow-md scale-105"
-                  : "bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary",
-                !canVote && "opacity-50 cursor-default",
-                canVote && !hasVoted && "hover:scale-105 active:scale-95"
-              )}
-            >
-              <ThumbsUp className={cn("w-3.5 h-3.5", hasVoted && "animate-scale-in")} />
-              <span>{p.vote_count}</span>
-            </button>
+            {/* Vote buttons */}
+            <div className="flex items-center gap-0.5" onClick={e => e.stopPropagation()}>
+              <button
+                onClick={() => canVote && onVote(1)}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1.5 rounded-l-full text-xs font-semibold transition-all duration-200 border-r-0",
+                  myVoteType === 1
+                    ? "bg-primary text-primary-foreground shadow-md"
+                    : "bg-secondary text-muted-foreground hover:bg-primary/10 hover:text-primary",
+                  !canVote && "opacity-50 cursor-default",
+                  canVote && "hover:scale-105 active:scale-95"
+                )}
+              >
+                <ThumbsUp className={cn("w-3.5 h-3.5", myVoteType === 1 && "animate-scale-in")} />
+                <span>{p.positive_vote_count ?? 0}</span>
+              </button>
+
+              <span className={cn(
+                "px-2 py-1.5 text-xs font-bold min-w-[32px] text-center",
+                score > 0 ? "text-primary bg-primary/5" : score < 0 ? "text-destructive bg-destructive/5" : "text-muted-foreground bg-secondary"
+              )}>
+                {score > 0 ? `+${score}` : score}
+              </span>
+
+              <button
+                onClick={() => canVote && onVote(-1)}
+                className={cn(
+                  "flex items-center gap-1 px-2 py-1.5 rounded-r-full text-xs font-semibold transition-all duration-200 border-l-0",
+                  myVoteType === -1
+                    ? "bg-destructive text-destructive-foreground shadow-md"
+                    : "bg-secondary text-muted-foreground hover:bg-destructive/10 hover:text-destructive",
+                  !canVote && "opacity-50 cursor-default",
+                  canVote && "hover:scale-105 active:scale-95"
+                )}
+              >
+                <ThumbsDown className={cn("w-3.5 h-3.5", myVoteType === -1 && "animate-scale-in")} />
+                <span>{p.negative_vote_count ?? 0}</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio, ClipboardList, FileEdit } from "lucide-react";
+import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio, ClipboardList, FileEdit, Lightbulb } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePresence } from "@/hooks/usePresence";
@@ -304,21 +304,31 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around py-2 z-30" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
-        {visibleItems.filter((i) => !i.adminOnly).slice(0, 5).map((item) => {
-          const active = location.pathname === item.path;
-          return (
-            <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
-              active ? "text-primary font-medium" : "text-muted-foreground"}`
-              }>
-              
-              <item.icon className="w-5 h-5" strokeWidth={1.5} />
-              <span>{item.label}</span>
-            </button>);
-
-        })}
+        {(() => {
+          let bottomItems = visibleItems.filter((i) => !i.adminOnly);
+          // When edital is active, replace Videoaulas with Propostas in mobile bottom nav
+          if (editalConfig?.is_active) {
+            bottomItems = bottomItems.map(item =>
+              item.path === "/videoaulas"
+                ? { label: "Propostas", path: "/propostas", icon: Lightbulb }
+                : item
+            );
+          }
+          return bottomItems.slice(0, 5).map((item) => {
+            const active = location.pathname === item.path;
+            return (
+              <button
+                key={item.path}
+                onClick={() => navigate(item.path)}
+                className={`flex flex-col items-center gap-1 px-3 py-1 text-xs ${
+                active ? "text-primary font-medium" : "text-muted-foreground"}`}
+              >
+                <item.icon className="w-5 h-5" strokeWidth={1.5} />
+                <span>{item.label}</span>
+              </button>
+            );
+          });
+        })()}
         {isAdmin &&
         <button
           onClick={() => navigate("/admin")}

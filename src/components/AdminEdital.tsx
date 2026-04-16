@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { sendPushNotification } from "@/lib/sendPushNotification";
-import { ToggleLeft, ToggleRight, Settings2 } from "lucide-react";
+import { ToggleLeft, ToggleRight, Settings2, FileDown } from "lucide-react";
+import ProposalReport from "@/components/proposals/ProposalReport";
 
 const PHASES = [
   { value: "submission", label: "Submissão", desc: "Líderes podem criar e enviar propostas" },
@@ -23,6 +24,7 @@ export default function AdminEdital() {
   const [config, setConfig] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({ total: 0, submitted: 0, approved: 0 });
+  const [showReport, setShowReport] = useState(false);
 
   const fetchConfig = async () => {
     const { data } = await supabase.from("edital_config").select("*").limit(1).maybeSingle();
@@ -82,9 +84,12 @@ export default function AdminEdital() {
 
   const currentPhase = PHASES.find(p => p.value === config.current_phase);
 
+  if (showReport) {
+    return <ProposalReport onBack={() => setShowReport(false)} />;
+  }
+
   return (
     <div className="space-y-4">
-      {/* Status card */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm font-heading flex items-center gap-2">
@@ -101,16 +106,27 @@ export default function AdminEdital() {
                 {currentPhase?.label || config.current_phase}
               </Badge>
             </div>
-            <Button
-              variant={config.is_active ? "destructive" : "default"}
-              size="sm"
-              onClick={toggleActive}
-              disabled={loading}
-              className="gap-1.5"
-            >
-              {config.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-              {config.is_active ? "Desativar" : "Ativar"}
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowReport(true)}
+                className="gap-1.5"
+              >
+                <FileDown className="w-4 h-4" />
+                Relatório
+              </Button>
+              <Button
+                variant={config.is_active ? "destructive" : "default"}
+                size="sm"
+                onClick={toggleActive}
+                disabled={loading}
+                className="gap-1.5"
+              >
+                {config.is_active ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                {config.is_active ? "Desativar" : "Ativar"}
+              </Button>
+            </div>
           </div>
 
           {config.is_active && (
@@ -134,7 +150,6 @@ export default function AdminEdital() {
                 </Select>
               </div>
 
-              {/* Stats */}
               <div className="grid grid-cols-3 gap-3">
                 <div className="bg-secondary rounded-lg p-3 text-center">
                   <p className="text-2xl font-bold">{stats.total}</p>
@@ -154,7 +169,6 @@ export default function AdminEdital() {
         </CardContent>
       </Card>
 
-      {/* Direction Dashboard */}
       {config.is_active && <DirectionDashboard />}
     </div>
   );
@@ -180,17 +194,6 @@ function DirectionDashboard() {
     setProposals(prev => prev.map(p => p.id === id ? { ...p, status } : p));
   };
 
-  const addFeedback = async (proposalId: string, content: string) => {
-    if (!content.trim()) return;
-    await supabase.from("proposal_direction_feedback").insert({
-      proposal_id: proposalId,
-      author_id: (await supabase.auth.getUser()).data.user!.id,
-      author_name: profile?.full_name || "Admin",
-      content: content.trim(),
-    } as any);
-    toast.success("Feedback adicionado!");
-  };
-
   const categories = [...new Set(proposals.map(p => p.category))];
   const catCounts = categories.map(c => ({ cat: c, count: proposals.filter(p => p.category === c).length }));
 
@@ -203,7 +206,6 @@ function DirectionDashboard() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Category breakdown */}
         <div>
           <p className="text-xs font-medium text-muted-foreground mb-2">Por Categoria</p>
           <div className="flex flex-wrap gap-2">
@@ -213,7 +215,6 @@ function DirectionDashboard() {
           </div>
         </div>
 
-        {/* Top proposals */}
         <div>
           <p className="text-xs font-medium text-muted-foreground mb-2">Top Propostas</p>
           <div className="space-y-2">
@@ -222,7 +223,9 @@ function DirectionDashboard() {
                 <span className="text-lg font-bold text-primary w-6">#{i + 1}</span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{p.title}</p>
-                  <p className="text-xs text-muted-foreground">{p.vote_count} votos · {p.comment_count} comentários</p>
+                  <p className="text-xs text-muted-foreground">
+                    👍 {p.positive_vote_count ?? p.vote_count} · 👎 {p.negative_vote_count ?? 0} · 💬 {p.comment_count}
+                  </p>
                 </div>
                 <Select value={p.status} onValueChange={(v) => updateStatus(p.id, v)}>
                   <SelectTrigger className="w-32 h-8 text-xs">

@@ -126,3 +126,13 @@
   50% { width: 70%; margin-left: 15%; }
   100% { width: 0; margin-left: 100%; }
 }
+
+/* Print styles for reports */
+@media print {
+  body { background: white !important; }
+  .print\\:hidden { display: none !important; }
+  aside, nav, header, footer { display: none !important; }
+  main { padding: 0 !important; margin: 0 !important; }
+  .md\\:pl-72 { padding-left: 0 !important; }
+  .pb-24 { padding-bottom: 0 !important; }
+}

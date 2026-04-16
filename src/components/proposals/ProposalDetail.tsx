@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
-  ThumbsUp, MessageSquare, ChevronLeft, History, Lock, UserPlus,
+  ThumbsUp, ThumbsDown, MessageSquare, ChevronLeft, History, Lock, UserPlus,
   Send, Users, Calendar, Target, Zap, Sparkles,
 } from "lucide-react";
 import { STATUS_LABELS, IMPACT_LABELS, CATEGORY_ICONS } from "./ProposalCard";
@@ -22,11 +22,11 @@ interface ProposalDetailProps {
   proposalId: string;
   onBack: () => void;
   config: any;
-  onVote: (id: string) => void;
-  hasVoted: boolean;
+  onVote: (id: string, type: number) => void;
+  myVoteType: number | null;
 }
 
-export default function ProposalDetail({ proposalId, onBack, config, onVote, hasVoted }: ProposalDetailProps) {
+export default function ProposalDetail({ proposalId, onBack, config, onVote, myVoteType }: ProposalDetailProps) {
   const { user, profile, isAdmin } = useAuth();
   const [proposal, setProposal] = useState<any>(null);
   const [comments, setComments] = useState<any[]>([]);
@@ -69,10 +69,8 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
   const addComment = async () => {
     if (!newComment.trim() || !user) return;
     await supabase.from("proposal_comments").insert({
-      proposal_id: proposalId,
-      author_id: user.id,
-      author_name: profile?.full_name || "",
-      author_avatar_url: profile?.avatar_url || null,
+      proposal_id: proposalId, author_id: user.id,
+      author_name: profile?.full_name || "", author_avatar_url: profile?.avatar_url || null,
       content: newComment.trim(),
     } as any);
     setNewComment("");
@@ -82,10 +80,8 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
   const addInternalComment = async () => {
     if (!newInternal.trim() || !user) return;
     await supabase.from("proposal_internal_comments").insert({
-      proposal_id: proposalId,
-      author_id: user.id,
-      author_name: profile?.full_name || "",
-      author_avatar_url: profile?.avatar_url || null,
+      proposal_id: proposalId, author_id: user.id,
+      author_name: profile?.full_name || "", author_avatar_url: profile?.avatar_url || null,
       content: newInternal.trim(),
     } as any);
     setNewInternal("");
@@ -95,10 +91,8 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
   const addDirectionFeedback = async () => {
     if (!newFeedback.trim() || !user) return;
     await supabase.from("proposal_direction_feedback").insert({
-      proposal_id: proposalId,
-      author_id: user.id,
-      author_name: profile?.full_name || "Admin",
-      content: newFeedback.trim(),
+      proposal_id: proposalId, author_id: user.id,
+      author_name: profile?.full_name || "Admin", content: newFeedback.trim(),
     } as any);
     setNewFeedback("");
     fetchAll();
@@ -108,10 +102,8 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
     if (!inviteUserId || !user) return;
     const invitedUser = allUsers.find(u => u.user_id === inviteUserId);
     await supabase.from("proposal_collaborators").insert({
-      proposal_id: proposalId,
-      user_id: inviteUserId,
-      user_name: invitedUser?.full_name || "",
-      user_avatar_url: invitedUser?.avatar_url || null,
+      proposal_id: proposalId, user_id: inviteUserId,
+      user_name: invitedUser?.full_name || "", user_avatar_url: invitedUser?.avatar_url || null,
       invited_by: user.id,
     } as any);
     toast.success("Convite enviado!");
@@ -132,7 +124,6 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
         <div className="h-8 w-24 bg-muted rounded-lg animate-pulse" />
         <div className="h-48 bg-muted rounded-2xl animate-pulse" />
         <div className="h-6 w-3/4 bg-muted rounded-lg animate-pulse" />
-        <div className="h-4 w-1/2 bg-muted rounded-lg animate-pulse" />
       </div>
     );
   }
@@ -148,6 +139,7 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
 
   const statusInfo = STATUS_LABELS[proposal.status] || STATUS_LABELS.submitted;
   const canVote = config.current_phase === "voting" || config.current_phase === "discussion";
+  const score = (proposal.positive_vote_count ?? 0) - (proposal.negative_vote_count ?? 0);
 
   return (
     <div className="w-full max-w-3xl mx-auto animate-fade-in">
@@ -155,14 +147,12 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
         <ChevronLeft className="w-4 h-4" /> Voltar
       </Button>
 
-      {/* Hero image */}
       {proposal.image_url && (
         <div className="w-full h-56 sm:h-72 rounded-2xl overflow-hidden mb-5 shadow-sm">
           <img src={proposal.image_url} alt="" className="w-full h-full object-cover" />
         </div>
       )}
 
-      {/* Header */}
       <div className="mb-5">
         <div className="flex items-center gap-2 mb-3 flex-wrap">
           <span className="inline-flex items-center gap-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full px-2.5 py-1">
@@ -197,7 +187,6 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
           </div>
         </div>
 
-        {/* Info pills */}
         <div className="flex flex-wrap gap-2 mb-4">
           <div className="flex items-center gap-1.5 text-xs bg-secondary rounded-full px-3 py-1.5">
             <Target className="w-3.5 h-3.5 text-primary" />
@@ -219,23 +208,38 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
       </div>
 
       {/* Vote bar */}
-      <div className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/60 mb-6 backdrop-blur-sm">
-        <Button
-          variant={hasVoted ? "default" : "outline"}
-          size="sm"
-          onClick={() => onVote(proposalId)}
-          disabled={!canVote}
-          className={cn("gap-1.5 rounded-xl transition-all", hasVoted && "shadow-md")}
-        >
-          <ThumbsUp className="w-4 h-4" /> {hasVoted ? "Votado" : "Votar"}
-        </Button>
-        <span className="text-sm font-bold">{proposal.vote_count} votos</span>
+      <div className="flex items-center gap-3 p-4 rounded-2xl bg-secondary/60 mb-6 backdrop-blur-sm flex-wrap">
+        <div className="flex items-center gap-1">
+          <Button
+            variant={myVoteType === 1 ? "default" : "outline"}
+            size="sm"
+            onClick={() => onVote(proposalId, 1)}
+            disabled={!canVote}
+            className={cn("gap-1.5 rounded-l-xl rounded-r-none transition-all", myVoteType === 1 && "shadow-md")}
+          >
+            <ThumbsUp className="w-4 h-4" /> {proposal.positive_vote_count ?? 0}
+          </Button>
+          <span className={cn(
+            "px-3 py-2 text-sm font-bold border-y",
+            score > 0 ? "text-primary" : score < 0 ? "text-destructive" : "text-muted-foreground"
+          )}>
+            {score > 0 ? `+${score}` : score}
+          </span>
+          <Button
+            variant={myVoteType === -1 ? "destructive" : "outline"}
+            size="sm"
+            onClick={() => onVote(proposalId, -1)}
+            disabled={!canVote}
+            className={cn("gap-1.5 rounded-r-xl rounded-l-none transition-all", myVoteType === -1 && "shadow-md")}
+          >
+            <ThumbsDown className="w-4 h-4" /> {proposal.negative_vote_count ?? 0}
+          </Button>
+        </div>
         <span className="text-sm text-muted-foreground">{proposal.comment_count} comentários</span>
 
         {isAuthor && (
           <Button
-            variant="ghost"
-            size="sm"
+            variant="ghost" size="sm"
             onClick={async () => {
               const users = await supabase.from("profiles").select("user_id, full_name, avatar_url");
               if (users.data) setAllUsers(users.data);
@@ -284,16 +288,8 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
         <TabsContent value="comments" className="mt-4 space-y-2">
           {comments.map(c => <CommentItem key={c.id} comment={c} />)}
           <div className="flex gap-2 mt-3">
-            <Input
-              value={newComment}
-              onChange={e => setNewComment(e.target.value)}
-              placeholder="Adicionar comentário..."
-              onKeyDown={e => e.key === "Enter" && addComment()}
-              className="rounded-xl"
-            />
-            <Button onClick={addComment} size="sm" className="rounded-xl">
-              <Send className="w-4 h-4" />
-            </Button>
+            <Input value={newComment} onChange={e => setNewComment(e.target.value)} placeholder="Adicionar comentário..." onKeyDown={e => e.key === "Enter" && addComment()} className="rounded-xl" />
+            <Button onClick={addComment} size="sm" className="rounded-xl"><Send className="w-4 h-4" /></Button>
           </div>
         </TabsContent>
 
@@ -304,16 +300,8 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
             </p>
             {internalComments.map(c => <CommentItem key={c.id} comment={c} />)}
             <div className="flex gap-2 mt-3">
-              <Input
-                value={newInternal}
-                onChange={e => setNewInternal(e.target.value)}
-                placeholder="Mensagem interna..."
-                onKeyDown={e => e.key === "Enter" && addInternalComment()}
-                className="rounded-xl"
-              />
-              <Button onClick={addInternalComment} size="sm" className="rounded-xl">
-                <Send className="w-4 h-4" />
-              </Button>
+              <Input value={newInternal} onChange={e => setNewInternal(e.target.value)} placeholder="Mensagem interna..." onKeyDown={e => e.key === "Enter" && addInternalComment()} className="rounded-xl" />
+              <Button onClick={addInternalComment} size="sm" className="rounded-xl"><Send className="w-4 h-4" /></Button>
             </div>
           </TabsContent>
         )}
@@ -346,7 +334,6 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
         )}
       </Tabs>
 
-      {/* Admin feedback input */}
       {isAdmin && (
         <div className="mt-4 p-4 rounded-2xl bg-secondary/50 border">
           <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Feedback da Direção</p>
@@ -357,7 +344,6 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
         </div>
       )}
 
-      {/* Collaborators */}
       {collaborators.length > 0 && (
         <div className="mt-6">
           <p className="text-xs font-semibold text-muted-foreground mb-2 uppercase tracking-wide">Colaboradores</p>
@@ -378,7 +364,6 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
         </div>
       )}
 
-      {/* Invite dialog */}
       <Dialog open={showInvite} onOpenChange={setShowInvite}>
         <DialogContent className="rounded-2xl">
           <DialogHeader>
@@ -406,17 +391,19 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, has
 
 function CommentItem({ comment: c }: { comment: any }) {
   return (
-    <div className="flex gap-2.5 p-3 rounded-xl hover:bg-secondary/40 transition-colors">
+    <div className="flex gap-3 p-3 rounded-xl bg-secondary/30">
       <Avatar className="w-7 h-7 flex-shrink-0">
         <AvatarImage src={c.author_avatar_url || undefined} />
-        <AvatarFallback className="text-[8px] bg-primary/10 text-primary">{(c.author_name || "?")[0]}</AvatarFallback>
+        <AvatarFallback className="text-[9px] bg-primary/10 text-primary font-bold">
+          {(c.author_name || "?")[0]}
+        </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{c.author_name}</span>
-          <span className="text-xs text-muted-foreground">{new Date(c.created_at).toLocaleDateString("pt-BR")}</span>
+        <div className="flex items-center gap-2 mb-0.5">
+          <span className="text-xs font-medium">{c.author_name}</span>
+          <span className="text-[10px] text-muted-foreground">{new Date(c.created_at).toLocaleString("pt-BR")}</span>
         </div>
-        <p className="text-sm text-foreground leading-relaxed">{c.content}</p>
+        <p className="text-sm leading-relaxed">{c.content}</p>
       </div>
     </div>
   );
