@@ -210,6 +210,42 @@ export type Database = {
         }
         Relationships: []
       }
+      edital_config: {
+        Row: {
+          allow_multiple_votes_same_proposal: boolean
+          current_phase: string
+          id: string
+          is_active: boolean
+          max_votes_per_user: number
+          scheduled_close_at: string | null
+          scheduled_open_at: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allow_multiple_votes_same_proposal?: boolean
+          current_phase?: string
+          id?: string
+          is_active?: boolean
+          max_votes_per_user?: number
+          scheduled_close_at?: string | null
+          scheduled_open_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allow_multiple_votes_same_proposal?: boolean
+          current_phase?: string
+          id?: string
+          is_active?: boolean
+          max_votes_per_user?: number
+          scheduled_close_at?: string | null
+          scheduled_open_at?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           created_at: string
