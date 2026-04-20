@@ -89,7 +89,20 @@ export default function NoticesPage() {
   };
 
   const shareWhatsApp = (notice: Notice) => {
-    const text = `📢 *${notice.title}*\n\n${notice.content.replace(/<[^>]*>/g, '').slice(0, 500)}`;
+    // Strip HTML and decode common entities; preserve full text (no truncation)
+    const plain = notice.content
+      .replace(/<br\s*\/?>/gi, "\n")
+      .replace(/<\/p>/gi, "\n\n")
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+    const text = `📢 *${notice.title}*\n\n${plain}`;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   };

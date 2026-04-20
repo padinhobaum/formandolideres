@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -217,6 +217,17 @@ export default function LoginPage() {
               </button>
             </form>
           )}
+
+          {/* Legal links */}
+          <div className="mt-8 pt-6 border-t border-border/40 flex items-center justify-center gap-4 text-xs">
+            <Link to="/politica-de-privacidade" className="text-muted-foreground hover:text-primary transition-colors">
+              Política de Privacidade
+            </Link>
+            <span className="text-muted-foreground/40">·</span>
+            <Link to="/termos-de-uso" className="text-muted-foreground hover:text-primary transition-colors">
+              Termos de Uso
+            </Link>
+          </div>
         </div>
       </div>
     </div>
