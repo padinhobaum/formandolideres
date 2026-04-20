@@ -183,6 +183,36 @@ export type Database = {
           },
         ]
       }
+      class_climate_responses: {
+        Row: {
+          class_name: string
+          comment: string | null
+          created_at: string
+          id: string
+          mood_score: number
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          class_name: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          mood_score: number
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          class_name?: string
+          comment?: string | null
+          created_at?: string
+          id?: string
+          mood_score?: number
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       custom_links: {
         Row: {
           created_at: string
@@ -1428,6 +1458,7 @@ export type Database = {
         Returns: undefined
       }
       calculate_level: { Args: { xp: number }; Returns: number }
+      get_week_start: { Args: { _d?: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
