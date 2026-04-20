@@ -20,6 +20,8 @@ import PublicSurveyPage from "@/pages/PublicSurveyPage";
 import LeaderDashboardPage from "@/pages/LeaderDashboardPage";
 import CertificateVerifyPage from "@/pages/CertificateVerifyPage";
 import ProposalsPage from "@/pages/ProposalsPage";
+import PoliticaPrivacidadePage from "@/pages/PoliticaPrivacidadePage";
+import TermosUsoPage from "@/pages/TermosUsoPage";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +39,8 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/pesquisa/:code" element={<PublicSurveyPage />} />
             <Route path="/verificar/:code" element={<CertificateVerifyPage />} />
+            <Route path="/politica-de-privacidade" element={<PoliticaPrivacidadePage />} />
+            <Route path="/termos-de-uso" element={<TermosUsoPage />} />
             <Route path="/home" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
             <Route path="/alunos" element={<Navigate to="/forum" replace />} />
