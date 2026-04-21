@@ -13,6 +13,7 @@ import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
+import ClassClimateCard from "@/components/ClassClimateCard";
 
 import NoticeRelayButton from "@/components/NoticeRelayButton";
 
@@ -252,7 +253,9 @@ export default function DashboardPage() {
               Olá, {profile?.full_name?.split(" ")[0]}
             </h2>
             <p className="text-muted-foreground text-lg">
-              {isAdmin ? "Painel administrativo" : "Painel do líder de classe"}
+              {isAdmin
+                ? "Painel administrativo"
+                : `Líder da Sala${profile?.class_name ? ` (${profile.class_name})` : ""}`}
             </p>
             {!isAdmin && (
               <p className="text-sm text-muted-foreground mt-0.5">
@@ -386,34 +389,8 @@ export default function DashboardPage() {
           </button>
         )}
 
-        {/* Quick stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-8">
-          {/* Sala do Líder - full width on mobile */}
-          <div className="border bg-card p-4 text-left rounded-xl col-span-1">
-            <div className="flex items-center gap-2 mb-2">
-              <GraduationCap className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
-              <span className="font-body text-muted-foreground text-lg">Sala do Líder</span>
-            </div>
-            <p className="font-heading font-bold text-primary text-2xl">{profile?.class_name || "Não definida"}</p>
-          </div>
-          {/* Avisos + Online side by side on mobile */}
-          <div className="grid grid-cols-2 lg:contents gap-4">
-            <button onClick={() => navigate("/mural")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-              <div className="flex items-center gap-2 mb-2">
-                <Megaphone className="text-primary w-[20px] h-[20px]" strokeWidth={1.5} />
-                <span className="font-body text-muted-foreground text-lg">Avisos</span>
-              </div>
-              <p className="font-heading font-bold text-primary text-3xl">{notices.length}</p>
-            </button>
-            <button onClick={() => navigate("/forum")} className="border bg-card p-4 text-left hover:bg-secondary transition-colors rounded-xl">
-              <div className="flex items-center gap-2 mb-2">
-                <Circle className="text-accent fill-accent w-[10px] h-[10px]" />
-                <span className="font-body text-muted-foreground text-lg">Online</span>
-              </div>
-              <p className="font-heading font-bold text-accent text-3xl">{onlineCount}</p>
-            </button>
-          </div>
-        </div>
+        {/* Clima da Turma - substitui blocos antigos de Sala/Avisos/Online */}
+        {!isAdmin && <ClassClimateCard />}
 
         {/* Calendário de Eventos */}
         <EventCalendar />
