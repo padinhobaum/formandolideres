@@ -50,30 +50,32 @@ export default function LoginPage() {
     <div className="min-h-screen flex">
       {/* Left side - Branding (desktop only) */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-[hsl(207,100%,22%)] to-accent relative overflow-hidden flex-col items-center justify-center p-12">
-        {/* Decorative circles */}
-        <div className="absolute top-[-10%] right-[-10%] w-[50%] aspect-square rounded-full bg-primary-foreground/5" />
-        <div className="absolute bottom-[-15%] left-[-10%] w-[60%] aspect-square rounded-full bg-primary-foreground/5" />
+        {/* Decorative circles - floating animation */}
+        <div className="absolute top-[-10%] right-[-10%] w-[50%] aspect-square rounded-full bg-primary-foreground/5 animate-[float_8s_ease-in-out_infinite]" />
+        <div className="absolute bottom-[-15%] left-[-10%] w-[60%] aspect-square rounded-full bg-primary-foreground/5 animate-[float_10s_ease-in-out_infinite_reverse]" />
         <div className="absolute top-[40%] left-[10%] w-20 h-20 rounded-full bg-accent/30 animate-pulse" />
+        <div className="absolute top-[20%] right-[20%] w-12 h-12 rounded-full bg-primary-foreground/10 animate-[float_6s_ease-in-out_infinite]" />
 
-        <div className="relative z-10 text-center max-w-md">
+        <div className="relative z-10 text-center max-w-md animate-fade-in">
           <img
             src="/lovable-uploads/footer-logo.png"
             alt="Formando Líderes"
-            className="h-20 w-auto mx-auto mb-8 brightness-0 invert"
+            className="h-20 w-auto mx-auto mb-8 brightness-0 invert hover:scale-105 transition-transform duration-500"
           />
-          <h1 className="font-heading text-3xl font-bold text-primary-foreground mb-4">
+          <h1 className="font-heading text-3xl font-bold text-primary-foreground mb-4 animate-fade-in" style={{ animationDelay: "0.15s", animationFillMode: "backwards" }}>
             Portal do Líder
           </h1>
-          <p className="text-primary-foreground/80 text-lg font-body leading-relaxed">
+          <p className="text-primary-foreground/80 text-lg font-body leading-relaxed animate-fade-in" style={{ animationDelay: "0.3s", animationFillMode: "backwards" }}>
             Acesse o portal para gerenciar sua turma, acompanhar avisos e participar do fórum de líderes.
           </p>
 
           {/* Feature pills */}
           <div className="flex flex-wrap justify-center gap-2 mt-8">
-            {["Fórum", "Videoaulas", "Avisos", "LíderAI"].map((f) => (
+            {["Fórum", "Videoaulas", "Avisos", "LíderAI"].map((f, i) => (
               <span
                 key={f}
-                className="px-4 py-1.5 rounded-full bg-primary-foreground/10 text-primary-foreground/90 text-sm font-body border border-primary-foreground/10"
+                className="px-4 py-1.5 rounded-full bg-primary-foreground/10 text-primary-foreground/90 text-sm font-body border border-primary-foreground/10 animate-fade-in hover:bg-primary-foreground/20 hover:scale-105 transition-all cursor-default"
+                style={{ animationDelay: `${0.45 + i * 0.1}s`, animationFillMode: "backwards" }}
               >
                 {f}
               </span>
@@ -84,17 +86,17 @@ export default function LoginPage() {
 
       {/* Right side - Form */}
       <div className="flex-1 flex items-center justify-center p-6 bg-background">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm animate-fade-in">
           {/* Mobile logo */}
-          <div className="lg:hidden flex justify-center mb-8">
+          <div className="lg:hidden flex justify-center mb-8 animate-scale-in">
             <img
               alt="Formando Líderes"
-              className="h-14 w-auto"
+              className="h-14 w-auto hover:scale-105 transition-transform duration-300"
               src="/lovable-uploads/d52473b9-ea3a-4883-9166-d1045f638583.png"
             />
           </div>
 
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 animate-fade-in" style={{ animationDelay: "0.1s", animationFillMode: "backwards" }}>
             <h2 className="font-heading text-2xl font-bold text-foreground">
               {mode === "login" ? "Bem-vindo de volta!" : "Recuperar senha"}
             </h2>
@@ -166,7 +168,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                className="w-full h-11 gap-2 text-base font-body"
+                className="w-full h-11 gap-2 text-base font-body transition-all duration-300 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0"
                 disabled={loading}
               >
                 {loading ? (
@@ -177,7 +179,7 @@ export default function LoginPage() {
                 ) : (
                   <>
                     Entrar
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                   </>
                 )}
               </Button>
