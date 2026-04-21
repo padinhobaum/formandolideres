@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import {
-  ThumbsUp, ThumbsDown, MessageSquare, ChevronLeft, History, Lock, UserPlus,
+  Check, X, MessageSquare, ChevronLeft, History, Lock, UserPlus, Trash2,
   Send, Users, Calendar, Target, Zap, Sparkles,
 } from "lucide-react";
 import { STATUS_LABELS, IMPACT_LABELS, CATEGORY_ICONS } from "./ProposalCard";
@@ -176,9 +176,11 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, myV
             <span className="font-medium text-foreground">{proposal.author_name}</span>
           </div>
           {collaborators.filter(c => c.status === "accepted").length > 0 && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5 bg-accent/10 text-accent rounded-full px-2.5 py-1">
               <Users className="w-3.5 h-3.5" />
-              <span>+{collaborators.filter(c => c.status === "accepted").length} colaboradores</span>
+              <span className="text-xs font-medium">
+                Co-autores: {collaborators.filter(c => c.status === "accepted").map(c => c.user_name).join(", ")}
+              </span>
             </div>
           )}
           <div className="flex items-center gap-1">
@@ -217,7 +219,7 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, myV
             disabled={!canVote}
             className={cn("gap-1.5 rounded-l-xl rounded-r-none transition-all", myVoteType === 1 && "shadow-md")}
           >
-            <ThumbsUp className="w-4 h-4" /> {proposal.positive_vote_count ?? 0}
+            <Check className="w-4 h-4" strokeWidth={3} /> {proposal.positive_vote_count ?? 0}
           </Button>
           <span className={cn(
             "px-3 py-2 text-sm font-bold border-y",
@@ -232,7 +234,7 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, myV
             disabled={!canVote}
             className={cn("gap-1.5 rounded-r-xl rounded-l-none transition-all", myVoteType === -1 && "shadow-md")}
           >
-            <ThumbsDown className="w-4 h-4" /> {proposal.negative_vote_count ?? 0}
+            <X className="w-4 h-4" strokeWidth={3} /> {proposal.negative_vote_count ?? 0}
           </Button>
         </div>
         <span className="text-sm text-muted-foreground">{proposal.comment_count} comentários</span>
@@ -248,6 +250,22 @@ export default function ProposalDetail({ proposalId, onBack, config, onVote, myV
             className="ml-auto gap-1 text-xs rounded-xl"
           >
             <UserPlus className="w-3.5 h-3.5" /> Convidar
+          </Button>
+        )}
+
+        {(isAuthor || isAdmin) && (
+          <Button
+            variant="ghost" size="sm"
+            onClick={async () => {
+              if (!confirm("Tem certeza que deseja excluir esta proposta? Esta ação não pode ser desfeita.")) return;
+              const { error } = await supabase.from("proposals").delete().eq("id", proposalId);
+              if (error) { toast.error("Erro ao excluir proposta."); return; }
+              toast.success("Proposta excluída.");
+              onBack();
+            }}
+            className={cn("gap-1 text-xs rounded-xl text-destructive hover:bg-destructive/10 hover:text-destructive", !isAuthor && "ml-auto")}
+          >
+            <Trash2 className="w-3.5 h-3.5" /> Excluir
           </Button>
         )}
       </div>

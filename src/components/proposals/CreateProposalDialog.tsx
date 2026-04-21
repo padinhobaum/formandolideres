@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Send, ImagePlus, X, Lightbulb } from "lucide-react";
+import { cropImageToResolution } from "@/lib/imageUtils";
 
 const CATEGORIES = [
   "Infraestrutura", "Eventos", "Ensino", "Convivência", "Tecnologia", "Esportes", "Cultura", "Outro",
@@ -51,9 +52,11 @@ export default function CreateProposalDialog({ open, onOpenChange, onCreated }: 
 
   const uploadImage = async (): Promise<string | null> => {
     if (!imageFile || !user) return null;
-    const ext = imageFile.name.split(".").pop();
+    // Crop/resize to 1920x1080 with smart center-crop (cover behavior)
+    const processed = await cropImageToResolution(imageFile, 1920, 1080, 0.9);
+    const ext = processed.name.split(".").pop() || "jpg";
     const path = `${user.id}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("proposal_images").upload(path, imageFile);
+    const { error } = await supabase.storage.from("proposal_images").upload(path, processed);
     if (error) {
       console.error("Upload error:", error);
       return null;
