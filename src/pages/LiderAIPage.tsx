@@ -117,9 +117,9 @@ export default function LiderAIPage() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100vh-12rem)] md:h-[calc(100vh-6rem)] max-w-4xl mx-auto">
+      <div className="flex flex-col h-[calc(100vh-9rem)] md:h-[calc(100vh-7rem)] max-w-4xl mx-auto md:px-2 md:py-2">
         {/* Sticky Header - animates in on first message */}
-        <div className={`sticky top-0 z-10 flex items-center gap-3 px-4 py-3 mb-4 rounded-xl bg-gradient-to-r from-primary/80 to-accent/80 backdrop-blur-sm transition-all duration-500 ease-out ${hasStarted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
+        <div className={`sticky top-0 z-10 flex items-center gap-3 px-4 py-3 mb-3 md:mb-5 rounded-xl bg-gradient-to-r from-primary/80 to-accent/80 backdrop-blur-sm transition-all duration-500 ease-out ${hasStarted ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-4'}`}>
           <Sparkles className="w-5 h-5 text-primary-foreground" />
           <h1 className="font-heading font-bold text-lg text-primary-foreground">LíderAI</h1>
         </div>
@@ -222,9 +222,9 @@ export default function LiderAIPage() {
           </div>
         )}
 
-        {/* Input - sticky on mobile, integrated with bottom nav */}
-        <div className="md:pt-2 md:pb-1 md:border-t md:relative fixed md:static bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-20 bg-background/95 backdrop-blur-md border-t md:bg-transparent md:backdrop-blur-none px-4 md:px-0 py-2 md:py-0 shadow-lg md:shadow-none">
-          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="gap-2 flex items-center py-2 max-w-4xl mx-auto">
+        {/* Input - sticky on mobile, integrated with bottom nav (no gap) */}
+        <div className="md:pt-3 md:pb-1 md:border-t md:relative fixed md:static bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-20 bg-background/95 backdrop-blur-md border-t md:bg-transparent md:backdrop-blur-none px-4 md:px-0 py-2 md:py-0 shadow-lg md:shadow-none">
+          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="gap-2 flex items-center py-1 md:py-2 max-w-4xl mx-auto">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -236,7 +236,7 @@ export default function LiderAIPage() {
               <Send className="w-4 h-4" />
             </Button>
           </form>
-          <p className="hidden md:block text-[11px] text-muted-foreground/60 text-center mt-1">
+          <p className="hidden md:block text-[11px] text-muted-foreground/60 text-center mt-1.5">
             As respostas da IA podem ser imprecisas. Verifique informações críticas.
           </p>
         </div>

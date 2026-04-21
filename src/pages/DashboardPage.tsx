@@ -252,11 +252,16 @@ export default function DashboardPage() {
             <h2 className="font-heading font-bold text-4xl text-accent">
               Olá, {profile?.full_name?.split(" ")[0]}
             </h2>
-            <p className="text-muted-foreground text-lg">
-              {isAdmin
-                ? "Painel administrativo"
-                : `Líder da Sala${profile?.class_name ? ` (${profile.class_name})` : ""}`}
-            </p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-muted-foreground text-lg">
+                {isAdmin ? "Painel administrativo" : "Líder da Sala"}
+              </p>
+              {!isAdmin && profile?.class_name && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-body font-semibold bg-secondary text-secondary-foreground border border-primary/20 shadow-sm">
+                  {profile.class_name}
+                </span>
+              )}
+            </div>
             {!isAdmin && (
               <p className="text-sm text-muted-foreground mt-0.5">
                 Nível {level} · <span className="text-accent font-medium">{totalXp} XP</span> / {nextLevelXp} XP
