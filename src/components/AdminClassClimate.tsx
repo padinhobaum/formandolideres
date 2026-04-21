@@ -248,7 +248,7 @@ export default function AdminClassClimate() {
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Sparkles className="w-4 h-4 text-primary" />
-                  <p className="font-heading font-bold text-sm text-primary">Insights automáticos</p>
+                  <p className="font-heading font-bold text-sm text-primary">Insights</p>
                 </div>
                 <ul className="space-y-1.5">
                   {insights.map((ins, i) => (

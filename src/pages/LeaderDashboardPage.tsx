@@ -95,9 +95,15 @@ export default function LeaderDashboardPage() {
           </Avatar>
           <div className="text-center sm:text-left">
             <h1 className="text-xl font-heading font-bold text-foreground">{profile?.full_name}</h1>
-            <p className="text-sm text-muted-foreground">
-              Líder da Sala{profile?.class_name ? ` (${profile.class_name})` : ""} · Resultados
-            </p>
+            <div className="flex items-center justify-center sm:justify-start gap-2 flex-wrap text-sm text-muted-foreground">
+              <span>Líder da Sala</span>
+              {profile?.class_name && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-body font-semibold bg-secondary text-secondary-foreground border border-primary/20">
+                  {profile.class_name}
+                </span>
+              )}
+              <span>· Resultados</span>
+            </div>
           </div>
         </div>
 
