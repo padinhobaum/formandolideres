@@ -222,9 +222,9 @@ export default function LiderAIPage() {
           </div>
         )}
 
-        {/* Input */}
-        <div className="pt-2 pb-1 border-t">
-          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="gap-2 flex items-center py-2">
+        {/* Input - sticky on mobile, integrated with bottom nav */}
+        <div className="md:pt-2 md:pb-1 md:border-t md:relative fixed md:static bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-20 bg-background/95 backdrop-blur-md border-t md:bg-transparent md:backdrop-blur-none px-4 md:px-0 py-2 md:py-0 shadow-lg md:shadow-none">
+          <form onSubmit={(e) => { e.preventDefault(); send(input); }} className="gap-2 flex items-center py-2 max-w-4xl mx-auto">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
@@ -236,7 +236,7 @@ export default function LiderAIPage() {
               <Send className="w-4 h-4" />
             </Button>
           </form>
-          <p className="text-[11px] text-muted-foreground/60 text-center mt-1">
+          <p className="hidden md:block text-[11px] text-muted-foreground/60 text-center mt-1">
             As respostas da IA podem ser imprecisas. Verifique informações críticas.
           </p>
         </div>

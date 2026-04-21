@@ -1,6 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ThumbsUp, ThumbsDown, MessageSquare, Sparkles } from "lucide-react";
+import { Check, X, MessageSquare, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const STATUS_LABELS: Record<string, { label: string; className: string }> = {
@@ -122,7 +122,7 @@ export default function ProposalCard({ proposal: p, myVoteType, onVote, onClick,
                   canVote && "hover:scale-105 active:scale-95"
                 )}
               >
-                <ThumbsUp className={cn("w-3.5 h-3.5", myVoteType === 1 && "animate-scale-in")} />
+                <Check className={cn("w-3.5 h-3.5", myVoteType === 1 && "animate-scale-in")} strokeWidth={3} />
                 <span>{p.positive_vote_count ?? 0}</span>
               </button>
 
@@ -144,7 +144,7 @@ export default function ProposalCard({ proposal: p, myVoteType, onVote, onClick,
                   canVote && "hover:scale-105 active:scale-95"
                 )}
               >
-                <ThumbsDown className={cn("w-3.5 h-3.5", myVoteType === -1 && "animate-scale-in")} />
+                <X className={cn("w-3.5 h-3.5", myVoteType === -1 && "animate-scale-in")} strokeWidth={3} />
                 <span>{p.negative_vote_count ?? 0}</span>
               </button>
             </div>

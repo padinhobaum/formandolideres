@@ -95,7 +95,9 @@ export default function LeaderDashboardPage() {
           </Avatar>
           <div className="text-center sm:text-left">
             <h1 className="text-xl font-heading font-bold text-foreground">{profile?.full_name}</h1>
-            <p className="text-sm text-muted-foreground">Resultados | Pesquisa de Opinião | Líderes de Sala</p>
+            <p className="text-sm text-muted-foreground">
+              Líder da Sala{profile?.class_name ? ` (${profile.class_name})` : ""} · Resultados
+            </p>
           </div>
         </div>
 

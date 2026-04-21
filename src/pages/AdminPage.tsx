@@ -19,10 +19,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sendPushNotification } from "@/lib/sendPushNotification";
 import AdminSurveys from "@/components/AdminSurveys";
 
-import AdminCertificates from "@/components/AdminCertificates";
 import AdminEdital from "@/components/AdminEdital";
+import AdminClassClimate from "@/components/AdminClassClimate";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "certificates" | "edital";
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate";
 
 interface CtaButton {
   text: string;
@@ -39,8 +39,8 @@ const tabGroups = [
       { key: "lives" as Tab, label: "Ao Vivo", icon: Radio, desc: "Transmissões ao vivo" },
       { key: "events" as Tab, label: "Eventos", icon: CalendarDays, desc: "Calendário de eventos" },
       { key: "surveys" as Tab, label: "Pesquisas", icon: ClipboardList, desc: "Pesquisas de opinião" },
-      { key: "certificates" as Tab, label: "Certificados", icon: CheckCircle, desc: "Gerar certificados para líderes" },
       { key: "edital" as Tab, label: "Edital", icon: ClipboardList, desc: "Edital de Propostas" },
+      { key: "climate" as Tab, label: "Clima da Turma", icon: CheckCircle, desc: "Relatório semanal de clima" },
     ],
   },
   {
@@ -157,8 +157,8 @@ export default function AdminPage() {
             {tab === "password" && <AdminChangePassword />}
             {tab === "events" && <AdminEvents />}
             {tab === "surveys" && <AdminSurveys />}
-            {tab === "certificates" && <AdminCertificates />}
             {tab === "edital" && <AdminEdital />}
+            {tab === "climate" && <AdminClassClimate />}
           </div>
         </div>
       </div>

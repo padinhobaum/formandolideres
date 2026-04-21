@@ -670,6 +670,18 @@ export default function ForumPage() {
                     onClick={() => handleExpandTopic(topic.id)}
                     className="w-full text-left hover:bg-muted/50 transition-colors"
                     style={catColor ? { borderLeft: `3px solid ${catColor}` } : {}}>
+                    {/* Image preview - shown when topic has image and is collapsed */}
+                    {topic.image_url && !isExpanded && (
+                      <div className="relative w-full h-40 sm:h-48 overflow-hidden bg-muted">
+                        <img
+                          src={topic.image_url}
+                          alt=""
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent pointer-events-none" />
+                      </div>
+                    )}
                     <div className="flex gap-2 sm:gap-3 p-3 sm:p-4">
                       <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-0.5">
                         <AvatarImage src={topic.author_avatar_url || undefined} />
@@ -702,6 +714,11 @@ export default function ForumPage() {
                               Enquete
                             </span>
                           }
+                          {topic.image_url && !isExpanded && (
+                            <span className="text-[10px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full font-medium">
+                              📷 com imagem
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-4 mt-2">
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
