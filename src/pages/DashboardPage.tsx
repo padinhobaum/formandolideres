@@ -237,36 +237,49 @@ export default function DashboardPage() {
       <div className="w-full">
         {/* Welcome with avatar */}
         <div className="flex items-center gap-4 mb-6 flex-wrap">
-          <UserLevelBadge
-            avatarUrl={profile?.avatar_url}
-            fullName={profile?.full_name || "U"}
-            xpData={xpData}
-            size={64}
-          >
-            <label className="absolute inset-0 flex items-center justify-center bg-foreground/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-              <Camera className="w-5 h-5 text-background" />
-              <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
-            </label>
-          </UserLevelBadge>
+          {isAdmin ? (
+            // Admin: Avatar simples sem nível
+            <div className="relative group">
+              <Avatar className="w-16 h-16 border-2 border-accent">
+                <AvatarImage src={profile?.avatar_url || undefined} />
+                <AvatarFallback className="text-xl bg-primary text-primary-foreground font-heading">
+                  {getInitials(profile?.full_name || "U")}
+                </AvatarFallback>
+              </Avatar>
+              <label className="absolute inset-0 flex items-center justify-center bg-foreground/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <Camera className="w-5 h-5 text-background" />
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+              </label>
+            </div>
+          ) : (
+            // Líder: Avatar com anel de nível
+            <UserLevelBadge
+              avatarUrl={profile?.avatar_url}
+              fullName={profile?.full_name || "U"}
+              xpData={xpData}
+              size={64}
+            >
+              <label className="absolute inset-0 flex items-center justify-center bg-foreground/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                <Camera className="w-5 h-5 text-background" />
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} disabled={uploadingAvatar} />
+              </label>
+            </UserLevelBadge>
+          )}
           <div>
             <h2 className="font-heading font-bold text-4xl text-accent">
               Olá, {profile?.full_name?.split(" ")[0]}
             </h2>
             <div className="flex items-center gap-2 flex-wrap">
               <p className="text-muted-foreground text-lg">
-                {isAdmin ? "Painel administrativo" : "Líder da Sala"}
+                {isAdmin ? "Painel Administrativo" : "Líder da Sala"}
               </p>
-              {!isAdmin && profile?.class_name && (
+              {/* Badge da sala para ambos Admin e Líder */}
+              {profile?.class_name && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-body font-semibold bg-secondary text-secondary-foreground border border-primary/20 shadow-sm">
                   {profile.class_name}
                 </span>
               )}
             </div>
-            {!isAdmin && (
-              <p className="text-sm text-muted-foreground mt-0.5">
-                Nível {level} · <span className="text-accent font-medium">{totalXp} XP</span> / {nextLevelXp} XP
-              </p>
-            )}
           </div>
           <div className="flex-1" />
           <Button
