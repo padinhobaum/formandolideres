@@ -127,6 +127,11 @@
   100% { width: 0; margin-left: 100%; }
 }
 
+@keyframes float {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  50% { transform: translateY(-20px) translateX(10px); }
+}
+
 /* Print styles for reports */
 @media print {
   body { background: white !important; }
