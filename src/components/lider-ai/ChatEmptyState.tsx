@@ -24,8 +24,8 @@ export function ChatEmptyState({ onSelectSuggestion }: ChatEmptyStateProps) {
       {/* Hero icon with glow */}
       <div className="relative animate-in zoom-in duration-500">
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/40 via-accent/30 to-primary/40 blur-3xl scale-150 animate-pulse" />
-        <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl shadow-primary/20">
-          <Sparkles className="w-10 h-10 md:w-12 md:h-12 text-primary-foreground" />
+        <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-xl shadow-primary/20">
+          <Sparkles className="w-7 h-7 md:w-9 md:h-9 text-primary-foreground" />
         </div>
       </div>
 
