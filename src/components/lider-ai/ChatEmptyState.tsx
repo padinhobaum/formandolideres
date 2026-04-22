@@ -35,7 +35,9 @@ export function ChatEmptyState({ onSelectSuggestion }: ChatEmptyStateProps) {
       {/* Heading */}
       <div className="text-center space-y-3 max-w-xl animate-in fade-in slide-in-from-bottom-2 duration-500 delay-100">
         <h1 className="text-2xl md:text-4xl font-bold font-heading bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent leading-tight">
-          Olá{firstName ? `, ${firstName}` : ""}! Como posso te ajudar?
+          Olá{firstName ? `, ${firstName}` : ""}!
+          <br />
+          Como posso te ajudar?
         </h1>
         <p className="text-muted-foreground text-sm md:text-base leading-relaxed px-4">
           Sou a <span className="font-semibold text-foreground">LíderAI</span>, sua assistente de liderança de sala de aula. Faça uma pergunta ou escolha uma sugestão abaixo.
