@@ -133,7 +133,7 @@ export default function LiderAIPage() {
         {!isEmpty && (
           <header className="flex items-center justify-between gap-3 px-4 md:px-2 py-3 mb-2 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
+              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
               <div>
