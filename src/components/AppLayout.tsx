@@ -149,7 +149,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
           <img
             alt="Formando Líderes"
             src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png"
-            className="h-14 w-auto brightness-0 invert transition-all duration-500 ease-out group-hover:scale-110 group-hover:drop-shadow-[0_0_12px_hsl(var(--sidebar-primary)/0.6)] group-hover:-rotate-2"
+            className="h-14 w-auto brightness-0 invert transition-transform duration-500 ease-out group-hover:scale-110"
           />
         </div>
 
