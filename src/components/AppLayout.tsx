@@ -145,8 +145,12 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     <div className="min-h-screen flex flex-col md:flex-row md:pl-72">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-72 flex-col border-r bg-sidebar text-sidebar-foreground">
-        <div className="p-4 border-b border-sidebar-border flex items-center justify-center">
-          <img alt="Formando Líderes" className="h-14 w-auto brightness-0 invert" src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png" />
+        <div className="p-4 border-b border-sidebar-border flex items-center justify-center group cursor-pointer">
+          <img
+            alt="Formando Líderes"
+            src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png"
+            className="h-14 w-auto brightness-0 invert transition-all duration-500 ease-out group-hover:scale-110 group-hover:drop-shadow-[0_0_12px_hsl(var(--sidebar-primary)/0.6)] group-hover:-rotate-2"
+          />
         </div>
 
         <nav className="flex-1 p-3 overflow-y-auto">
