@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Video, ExternalLink, Sparkles, KeyRound, Radio, ClipboardList, FileEdit, Lightbulb } from "lucide-react";
+import { Home, MessageSquare, Download, Megaphone, Shield, LogOut, Map, ExternalLink, Sparkles, KeyRound, Radio, ClipboardList, FileEdit, Lightbulb } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { usePresence } from "@/hooks/usePresence";
@@ -34,7 +34,7 @@ const baseNavItems: NavItem[] = [
 { label: "Mural", path: "/mural", icon: Megaphone },
 { label: "Fórum", path: "/forum", icon: MessageSquare },
 { label: "LíderAI", path: "/lider-ai", icon: Sparkles, badge: "Novo" },
-{ label: "Videoaulas", path: "/videoaulas", icon: Video },
+{ label: "Trilhas", path: "/trilhas", icon: Map },
 { label: "Materiais", path: "/materiais", icon: Download },
 { label: "Admin", path: "/admin", icon: Shield, adminOnly: true }];
 
@@ -310,10 +310,10 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t flex justify-around py-2 z-30" style={{ paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))" }}>
         {(() => {
           let bottomItems = visibleItems.filter((i) => !i.adminOnly);
-          // When edital is active, replace Videoaulas with Propostas in mobile bottom nav
+          // When edital is active, replace Trilhas with Propostas in mobile bottom nav
           if (editalConfig?.is_active) {
             bottomItems = bottomItems.map(item =>
-              item.path === "/videoaulas"
+              item.path === "/trilhas"
                 ? { label: "Propostas", path: "/propostas", icon: Lightbulb }
                 : item
             );
