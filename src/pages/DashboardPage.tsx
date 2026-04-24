@@ -92,7 +92,7 @@ export default function DashboardPage() {
   const [hasReleasedResults, setHasReleasedResults] = useState(false);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
-  const { streak } = useUserStreak();
+  const { current: streakCurrent } = useUserStreak();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const prevLevelRef = useRef(level);
   // Detect level-up
@@ -458,47 +458,32 @@ export default function DashboardPage() {
             </div>}
         </section>
 
-        {/* Videoaulas Recentes */}
+        {/* Trilhas em destaque */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-accent rounded-xl">
-            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Videoaulas Recentes</h3>
-            <button onClick={() => navigate("/videoaulas")} className="text-xs hover:underline font-body text-primary-foreground">
+            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Trilhas de Aprendizagem</h3>
+            <button onClick={() => navigate("/trilhas")} className="text-xs hover:underline font-body text-primary-foreground">
               Ver todas
             </button>
           </div>
-          {videoLessons.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p> :
+          {tracksHighlight.length === 0 ?
+          <p className="text-sm text-muted-foreground">Nenhuma trilha disponível ainda.</p> :
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 px-[20px] py-[20px] rounded-2xl bg-accent">
-              {videoLessons.slice(0, 3).map((v) => {
-              const thumbnail = getYouTubeThumbnail(v.video_url);
-              return (
-                <button key={v.id} onClick={() => navigate("/videoaulas")} className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
-                    <div className="relative aspect-video bg-muted">
-                      {thumbnail ?
-                    <img src={thumbnail} alt={v.title} className="w-full h-full object-cover" loading="lazy" /> :
-                    <div className="w-full h-full flex items-center justify-center">
-                          <Video className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
-                        </div>}
-                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-accent">
-                          <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      <h4 className="font-heading line-clamp-1 text-accent text-base font-bold">{v.title}</h4>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Avatar className="w-5 h-5 flex-shrink-0">
-                          <AvatarImage src={v.author_avatar_url || undefined} />
-                          <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
-                            {getInitials(v.author_name || v.category)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <p className="text-xs text-muted-foreground">{v.author_name || v.category} · {formatDate(v.created_at)}</p>
-                      </div>
-                    </div>
-                  </button>);
-            })}
+              {tracksHighlight.map((t) => (
+                <button key={t.id} onClick={() => navigate(`/trilhas/${t.id}`)} className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
+                  <div className="relative aspect-video bg-gradient-to-br from-primary/20 via-accent/20 to-primary/10 flex items-center justify-center overflow-hidden">
+                    {t.cover_url ?
+                      <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" loading="lazy" /> :
+                      <MapIcon className="w-10 h-10 text-primary/60" strokeWidth={1.5} />
+                    }
+                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
+                  </div>
+                  <div className="p-3">
+                    <h4 className="font-heading line-clamp-1 text-accent text-base font-bold">{t.title}</h4>
+                    {t.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{t.description}</p>}
+                  </div>
+                </button>
+              ))}
             </div>}
         </section>
 
