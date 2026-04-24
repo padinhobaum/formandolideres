@@ -1,3 +1,4 @@
+// Helpers para vídeos do YouTube
 export function getYouTubeId(url: string): string | null {
   if (!url) return null;
   const match = url.match(
@@ -13,7 +14,7 @@ export function getYouTubeEmbed(url: string): string | null {
 
 export function getYouTubeThumbnail(url: string): string | null {
   const id = getYouTubeId(url);
-  return id ? `https://img.youtube.com/vi/${id}/mqdefault.jpg` : null;
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
 }
 
 export function formatDuration(seconds?: number | null): string {
