@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NotificationItem {
   id: string;
-  type: "notice" | "topic" | "material" | "forum_reply" | "live" | "track";
+  type: "notice" | "topic" | "material" | "forum_reply" | "live" | "video";
   title: string;
   created_at: string;
   route?: string;
@@ -25,7 +25,7 @@ function getNotificationRoute(item: NotificationItem): string {
     case "material": return "/materiais";
     case "forum_reply": return item.route || "/forum";
     case "live": return "/ao-vivo";
-    case "track": return "/trilhas";
+    case "video": return "/videoaulas";
     default: return "/home";
   }
 }
@@ -57,7 +57,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     if (!user) return;
     const { lr, ca } = await fetchLastRead();
 
-    const [notices, topics, materials, forumReplies, tracks] = await Promise.all([
+    const [notices, topics, materials, forumReplies, videoPlaylists] = await Promise.all([
       supabase.from("notices").select("id, title, created_at, target_user_ids, author_id, author_name").order("created_at", { ascending: false }).limit(10),
       supabase.from("forum_topics").select("id, title, created_at, author_id, author_name, author_avatar_url").order("created_at", { ascending: false }).limit(10),
       supabase.from("materials").select("id, title, created_at, uploaded_by").order("created_at", { ascending: false }).limit(10),
@@ -66,7 +66,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
         .not("author_id", "eq", user.id)
         .not("parent_reply_id", "is", null)
         .order("created_at", { ascending: false }).limit(20),
-      supabase.from("tracks").select("id, title, created_at, created_by").eq("is_published", true).order("created_at", { ascending: false }).limit(5),
+      supabase.from("video_playlists").select("id, title, created_at, created_by").eq("is_published", true).order("created_at", { ascending: false }).limit(5),
     ]);
 
     const filteredNotices = (notices.data || []).filter((n: any) => {
@@ -95,11 +95,11 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       }
     }
 
-    // Collect author IDs that need avatar lookup (notices, materials, tracks)
+    // Collect author IDs that need avatar lookup (notices, materials, video playlists)
     const authorIdsToLookup = new Set<string>();
     filteredNotices.forEach((n: any) => { if (n.author_id) authorIdsToLookup.add(n.author_id); });
     (materials.data || []).forEach((m: any) => { if (m.uploaded_by) authorIdsToLookup.add(m.uploaded_by); });
-    (tracks.data || []).forEach((t: any) => { if (t.created_by) authorIdsToLookup.add(t.created_by); });
+    (videoPlaylists.data || []).forEach((t: any) => { if (t.created_by) authorIdsToLookup.add(t.created_by); });
 
     let avatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
     if (authorIdsToLookup.size > 0) {
@@ -120,7 +120,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const, author_avatar_url: avatarMap[n.author_id]?.avatar_url, author_name: n.author_name })),
       ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const, author_avatar_url: t.author_avatar_url, author_name: t.author_name })),
       ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const, author_avatar_url: avatarMap[m.uploaded_by]?.avatar_url, author_name: avatarMap[m.uploaded_by]?.full_name })),
-      ...(tracks.data || []).map((t: any) => ({ id: t.id, title: `🗺️ Nova trilha: ${t.title}`, created_at: t.created_at, type: "track" as const, route: "/trilhas", author_avatar_url: avatarMap[t.created_by]?.avatar_url, author_name: avatarMap[t.created_by]?.full_name })),
+      ...(videoPlaylists.data || []).map((t: any) => ({ id: t.id, title: `🎓 Novo curso: ${t.title}`, created_at: t.created_at, type: "video" as const, route: `/videoaulas/${t.id}`, author_avatar_url: avatarMap[t.created_by]?.avatar_url, author_name: avatarMap[t.created_by]?.full_name })),
       ...(liveStreams || []).map((l: any) => ({ id: l.id, title: `🔴 Ao Vivo: ${l.title}`, created_at: l.created_at, type: "live" as const, route: "/ao-vivo", author_avatar_url: liveAvatarMap[l.created_by]?.avatar_url, author_name: liveAvatarMap[l.created_by]?.full_name })),
       ...myForumReplyNotifs,
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
@@ -175,7 +175,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     material: "Material",
     forum_reply: "Resposta",
     live: "Ao Vivo",
-    track: "Trilha",
+    video: "Videoaula",
   };
 
   const typeColor: Record<string, string> = {
@@ -184,7 +184,7 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     material: "bg-secondary-foreground",
     forum_reply: "bg-accent",
     live: "bg-red-500",
-    track: "bg-primary",
+    video: "bg-primary",
   };
 
   const formatDate = (d: string) =>

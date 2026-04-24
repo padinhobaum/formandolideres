@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {
-  Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Map, Radio,
+  Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio,
   Megaphone, LayoutDashboard, Users, Link2, Tag, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
   FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList, CheckCircle,
 } from "lucide-react";
@@ -18,12 +18,12 @@ import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sendPushNotification } from "@/lib/sendPushNotification";
 import AdminSurveys from "@/components/AdminSurveys";
-import AdminTracks from "@/components/admin/AdminTracks";
+import AdminVideoLessons from "@/components/admin/AdminVideoLessons";
 
 import AdminEdital from "@/components/AdminEdital";
 import AdminClassClimate from "@/components/AdminClassClimate";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "tracks" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate";
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate";
 
 interface CtaButton {
   text: string;
@@ -48,7 +48,7 @@ const tabGroups = [
     label: "Aprendizado",
     tabs: [
       { key: "materials" as Tab, label: "Materiais", icon: FileText, desc: "Materiais de apoio" },
-      { key: "tracks" as Tab, label: "Trilhas", icon: Map, desc: "Trilhas de aprendizagem gamificadas" },
+      { key: "videos" as Tab, label: "Videoaulas", icon: MonitorPlay, desc: "Cursos, categorias e aulas em vídeo" },
     ],
   },
   {
@@ -149,7 +149,7 @@ export default function AdminPage() {
             {tab === "banners" && <AdminBanners />}
             {tab === "lives" && <AdminLives />}
             {tab === "materials" && <AdminMaterials />}
-            {tab === "tracks" && <AdminTracks />}
+            {tab === "videos" && <AdminVideoLessons />}
             {tab === "links" && <AdminLinks />}
             {tab === "forum-categories" && <AdminForumCategories />}
             {tab === "users" && <AdminUsers />}
