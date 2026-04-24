@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays, Share2 } from "lucide-react";
+import { Megaphone, Pin, Play, Map as MapIcon, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays, Share2, Flame } from "lucide-react";
 import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
 import ClassClimateCard from "@/components/ClassClimateCard";
+import StreakBadge from "@/components/StreakBadge";
+import { useUserStreak } from "@/hooks/useUserStreak";
 
 import NoticeRelayButton from "@/components/NoticeRelayButton";
 
@@ -62,6 +64,13 @@ interface ForumTopic {
   category_id: string | null;
 }
 
+interface TrackHighlight {
+  id: string;
+  title: string;
+  description: string | null;
+  cover_url: string | null;
+}
+
 function getYouTubeThumbnail(url: string): string | null {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
   return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
@@ -73,7 +82,7 @@ export default function DashboardPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
-  const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
+  const [tracksHighlight, setTracksHighlight] = useState<TrackHighlight[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [hasActiveLive, setHasActiveLive] = useState(false);
@@ -83,6 +92,7 @@ export default function DashboardPage() {
   const [hasReleasedResults, setHasReleasedResults] = useState(false);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
+  const { streak } = useUserStreak();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const prevLevelRef = useRef(level);
   // Detect level-up
@@ -97,11 +107,11 @@ export default function DashboardPage() {
     const fetchData = async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       const now = new Date().toISOString();
-      const [noticesRes, forumRes, presenceRes, videosRes, bannersRes, liveRes] = await Promise.all([
+      const [noticesRes, forumRes, presenceRes, tracksRes, bannersRes, liveRes] = await Promise.all([
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
       supabase.from("forum_topics").select("id, title, author_name, author_avatar_url, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
-      supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4),
+      supabase.from("tracks").select("id, title, description, cover_url").eq("is_published", true).order("sort_order").limit(3),
       supabase.from("banners").select("*").lte("starts_at", now).order("created_at", { ascending: false }),
       supabase.from("live_streams").select("id, title").eq("is_active", true).limit(1),
       ]);
@@ -109,7 +119,6 @@ export default function DashboardPage() {
       // Collect author IDs for avatar lookup
       const authorIds = new Set<string>();
       (noticesRes.data || []).forEach((n: any) => { if (n.author_id) authorIds.add(n.author_id); });
-      (videosRes.data || []).forEach((v: any) => { if (v.created_by) authorIds.add(v.created_by); });
 
       let avatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
       if (authorIds.size > 0) {
@@ -123,7 +132,7 @@ export default function DashboardPage() {
       }
       if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
-      if (videosRes.data) setVideoLessons((videosRes.data as any[]).map((v: any) => ({ ...v, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })) as VideoLesson[]);
+      if (tracksRes.data) setTracksHighlight(tracksRes.data as TrackHighlight[]);
       if (bannersRes.data) {
         const activeBanners = bannersRes.data.filter((b: any) => !b.ends_at || new Date(b.ends_at) > new Date());
         setBanners(activeBanners as Banner[]);
