@@ -9,7 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface NotificationItem {
   id: string;
-  type: "notice" | "topic" | "video" | "material" | "forum_reply" | "video_reply" | "live";
+  type: "notice" | "topic" | "material" | "forum_reply" | "live" | "track";
   title: string;
   created_at: string;
   route?: string;
@@ -22,11 +22,10 @@ function getNotificationRoute(item: NotificationItem): string {
   switch (item.type) {
     case "notice": return "/mural";
     case "topic": return `/forum?topic=${item.id}`;
-    case "video": return "/videoaulas";
     case "material": return "/materiais";
     case "forum_reply": return item.route || "/forum";
-    case "video_reply": return item.route || "/videoaulas";
     case "live": return "/ao-vivo";
+    case "track": return "/trilhas";
     default: return "/home";
   }
 }
@@ -58,21 +57,16 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     if (!user) return;
     const { lr, ca } = await fetchLastRead();
 
-    const [notices, topics, videos, materials, forumReplies, videoReplies] = await Promise.all([
+    const [notices, topics, materials, forumReplies, tracks] = await Promise.all([
       supabase.from("notices").select("id, title, created_at, target_user_ids, author_id, author_name").order("created_at", { ascending: false }).limit(10),
       supabase.from("forum_topics").select("id, title, created_at, author_id, author_name, author_avatar_url").order("created_at", { ascending: false }).limit(10),
-      supabase.from("video_lessons").select("id, title, created_at, created_by").order("created_at", { ascending: false }).limit(10),
       supabase.from("materials").select("id, title, created_at, uploaded_by").order("created_at", { ascending: false }).limit(10),
       // Replies to my forum comments
       supabase.from("forum_replies").select("id, topic_id, author_name, author_avatar_url, parent_reply_id, created_at")
         .not("author_id", "eq", user.id)
         .not("parent_reply_id", "is", null)
         .order("created_at", { ascending: false }).limit(20),
-      // Replies to my video comments
-      supabase.from("video_comments").select("id, video_id, user_name, parent_comment_id, created_at, user_id")
-        .not("user_id", "eq", user.id)
-        .not("parent_comment_id", "is", null)
-        .order("created_at", { ascending: false }).limit(20),
+      supabase.from("tracks").select("id, title, created_at, created_by").eq("is_published", true).order("created_at", { ascending: false }).limit(5),
     ]);
 
     const filteredNotices = (notices.data || []).filter((n: any) => {
@@ -101,38 +95,11 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
       }
     }
 
-    // Filter video replies: only those replying to MY comments
-    let myVideoReplyNotifs: NotificationItem[] = [];
-    if (videoReplies.data && videoReplies.data.length > 0) {
-      const parentIds = [...new Set((videoReplies.data as any[]).map((r: any) => r.parent_comment_id).filter(Boolean))];
-      if (parentIds.length > 0) {
-        const { data: parentComments } = await supabase.from("video_comments").select("id, user_id").in("id", parentIds);
-        const myParentIds = new Set((parentComments || []).filter((p: any) => p.user_id === user.id).map((p: any) => p.id));
-        const filteredVideoReplies = (videoReplies.data as any[]).filter((r: any) => myParentIds.has(r.parent_comment_id));
-        // Fetch avatars for video reply authors
-        const videoReplyAuthorIds = [...new Set(filteredVideoReplies.map((r: any) => r.user_id))];
-        let videoReplyAvatarMap: Record<string, string | null> = {};
-        if (videoReplyAuthorIds.length > 0) {
-          const { data: vrProfiles } = await supabase.from("profiles").select("user_id, avatar_url").in("user_id", videoReplyAuthorIds);
-          (vrProfiles || []).forEach((p: any) => { videoReplyAvatarMap[p.user_id] = p.avatar_url; });
-        }
-        myVideoReplyNotifs = filteredVideoReplies.map((r: any) => ({
-            id: r.id,
-            title: `${r.user_name} respondeu ao seu comentário na videoaula`,
-            created_at: r.created_at,
-            type: "video_reply" as const,
-            route: "/videoaulas",
-            author_avatar_url: videoReplyAvatarMap[r.user_id],
-            author_name: r.user_name,
-          }));
-      }
-    }
-
-    // Collect author IDs that need avatar lookup (notices, videos, materials)
+    // Collect author IDs that need avatar lookup (notices, materials, tracks)
     const authorIdsToLookup = new Set<string>();
     filteredNotices.forEach((n: any) => { if (n.author_id) authorIdsToLookup.add(n.author_id); });
-    (videos.data || []).forEach((v: any) => { if (v.created_by) authorIdsToLookup.add(v.created_by); });
     (materials.data || []).forEach((m: any) => { if (m.uploaded_by) authorIdsToLookup.add(m.uploaded_by); });
+    (tracks.data || []).forEach((t: any) => { if (t.created_by) authorIdsToLookup.add(t.created_by); });
 
     let avatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
     if (authorIdsToLookup.size > 0) {
@@ -152,11 +119,10 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
     let all: NotificationItem[] = [
       ...filteredNotices.map((n: any) => ({ id: n.id, title: n.title, created_at: n.created_at, type: "notice" as const, author_avatar_url: avatarMap[n.author_id]?.avatar_url, author_name: n.author_name })),
       ...(topics.data || []).map((t: any) => ({ ...t, type: "topic" as const, author_avatar_url: t.author_avatar_url, author_name: t.author_name })),
-      ...(videos.data || []).map((v: any) => ({ ...v, type: "video" as const, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })),
       ...(materials.data || []).map((m: any) => ({ ...m, type: "material" as const, author_avatar_url: avatarMap[m.uploaded_by]?.avatar_url, author_name: avatarMap[m.uploaded_by]?.full_name })),
+      ...(tracks.data || []).map((t: any) => ({ id: t.id, title: `🗺️ Nova trilha: ${t.title}`, created_at: t.created_at, type: "track" as const, route: "/trilhas", author_avatar_url: avatarMap[t.created_by]?.avatar_url, author_name: avatarMap[t.created_by]?.full_name })),
       ...(liveStreams || []).map((l: any) => ({ id: l.id, title: `🔴 Ao Vivo: ${l.title}`, created_at: l.created_at, type: "live" as const, route: "/ao-vivo", author_avatar_url: liveAvatarMap[l.created_by]?.avatar_url, author_name: liveAvatarMap[l.created_by]?.full_name })),
       ...myForumReplyNotifs,
-      ...myVideoReplyNotifs,
     ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
     // Filter out items that were cleared
@@ -206,21 +172,19 @@ export default function NotificationPopover({ variant = "sidebar" }: { variant?:
   const typeLabel: Record<string, string> = {
     notice: "Aviso",
     topic: "Fórum",
-    video: "Videoaula",
     material: "Material",
     forum_reply: "Resposta",
-    video_reply: "Resposta",
     live: "Ao Vivo",
+    track: "Trilha",
   };
 
   const typeColor: Record<string, string> = {
     notice: "bg-primary",
     topic: "bg-accent",
-    video: "bg-destructive",
     material: "bg-secondary-foreground",
     forum_reply: "bg-accent",
-    video_reply: "bg-destructive",
     live: "bg-red-500",
+    track: "bg-primary",
   };
 
   const formatDate = (d: string) =>
