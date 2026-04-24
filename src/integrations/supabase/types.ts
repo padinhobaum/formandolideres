@@ -467,91 +467,6 @@ export type Database = {
           },
         ]
       }
-      lesson_completions: {
-        Row: {
-          completed_at: string
-          id: string
-          lesson_id: string
-          user_id: string
-          xp_earned: number
-        }
-        Insert: {
-          completed_at?: string
-          id?: string
-          lesson_id: string
-          user_id: string
-          xp_earned?: number
-        }
-        Update: {
-          completed_at?: string
-          id?: string
-          lesson_id?: string
-          user_id?: string
-          xp_earned?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lesson_completions_lesson_id_fkey"
-            columns: ["lesson_id"]
-            isOneToOne: false
-            referencedRelation: "lessons"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      lessons: {
-        Row: {
-          created_at: string
-          description: string | null
-          difficulty: string
-          duration_seconds: number | null
-          extra_material_url: string | null
-          id: string
-          module_id: string
-          sort_order: number
-          title: string
-          updated_at: string
-          video_url: string
-          xp_reward: number
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          difficulty?: string
-          duration_seconds?: number | null
-          extra_material_url?: string | null
-          id?: string
-          module_id: string
-          sort_order?: number
-          title: string
-          updated_at?: string
-          video_url: string
-          xp_reward?: number
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          difficulty?: string
-          duration_seconds?: number | null
-          extra_material_url?: string | null
-          id?: string
-          module_id?: string
-          sort_order?: number
-          title?: string
-          updated_at?: string
-          video_url?: string
-          xp_reward?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "lessons_module_id_fkey"
-            columns: ["module_id"]
-            isOneToOne: false
-            referencedRelation: "modules"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       live_streams: {
         Row: {
           created_at: string
@@ -620,44 +535,6 @@ export type Database = {
           uploaded_by?: string
         }
         Relationships: []
-      }
-      modules: {
-        Row: {
-          created_at: string
-          description: string | null
-          id: string
-          sort_order: number
-          title: string
-          track_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          sort_order?: number
-          title: string
-          track_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          id?: string
-          sort_order?: number
-          title?: string
-          track_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "modules_track_id_fkey"
-            columns: ["track_id"]
-            isOneToOne: false
-            referencedRelation: "tracks"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       notice_reads: {
         Row: {
@@ -1374,74 +1251,6 @@ export type Database = {
         }
         Relationships: []
       }
-      track_completions: {
-        Row: {
-          completed_at: string
-          id: string
-          track_id: string
-          user_id: string
-        }
-        Insert: {
-          completed_at?: string
-          id?: string
-          track_id: string
-          user_id: string
-        }
-        Update: {
-          completed_at?: string
-          id?: string
-          track_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "track_completions_track_id_fkey"
-            columns: ["track_id"]
-            isOneToOne: false
-            referencedRelation: "tracks"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      tracks: {
-        Row: {
-          cover_url: string | null
-          created_at: string
-          created_by: string
-          description: string | null
-          id: string
-          is_published: boolean
-          is_sequential: boolean
-          sort_order: number
-          title: string
-          updated_at: string
-        }
-        Insert: {
-          cover_url?: string | null
-          created_at?: string
-          created_by: string
-          description?: string | null
-          id?: string
-          is_published?: boolean
-          is_sequential?: boolean
-          sort_order?: number
-          title: string
-          updated_at?: string
-        }
-        Update: {
-          cover_url?: string | null
-          created_at?: string
-          created_by?: string
-          description?: string | null
-          id?: string
-          is_published?: boolean
-          is_sequential?: boolean
-          sort_order?: number
-          title?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -1552,6 +1361,222 @@ export type Database = {
         }
         Relationships: []
       }
+      video_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      video_comments: {
+        Row: {
+          author_avatar_url: string | null
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          lesson_id: string
+          parent_id: string | null
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_id: string
+          author_name?: string
+          content: string
+          created_at?: string
+          id?: string
+          lesson_id: string
+          parent_id?: string | null
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          lesson_id?: string
+          parent_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_comments_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "video_lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "video_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          lesson_id: string
+          user_id: string
+          xp_earned: number
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          lesson_id: string
+          user_id: string
+          xp_earned?: number
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          lesson_id?: string
+          user_id?: string
+          xp_earned?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_completions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "video_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_lessons: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          difficulty: string
+          duration_seconds: number | null
+          extra_material_url: string | null
+          id: string
+          playlist_id: string | null
+          sort_order: number
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          video_url: string
+          xp_reward: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          difficulty?: string
+          duration_seconds?: number | null
+          extra_material_url?: string | null
+          id?: string
+          playlist_id?: string | null
+          sort_order?: number
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          video_url: string
+          xp_reward?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          difficulty?: string
+          duration_seconds?: number | null
+          extra_material_url?: string | null
+          id?: string
+          playlist_id?: string | null
+          sort_order?: number
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          video_url?: string
+          xp_reward?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_lessons_playlist_id_fkey"
+            columns: ["playlist_id"]
+            isOneToOne: false
+            referencedRelation: "video_playlists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_playlists: {
+        Row: {
+          category_id: string | null
+          cover_url: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_published: boolean
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_id?: string | null
+          cover_url?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_id?: string | null
+          cover_url?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_published?: boolean
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_playlists_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "video_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       xp_events: {
         Row: {
           action: string
@@ -1594,7 +1619,7 @@ export type Database = {
         Returns: undefined
       }
       calculate_level: { Args: { xp: number }; Returns: number }
-      complete_lesson: { Args: { _lesson_id: string }; Returns: Json }
+      complete_video_lesson: { Args: { _lesson_id: string }; Returns: Json }
       get_week_start: { Args: { _d?: string }; Returns: string }
       has_role: {
         Args: {
