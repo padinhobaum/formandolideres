@@ -62,17 +62,6 @@ interface ForumTopic {
   category_id: string | null;
 }
 
-interface VideoLesson {
-  id: string;
-  title: string;
-  video_url: string;
-  category: string;
-  created_at: string;
-  created_by: string;
-  author_avatar_url?: string | null;
-  author_name?: string;
-}
-
 function getYouTubeThumbnail(url: string): string | null {
   const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
   return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
