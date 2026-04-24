@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {
-  Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Map, Radio,
+  Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Map, Radio,
   Megaphone, LayoutDashboard, Users, Link2, Tag, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
   FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList, CheckCircle,
 } from "lucide-react";
