@@ -280,7 +280,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex-1" />
-          {!isAdmin && streakCurrent > 0 && <StreakBadge streak={streakCurrent} />}
+          {!isAdmin && streakCurrent > 0 && <StreakBadge variant="compact" />}
           <Button
             onClick={() => navigate("/lider-ai")}
             className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg">
