@@ -10,19 +10,20 @@ import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import {
-  Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Radio,
-  Megaphone, LayoutDashboard, Users, Link2, Tag, ListVideo, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
+  Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, ChevronDown, ChevronUp, Pin, Video, Map, Radio,
+  Megaphone, LayoutDashboard, Users, Link2, Tag, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
   FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList, CheckCircle,
 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { sendPushNotification } from "@/lib/sendPushNotification";
 import AdminSurveys from "@/components/AdminSurveys";
+import AdminTracks from "@/components/admin/AdminTracks";
 
 import AdminEdital from "@/components/AdminEdital";
 import AdminClassClimate from "@/components/AdminClassClimate";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "playlists" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate";
+type Tab = "notices" | "banners" | "lives" | "materials" | "tracks" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate";
 
 interface CtaButton {
   text: string;
@@ -47,8 +48,7 @@ const tabGroups = [
     label: "Aprendizado",
     tabs: [
       { key: "materials" as Tab, label: "Materiais", icon: FileText, desc: "Materiais de apoio" },
-      { key: "videos" as Tab, label: "Videoaulas", icon: Video, desc: "Videoaulas e conteúdos" },
-      { key: "playlists" as Tab, label: "Playlists", icon: ListVideo, desc: "Organizar videoaulas" },
+      { key: "tracks" as Tab, label: "Trilhas", icon: Map, desc: "Trilhas de aprendizagem gamificadas" },
     ],
   },
   {
@@ -149,8 +149,7 @@ export default function AdminPage() {
             {tab === "banners" && <AdminBanners />}
             {tab === "lives" && <AdminLives />}
             {tab === "materials" && <AdminMaterials />}
-            {tab === "videos" && <AdminVideos />}
-            {tab === "playlists" && <AdminPlaylists />}
+            {tab === "tracks" && <AdminTracks />}
             {tab === "links" && <AdminLinks />}
             {tab === "forum-categories" && <AdminForumCategories />}
             {tab === "users" && <AdminUsers />}
@@ -896,192 +895,7 @@ function AdminMaterials() {
   );
 }
 
-/* ═══════════════════════ Videos ═══════════════════════ */
-function AdminVideos() {
-  const { user } = useAuth();
-  const [videos, setVideos] = useState<any[]>([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [videoUrl, setVideoUrl] = useState("");
-  const [category, setCategory] = useState("Geral");
-
-  const fetchVideos = async () => {
-    const { data } = await supabase.from("video_lessons").select("*").order("created_at", { ascending: false });
-    if (data) setVideos(data);
-  };
-  useEffect(() => { fetchVideos(); }, []);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !videoUrl.trim()) return;
-    const { data: videoData, error } = await supabase.from("video_lessons").insert({
-      title: title.trim(), description: description.trim() || null,
-      video_url: videoUrl.trim(), category: category.trim(), created_by: user!.id,
-    }).select("id").single();
-    if (error) { toast.error("Erro ao adicionar videoaula."); return; }
-    toast.success("Videoaula adicionada.");
-    if (videoData) {
-      await sendPushNotification({
-        title: "🎥 Nova videoaula disponível",
-        body: title.trim(),
-        url: "/videoaulas",
-        contentType: "video",
-        referenceId: (videoData as any).id,
-      });
-    }
-    setTitle(""); setDescription(""); setVideoUrl(""); setCategory("Geral");
-    fetchVideos();
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("video_lessons").delete().eq("id", id);
-    if (error) { toast.error("Erro ao excluir."); return; }
-    toast.success("Videoaula excluída.");
-    fetchVideos();
-  };
-
-  return (
-    <div>
-      <FormCard title="Nova Videoaula" onSubmit={handleCreate} submitLabel="Publicar" icon={Video}>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
-          <div><Label className="text-sm">Categoria</Label><Input value={category} onChange={(e) => setCategory(e.target.value)} className="mt-1" /></div>
-        </div>
-        <div>
-          <Label className="text-sm">URL do vídeo (YouTube ou Vimeo)</Label>
-          <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} className="mt-1" placeholder="https://youtube.com/watch?v=..." required />
-          <p className="text-xs text-muted-foreground mt-1">Cole o link do YouTube ou Vimeo</p>
-        </div>
-        <div>
-          <Label className="text-sm">Descrição (opcional)</Label>
-          <textarea value={description} onChange={(e) => setDescription(e.target.value)} className="mt-1 w-full border border-input bg-background p-2 text-sm font-body rounded-lg min-h-[60px] resize-y" />
-        </div>
-      </FormCard>
-      <div className="space-y-2">
-        {videos.map((v) => (
-          <ItemCard key={v.id}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-heading font-semibold">{v.title}</p>
-                <p className="text-xs text-muted-foreground">{v.category} · {new Date(v.created_at).toLocaleDateString("pt-BR")}</p>
-              </div>
-              <button onClick={() => handleDelete(v.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
-                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-              </button>
-            </div>
-          </ItemCard>
-        ))}
-        {videos.length === 0 && <EmptyState message="Nenhuma videoaula adicionada." />}
-      </div>
-    </div>
-  );
-}
-
-/* ═══════════════════════ Playlists ═══════════════════════ */
-function AdminPlaylists() {
-  const { user } = useAuth();
-  const [playlists, setPlaylists] = useState<any[]>([]);
-  const [videos, setVideos] = useState<any[]>([]);
-  const [title, setTitle] = useState("");
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [playlistVideos, setPlaylistVideos] = useState<Record<string, any[]>>({});
-  const [selectedVideoId, setSelectedVideoId] = useState("");
-
-  const fetchPlaylists = async () => {
-    const { data } = await supabase.from("playlists").select("*").order("sort_order");
-    if (data) setPlaylists(data as any[]);
-  };
-
-  const fetchVideos = async () => {
-    const { data } = await supabase.from("video_lessons").select("id, title").order("title");
-    if (data) setVideos(data);
-  };
-
-  useEffect(() => { fetchPlaylists(); fetchVideos(); }, []);
-
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-    const maxOrder = playlists.length > 0 ? Math.max(...playlists.map((p: any) => p.sort_order)) + 1 : 0;
-    const { error } = await supabase.from("playlists").insert({ title: title.trim(), created_by: user!.id, sort_order: maxOrder } as any);
-    if (error) { toast.error("Erro ao criar playlist."); return; }
-    toast.success("Playlist criada.");
-    setTitle("");
-    fetchPlaylists();
-  };
-
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("playlists").delete().eq("id", id);
-    if (error) { toast.error("Erro ao excluir."); return; }
-    toast.success("Playlist excluída.");
-    fetchPlaylists();
-  };
-
-  const toggleExpand = async (id: string) => {
-    if (expandedId === id) { setExpandedId(null); return; }
-    setExpandedId(id);
-    const { data } = await supabase.from("playlist_videos").select("*, video_lessons(title)").eq("playlist_id", id).order("sort_order");
-    setPlaylistVideos((prev) => ({ ...prev, [id]: (data as any[]) || [] }));
-  };
-
-  const addVideoToPlaylist = async (playlistId: string) => {
-    if (!selectedVideoId) return;
-    const existing = playlistVideos[playlistId] || [];
-    const maxOrder = existing.length > 0 ? Math.max(...existing.map((v: any) => v.sort_order)) + 1 : 0;
-    const { error } = await supabase.from("playlist_videos").insert({ playlist_id: playlistId, video_id: selectedVideoId, sort_order: maxOrder } as any);
-    if (error) { toast.error("Erro ao adicionar vídeo."); return; }
-    setSelectedVideoId("");
-    toggleExpand(playlistId);
-  };
-
-  const removeVideoFromPlaylist = async (pvId: string, playlistId: string) => {
-    await supabase.from("playlist_videos").delete().eq("id", pvId);
-    toggleExpand(playlistId);
-  };
-
-  return (
-    <div>
-      <FormCard title="Nova Playlist" onSubmit={handleCreate} submitLabel="Criar" icon={ListVideo}>
-        <div><Label className="text-sm">Título</Label><Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required /></div>
-      </FormCard>
-      <div className="space-y-2">
-        {playlists.map((p: any) => (
-          <Card key={p.id} className="overflow-hidden transition-all duration-150 hover:shadow-md">
-            <div className="p-4 flex items-center justify-between">
-              <button onClick={() => toggleExpand(p.id)} className="flex items-center gap-2 text-sm font-heading font-semibold hover:text-primary transition-colors">
-                {expandedId === p.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                {p.title}
-              </button>
-              <button onClick={() => handleDelete(p.id)} className="text-destructive hover:text-destructive/80 p-1.5 rounded-lg hover:bg-destructive/10 transition-colors">
-                <Trash2 className="w-4 h-4" strokeWidth={1.5} />
-              </button>
-            </div>
-            {expandedId === p.id && (
-              <div className="border-t p-4 space-y-2 bg-secondary/20">
-                {(playlistVideos[p.id] || []).map((pv: any) => (
-                  <div key={pv.id} className="flex items-center justify-between text-sm bg-card p-2.5 rounded-lg border">
-                    <span className="truncate">{pv.video_lessons?.title || "Vídeo"}</span>
-                    <button onClick={() => removeVideoFromPlaylist(pv.id, p.id)} className="text-destructive hover:text-destructive/80 p-1">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-                <div className="flex gap-2">
-                  <select value={selectedVideoId} onChange={(e) => setSelectedVideoId(e.target.value)} className="flex-1 border border-input bg-background px-2.5 py-1.5 text-sm rounded-lg">
-                    <option value="">Selecionar vídeo...</option>
-                    {videos.map((v) => <option key={v.id} value={v.id}>{v.title}</option>)}
-                  </select>
-                  <Button size="sm" onClick={() => addVideoToPlaylist(p.id)} className="gap-1"><Plus className="w-3 h-3" /></Button>
-                </div>
-              </div>
-            )}
-          </Card>
-        ))}
-        {playlists.length === 0 && <EmptyState message="Nenhuma playlist criada." />}
-      </div>
-    </div>
-  );
-}
+/* ═══════════════════════ (Videoaulas e Playlists removidos — substituídos por Trilhas) ═══════════════════════ */
 
 /* ═══════════════════════ Users ═══════════════════════ */
 function AdminUsers() {

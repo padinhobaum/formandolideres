@@ -9,7 +9,8 @@ import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import DashboardPage from "@/pages/DashboardPage";
 import ForumPage from "@/pages/ForumPage";
 import MaterialsPage from "@/pages/MaterialsPage";
-import VideoLessonsPage from "@/pages/VideoLessonsPage";
+import TracksPage from "@/pages/TracksPage";
+import TrackDetailPage from "@/pages/TrackDetailPage";
 import NoticesPage from "@/pages/NoticesPage";
 import AdminPage from "@/pages/AdminPage";
 import LiderAIPage from "@/pages/LiderAIPage";
@@ -45,7 +46,9 @@ const App = () => (
             <Route path="/forum" element={<ProtectedRoute><ForumPage /></ProtectedRoute>} />
             <Route path="/alunos" element={<Navigate to="/forum" replace />} />
             <Route path="/materiais" element={<ProtectedRoute><MaterialsPage /></ProtectedRoute>} />
-            <Route path="/videoaulas" element={<ProtectedRoute><VideoLessonsPage /></ProtectedRoute>} />
+            <Route path="/trilhas" element={<ProtectedRoute><TracksPage /></ProtectedRoute>} />
+            <Route path="/trilhas/:trackId" element={<ProtectedRoute><TrackDetailPage /></ProtectedRoute>} />
+            <Route path="/videoaulas" element={<Navigate to="/trilhas" replace />} />
             <Route path="/mural" element={<ProtectedRoute><NoticesPage /></ProtectedRoute>} />
             <Route path="/lider-ai" element={<ProtectedRoute><LiderAIPage /></ProtectedRoute>} />
             <Route path="/ao-vivo" element={<ProtectedRoute><LivePage /></ProtectedRoute>} />

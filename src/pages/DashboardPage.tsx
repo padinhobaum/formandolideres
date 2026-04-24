@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Video, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays, Share2 } from "lucide-react";
+import { Megaphone, Pin, Play, Map as MapIcon, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays, Share2, Flame } from "lucide-react";
 import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
 import ClassClimateCard from "@/components/ClassClimateCard";
+import StreakBadge from "@/components/StreakBadge";
+import { useUserStreak } from "@/hooks/useUserStreak";
 
 import NoticeRelayButton from "@/components/NoticeRelayButton";
 
@@ -62,15 +64,11 @@ interface ForumTopic {
   category_id: string | null;
 }
 
-interface VideoLesson {
+interface TrackHighlight {
   id: string;
   title: string;
-  video_url: string;
-  category: string;
-  created_at: string;
-  created_by: string;
-  author_avatar_url?: string | null;
-  author_name?: string;
+  description: string | null;
+  cover_url: string | null;
 }
 
 function getYouTubeThumbnail(url: string): string | null {
@@ -84,7 +82,7 @@ export default function DashboardPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
-  const [videoLessons, setVideoLessons] = useState<VideoLesson[]>([]);
+  const [tracksHighlight, setTracksHighlight] = useState<TrackHighlight[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [hasActiveLive, setHasActiveLive] = useState(false);
@@ -94,6 +92,7 @@ export default function DashboardPage() {
   const [hasReleasedResults, setHasReleasedResults] = useState(false);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
+  const { current: streakCurrent } = useUserStreak();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const prevLevelRef = useRef(level);
   // Detect level-up
@@ -108,11 +107,11 @@ export default function DashboardPage() {
     const fetchData = async () => {
       const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
       const now = new Date().toISOString();
-      const [noticesRes, forumRes, presenceRes, videosRes, bannersRes, liveRes] = await Promise.all([
+      const [noticesRes, forumRes, presenceRes, tracksRes, bannersRes, liveRes] = await Promise.all([
       supabase.from("notices").select("*").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(5),
       supabase.from("forum_topics").select("id, title, author_name, author_avatar_url, updated_at, category_id").order("updated_at", { ascending: false }).limit(5),
       supabase.from("user_presence").select("user_id", { count: "exact", head: true }).eq("is_online", true).gte("last_seen", fiveMinAgo),
-      supabase.from("video_lessons").select("id, title, video_url, category, created_at, created_by").order("created_at", { ascending: false }).limit(4),
+      supabase.from("tracks").select("id, title, description, cover_url").eq("is_published", true).order("sort_order").limit(3),
       supabase.from("banners").select("*").lte("starts_at", now).order("created_at", { ascending: false }),
       supabase.from("live_streams").select("id, title").eq("is_active", true).limit(1),
       ]);
@@ -120,7 +119,6 @@ export default function DashboardPage() {
       // Collect author IDs for avatar lookup
       const authorIds = new Set<string>();
       (noticesRes.data || []).forEach((n: any) => { if (n.author_id) authorIds.add(n.author_id); });
-      (videosRes.data || []).forEach((v: any) => { if (v.created_by) authorIds.add(v.created_by); });
 
       let avatarMap: Record<string, { avatar_url: string | null; full_name: string }> = {};
       if (authorIds.size > 0) {
@@ -134,7 +132,7 @@ export default function DashboardPage() {
       }
       if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
-      if (videosRes.data) setVideoLessons((videosRes.data as any[]).map((v: any) => ({ ...v, author_avatar_url: avatarMap[v.created_by]?.avatar_url, author_name: avatarMap[v.created_by]?.full_name })) as VideoLesson[]);
+      if (tracksRes.data) setTracksHighlight(tracksRes.data as TrackHighlight[]);
       if (bannersRes.data) {
         const activeBanners = bannersRes.data.filter((b: any) => !b.ends_at || new Date(b.ends_at) > new Date());
         setBanners(activeBanners as Banner[]);
@@ -282,6 +280,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex-1" />
+          {!isAdmin && streakCurrent > 0 && <StreakBadge variant="compact" />}
           <Button
             onClick={() => navigate("/lider-ai")}
             className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg">
@@ -460,47 +459,32 @@ export default function DashboardPage() {
             </div>}
         </section>
 
-        {/* Videoaulas Recentes */}
+        {/* Trilhas em destaque */}
         <section className="mb-8">
           <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-accent rounded-xl">
-            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Videoaulas Recentes</h3>
-            <button onClick={() => navigate("/videoaulas")} className="text-xs hover:underline font-body text-primary-foreground">
+            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Trilhas de Aprendizagem</h3>
+            <button onClick={() => navigate("/trilhas")} className="text-xs hover:underline font-body text-primary-foreground">
               Ver todas
             </button>
           </div>
-          {videoLessons.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhuma videoaula disponível.</p> :
+          {tracksHighlight.length === 0 ?
+          <p className="text-sm text-muted-foreground">Nenhuma trilha disponível ainda.</p> :
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 px-[20px] py-[20px] rounded-2xl bg-accent">
-              {videoLessons.slice(0, 3).map((v) => {
-              const thumbnail = getYouTubeThumbnail(v.video_url);
-              return (
-                <button key={v.id} onClick={() => navigate("/videoaulas")} className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
-                    <div className="relative aspect-video bg-muted">
-                      {thumbnail ?
-                    <img src={thumbnail} alt={v.title} className="w-full h-full object-cover" loading="lazy" /> :
-                    <div className="w-full h-full flex items-center justify-center">
-                          <Video className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
-                        </div>}
-                      <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors flex items-center justify-center">
-                        <div className="w-10 h-10 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-accent">
-                          <Play className="w-5 h-5 text-primary-foreground ml-0.5" fill="currentColor" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      <h4 className="font-heading line-clamp-1 text-accent text-base font-bold">{v.title}</h4>
-                      <div className="flex items-center gap-1.5 mt-1">
-                        <Avatar className="w-5 h-5 flex-shrink-0">
-                          <AvatarImage src={v.author_avatar_url || undefined} />
-                          <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
-                            {getInitials(v.author_name || v.category)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <p className="text-xs text-muted-foreground">{v.author_name || v.category} · {formatDate(v.created_at)}</p>
-                      </div>
-                    </div>
-                  </button>);
-            })}
+              {tracksHighlight.map((t) => (
+                <button key={t.id} onClick={() => navigate(`/trilhas/${t.id}`)} className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
+                  <div className="relative aspect-video bg-gradient-to-br from-primary/20 via-accent/20 to-primary/10 flex items-center justify-center overflow-hidden">
+                    {t.cover_url ?
+                      <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" loading="lazy" /> :
+                      <MapIcon className="w-10 h-10 text-primary/60" strokeWidth={1.5} />
+                    }
+                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
+                  </div>
+                  <div className="p-3">
+                    <h4 className="font-heading line-clamp-1 text-accent text-base font-bold">{t.title}</h4>
+                    {t.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{t.description}</p>}
+                  </div>
+                </button>
+              ))}
             </div>}
         </section>
 
