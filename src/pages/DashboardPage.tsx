@@ -81,7 +81,7 @@ export default function DashboardPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [forumTopics, setForumTopics] = useState<ForumTopic[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
-  const [tracksHighlight, setTracksHighlight] = useState<TrackHighlight[]>([]);
+  const [playlistsHighlight, setPlaylistsHighlight] = useState<PlaylistHighlight[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [hasActiveLive, setHasActiveLive] = useState(false);
@@ -91,7 +91,6 @@ export default function DashboardPage() {
   const [hasReleasedResults, setHasReleasedResults] = useState(false);
   const { totalXp, level, progress, nextLevelXp, currentLevelXp, awardXp } = useUserXp();
   const xpData = { totalXp, level, progress, nextLevelXp, currentLevelXp };
-  const { current: streakCurrent } = useUserStreak();
   const [showLevelUp, setShowLevelUp] = useState(false);
   const prevLevelRef = useRef(level);
   // Detect level-up
