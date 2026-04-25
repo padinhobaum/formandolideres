@@ -63,7 +63,7 @@ interface ForumTopic {
   category_id: string | null;
 }
 
-interface TrackHighlight {
+interface PlaylistHighlight {
   id: string;
   title: string;
   description: string | null;
