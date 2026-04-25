@@ -415,7 +415,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Megaphone className="w-5 h-5 text-primary" strokeWidth={1.5} />
-              <h3 className="font-heading font-bold text-2xl text-foreground">Últimos Avisos</h3>
+              <h3 className="font-heading font-bold text-2xl text-primary">Últimos Avisos</h3>
             </div>
             <button onClick={() => navigate("/mural")} className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-0.5">
               Ver todos <ChevronRightIcon className="w-3 h-3" />
@@ -449,7 +449,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <PlayCircle className="w-5 h-5 text-primary" strokeWidth={1.5} />
-              <h3 className="font-heading font-bold text-2xl text-foreground">Videoaulas em destaque</h3>
+              <h3 className="font-heading font-bold text-2xl text-primary">Videoaulas em destaque</h3>
             </div>
             <button onClick={() => navigate("/videoaulas")} className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-0.5">
               Ver todas <ChevronRightIcon className="w-3 h-3" />
@@ -541,8 +541,8 @@ export default function DashboardPage() {
         <section className="mb-8 border bg-card rounded-xl p-4 md:p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Megaphone className="w-5 h-5 text-primary" strokeWidth={1.5} />
-                <h3 className="font-heading font-bold text-xl text-foreground">Tópicos Recentes</h3>
+                <Megaphone className="w-5 h-5 text-accent" strokeWidth={1.5} />
+                <h3 className="font-heading font-bold text-xl text-accent">Tópicos Recentes</h3>
               </div>
               <button onClick={() => navigate("/forum")} className="text-xs hover:underline font-body text-primary">
                 Ver todos
