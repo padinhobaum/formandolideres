@@ -410,80 +410,80 @@ export default function DashboardPage() {
         {/* Calendário de Eventos */}
         <EventCalendar />
 
-        {/* Últimos Avisos */}
+        {/* Últimos Avisos — novo design com NoticeCard */}
         <section className="mb-8">
-          <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-primary rounded-xl">
-            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Últimos Avisos</h3>
-            <button onClick={() => navigate("/mural")} className="text-xs hover:underline font-body text-primary-foreground">
-              Ver todos
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Megaphone className="w-5 h-5 text-primary" strokeWidth={1.5} />
+              <h3 className="font-heading font-bold text-2xl text-foreground">Últimos Avisos</h3>
+            </div>
+            <button onClick={() => navigate("/mural")} className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-0.5">
+              Ver todos <ChevronRightIcon className="w-3 h-3" />
             </button>
           </div>
-          {notices.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p> :
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 px-[20px] py-[20px] bg-primary rounded-2xl">
-              {notices.map((n) =>
-            <div key={n.id} className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl flex flex-col">
-                  <div className="relative aspect-video bg-muted">
-                    {n.image_url ?
-                <img src={n.image_url} alt={n.title} className="w-full h-full object-cover" loading="lazy" /> :
-                <div className="w-full h-full flex items-center justify-center">
-                        <Megaphone className="w-8 h-8 text-muted-foreground" strokeWidth={1.5} />
-                      </div>}
-                    {n.is_pinned &&
-                <div className="absolute top-2 right-2 flex items-center gap-1 bg-primary/90 rounded-full px-2 py-1">
-                        <Pin className="w-3 h-3 text-primary-foreground" strokeWidth={2} />
-                        <span className="text-[10px] font-bold text-primary-foreground">Aviso Fixado</span>
-                      </div>}
-                  </div>
-                  <div className="p-3 flex flex-col flex-1">
-                    <h4 className="font-heading line-clamp-2 font-bold text-primary text-base">{n.title}</h4>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <Avatar className="w-5 h-5 flex-shrink-0">
-                        <AvatarImage src={n.author_avatar_url || undefined} />
-                        <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
-                          {getInitials(n.author_name)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <p className="text-xs text-muted-foreground">{n.author_name} · {formatDate(n.created_at)}</p>
-                    </div>
-                    <div className="mt-auto pt-2 space-y-2">
-                      <NoticeRelayButton noticeId={n.id} requiresRelay={n.requires_relay} />
-                      <Button variant="outline" size="sm" className="w-full text-xs" onClick={() => handleOpenNotice(n)}>
-                        Ler aviso completo
-                      </Button>
-                    </div>
-                  </div>
-                </div>)}
-            </div>}
+          {notices.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p>
+          ) : (
+            <>
+              {/* Aviso fixado em destaque (featured) */}
+              {notices[0]?.is_pinned && (
+                <div className="mb-4">
+                  <NoticeCard
+                    variant="featured"
+                    notice={notices[0] as unknown as NoticeCardData}
+                    onOpen={() => handleOpenNotice(notices[0])}
+                  />
+                </div>
+              )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {(notices[0]?.is_pinned ? notices.slice(1) : notices).map((n) => (
+                  <NoticeCard
+                    key={n.id}
+                    notice={n as unknown as NoticeCardData}
+                    onOpen={() => handleOpenNotice(n)}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </section>
 
-        {/* Trilhas em destaque */}
+        {/* Videoaulas em destaque */}
         <section className="mb-8">
-          <div className="flex items-center justify-between mb-3 px-[20px] py-[10px] bg-accent rounded-xl">
-            <h3 className="font-heading font-bold text-2xl text-primary-foreground">Trilhas de Aprendizagem</h3>
-            <button onClick={() => navigate("/trilhas")} className="text-xs hover:underline font-body text-primary-foreground">
-              Ver todas
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <PlayCircle className="w-5 h-5 text-primary" strokeWidth={1.5} />
+              <h3 className="font-heading font-bold text-2xl text-foreground">Videoaulas em destaque</h3>
+            </div>
+            <button onClick={() => navigate("/videoaulas")} className="text-xs font-medium text-primary hover:underline inline-flex items-center gap-0.5">
+              Ver todas <ChevronRightIcon className="w-3 h-3" />
             </button>
           </div>
-          {tracksHighlight.length === 0 ?
-          <p className="text-sm text-muted-foreground">Nenhuma trilha disponível ainda.</p> :
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 px-[20px] py-[20px] rounded-2xl bg-accent">
-              {tracksHighlight.map((t) => (
-                <button key={t.id} onClick={() => navigate(`/trilhas/${t.id}`)} className="border bg-card overflow-hidden text-left hover:bg-secondary transition-colors group rounded-xl">
-                  <div className="relative aspect-video bg-gradient-to-br from-primary/20 via-accent/20 to-primary/10 flex items-center justify-center overflow-hidden">
-                    {t.cover_url ?
-                      <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover" loading="lazy" /> :
-                      <MapIcon className="w-10 h-10 text-primary/60" strokeWidth={1.5} />
-                    }
-                    <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/10 transition-colors" />
+          {playlistsHighlight.length === 0 ? (
+            <p className="text-sm text-muted-foreground">Nenhum curso disponível ainda.</p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {playlistsHighlight.map((t) => (
+                <button
+                  key={t.id}
+                  onClick={() => navigate(`/videoaulas/${t.id}`)}
+                  className="group border bg-card overflow-hidden text-left hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 rounded-2xl"
+                >
+                  <div className="relative aspect-video bg-gradient-to-br from-primary/15 via-accent/10 to-primary/5 flex items-center justify-center overflow-hidden">
+                    {t.cover_url ? (
+                      <img src={t.cover_url} alt={t.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    ) : (
+                      <PlayCircle className="w-12 h-12 text-primary/50" strokeWidth={1.3} />
+                    )}
                   </div>
-                  <div className="p-3">
-                    <h4 className="font-heading line-clamp-1 text-accent text-base font-bold">{t.title}</h4>
+                  <div className="p-4">
+                    <h4 className="font-heading line-clamp-1 text-foreground text-base font-bold group-hover:text-primary transition-colors">{t.title}</h4>
                     {t.description && <p className="text-xs text-muted-foreground line-clamp-2 mt-1">{t.description}</p>}
                   </div>
                 </button>
               ))}
-            </div>}
+            </div>
+          )}
         </section>
 
         {/* Modal de Aviso Completo */}
