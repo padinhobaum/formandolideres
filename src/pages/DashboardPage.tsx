@@ -424,27 +424,23 @@ export default function DashboardPage() {
           {notices.length === 0 ? (
             <p className="text-sm text-muted-foreground">Nenhum aviso publicado.</p>
           ) : (
-            <>
-              {/* Aviso fixado em destaque (featured) */}
-              {notices[0]?.is_pinned && (
-                <div className="mb-4">
-                  <NoticeCard
-                    variant="featured"
-                    notice={notices[0] as unknown as NoticeCardData}
-                    onOpen={() => handleOpenNotice(notices[0])}
-                  />
-                </div>
-              )}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {(notices[0]?.is_pinned ? notices.slice(1) : notices).map((n) => (
-                  <NoticeCard
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 auto-rows-fr">
+              {notices.map((n, idx) => {
+                const isFeatured = idx === 0 && n.is_pinned;
+                return (
+                  <div
                     key={n.id}
-                    notice={n as unknown as NoticeCardData}
-                    onOpen={() => handleOpenNotice(n)}
-                  />
-                ))}
-              </div>
-            </>
+                    className={isFeatured ? "sm:col-span-2 lg:col-span-2" : "lg:col-span-1"}
+                  >
+                    <NoticeCard
+                      variant={isFeatured ? "featured" : "default"}
+                      notice={n as unknown as NoticeCardData}
+                      onOpen={() => handleOpenNotice(n)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
           )}
         </section>
 
