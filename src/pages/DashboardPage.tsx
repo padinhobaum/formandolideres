@@ -8,14 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { RichText } from "@/components/RichTextEditor";
 import { toast } from "sonner";
-import { Megaphone, Pin, Play, Map as MapIcon, Circle, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays, Share2, Flame } from "lucide-react";
+import { Megaphone, Camera, GraduationCap, ExternalLink, Sparkles, ChevronLeft, ChevronRight, Radio, ClipboardList, CalendarDays, Share2, PlayCircle, ChevronRight as ChevronRightIcon } from "lucide-react";
 import { useUserXp } from "@/hooks/useUserXp";
 import UserLevelBadge from "@/components/UserLevelBadge";
 import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
 import ClassClimateCard from "@/components/ClassClimateCard";
-import StreakBadge from "@/components/StreakBadge";
-import { useUserStreak } from "@/hooks/useUserStreak";
+import NoticeCard, { type NoticeCardData } from "@/components/NoticeCard";
 
 import NoticeRelayButton from "@/components/NoticeRelayButton";
 
