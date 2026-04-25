@@ -47,18 +47,18 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
     return (
       <button
         onClick={handleClick}
-        className="group relative w-full text-left rounded-3xl overflow-hidden border-2 border-primary/20 bg-card hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300 shadow-sm hover:shadow-xl"
+        className="group relative w-full h-full text-left rounded-3xl overflow-hidden border-2 border-primary/20 bg-card hover:border-primary/40 hover:-translate-y-0.5 transition-all duration-300 shadow-sm hover:shadow-xl flex flex-col"
       >
-        <div className="relative aspect-[16/9] sm:aspect-[21/9] overflow-hidden bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10">
+        <div className="relative flex-1 min-h-[200px] overflow-hidden bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10">
           {notice.image_url ? (
             <img
               src={notice.image_url}
               alt={notice.title}
               loading="lazy"
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center">
+            <div className="absolute inset-0 flex items-center justify-center">
               <Megaphone className="w-20 h-20 text-primary/30" strokeWidth={1.2} />
             </div>
           )}
