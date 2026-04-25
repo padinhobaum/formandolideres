@@ -130,7 +130,7 @@ export default function DashboardPage() {
       }
       if (forumRes.data) setForumTopics(forumRes.data as ForumTopic[]);
       if (presenceRes.count !== null) setOnlineCount(presenceRes.count);
-      if (tracksRes.data) setTracksHighlight(tracksRes.data as TrackHighlight[]);
+      if (tracksRes.data) setPlaylistsHighlight(tracksRes.data as PlaylistHighlight[]);
       if (bannersRes.data) {
         const activeBanners = bannersRes.data.filter((b: any) => !b.ends_at || new Date(b.ends_at) > new Date());
         setBanners(activeBanners as Banner[]);
@@ -278,7 +278,7 @@ export default function DashboardPage() {
             </div>
           </div>
           <div className="flex-1" />
-          {!isAdmin && streakCurrent > 0 && <StreakBadge variant="compact" />}
+          {/* streak removed */}
           <Button
             onClick={() => navigate("/lider-ai")}
             className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg">
