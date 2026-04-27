@@ -1,6 +1,7 @@
 import { Pin, ArrowRight, CalendarDays, Clock, Megaphone } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RichText } from "@/components/RichTextEditor";
+import RelayAvatars from "@/components/RelayAvatars";
 
 interface NoticeEvent {
   id: string;
