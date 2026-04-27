@@ -72,7 +72,7 @@ export default function AdminInsightsCard() {
         noticesRes,
         proposalsRes,
       ] = await Promise.all([
-        supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "user"),
+        supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "leader"),
         supabase
           .from("user_presence")
           .select("user_id", { count: "exact", head: true })
