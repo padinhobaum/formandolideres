@@ -1,6 +1,7 @@
 import { Pin, ArrowRight, CalendarDays, Clock, Megaphone } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { RichText } from "@/components/RichTextEditor";
+import RelayAvatars from "@/components/RelayAvatars";
 
 interface NoticeEvent {
   id: string;
@@ -72,7 +73,7 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
             <h3 className="font-heading font-bold text-xl sm:text-2xl text-background mb-2 line-clamp-2 drop-shadow-lg">
               {notice.title}
             </h3>
-            <div className="flex items-center gap-2 text-background/90 text-xs sm:text-sm">
+            <div className="flex items-center gap-2 text-background/90 text-xs sm:text-sm flex-wrap">
               <Avatar className="w-6 h-6">
                 <AvatarImage src={notice.author_avatar_url || undefined} />
                 <AvatarFallback className="text-[9px] bg-primary text-primary-foreground">
@@ -82,6 +83,11 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
               <span className="font-medium">{notice.author_name}</span>
               <span>·</span>
               <span>{formatRelative(notice.created_at)}</span>
+              {notice.requires_relay && (
+                <span className="ml-auto bg-card/90 backdrop-blur-sm rounded-full">
+                  <RelayAvatars noticeId={notice.id} maxVisible={4} size={22} />
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -169,6 +175,12 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
                 <span>{notice.event.event_time.slice(0, 5)}</span>
               </>
             )}
+          </div>
+        )}
+
+        {notice.requires_relay && (
+          <div className="mt-3">
+            <RelayAvatars noticeId={notice.id} maxVisible={4} size={22} />
           </div>
         )}
 

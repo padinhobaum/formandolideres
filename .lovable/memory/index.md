@@ -20,6 +20,7 @@ Updated: today
 
 ## Memories
 - [Clima da Turma](mem://features/clima-da-turma) — Sistema semanal de feedback com escala emoji 1x/semana e relatório admin
+- [Home Insights e Avisos](mem://features/home/insights-and-notices) — AdminInsightsCard para admins, limite de 3 avisos com "Ver todos", RelayAvatars nos cards
 - [Edital de Propostas](mem://features/edital-propostas) — Sistema completo de propostas com fases, votos +/-, ranking
 - [Home Page Mobile Layout](mem://ui-ux/home-page-mobile-layout) — Mobile layout specifics for Home page counters
 - [Forum User Categorization](mem://functional-corrections/forum-user-categorization) — Forum separation of Online Admins and Leaders
