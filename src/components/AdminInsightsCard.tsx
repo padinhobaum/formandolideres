@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, Users, Activity, Heart, AlertTriangle, ArrowUpRight, Sparkles, BarChart3, MessageSquare } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+
+interface OnlineUser {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+}
 
 interface Stats {
   totalLeaders: number;
@@ -49,6 +57,7 @@ const moodLabel = (avg: number | null) => {
 export default function AdminInsightsCard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -75,9 +84,11 @@ export default function AdminInsightsCard() {
         supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "leader"),
         supabase
           .from("user_presence")
-          .select("user_id", { count: "exact", head: true })
+          .select("user_id")
           .eq("is_online", true)
-          .gte("last_seen", fiveMinAgo),
+          .gte("last_seen", fiveMinAgo)
+          .order("last_seen", { ascending: false })
+          .limit(50),
         supabase.from("class_climate_responses").select("mood_score, class_name").eq("week_start", weekStart),
         supabase.from("class_climate_responses").select("mood_score").eq("week_start", prevWeekStart),
         supabase.from("forum_topics").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
@@ -118,10 +129,26 @@ export default function AdminInsightsCard() {
       const participation =
         totalLeaders > 0 ? Math.round((climateWeek.length / totalLeaders) * 100) : 0;
 
+      // Buscar perfis dos usuários online
+      const onlineIds = (presenceRes.data || []).map((p: any) => p.user_id);
+      let online: OnlineUser[] = [];
+      if (onlineIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, avatar_url")
+          .in("user_id", onlineIds);
+        // Preserva ordem original (mais recentes primeiro)
+        const map = new Map((profs || []).map((p: any) => [p.user_id, p]));
+        online = onlineIds
+          .map((id) => map.get(id))
+          .filter(Boolean) as OnlineUser[];
+      }
+
       if (!cancelled) {
+        setOnlineUsers(online);
         setStats({
           totalLeaders,
-          activeOnline: presenceRes.count || 0,
+          activeOnline: onlineIds.length,
           weeklyClimateAvg: weeklyAvg,
           weeklyClimateCount: climateWeek.length,
           prevClimateAvg: prevAvg,
@@ -262,8 +289,36 @@ export default function AdminInsightsCard() {
             icon={<Activity className="w-4 h-4" />}
             label="Online agora"
             value={`${stats.activeOnline}`}
-            sub="usuários ativos"
+            sub={stats.activeOnline === 0 ? "ninguém online" : undefined}
             accent="from-emerald-500/15 to-emerald-500/5"
+            footer={
+              onlineUsers.length > 0 ? (
+                <div className="flex items-center -space-x-2 mt-2">
+                  {onlineUsers.slice(0, 5).map((u) => (
+                    <Tooltip key={u.user_id}>
+                      <TooltipTrigger asChild>
+                        <Avatar className="w-6 h-6 ring-2 ring-card hover:scale-110 hover:z-10 transition-transform">
+                          <AvatarImage src={u.avatar_url || undefined} />
+                          <AvatarFallback className="text-[8px] font-bold bg-emerald-500/15 text-emerald-700">
+                            {u.full_name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">{u.full_name}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                  {onlineUsers.length > 5 && (
+                    <div className="w-6 h-6 ring-2 ring-card rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center text-[9px] font-bold">
+                      +{onlineUsers.length - 5}
+                    </div>
+                  )}
+                  <span className="relative inline-flex w-2 h-2 ml-3 z-10">
+                    <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+                    <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-500" />
+                  </span>
+                </div>
+              ) : null
+            }
           />
           <StatTile
             icon={<MessageSquare className="w-4 h-4" />}
@@ -308,9 +363,10 @@ interface TileProps {
   sub?: string;
   delta?: number | null;
   accent?: string;
+  footer?: React.ReactNode;
 }
 
-function StatTile({ icon, label, value, sub, delta, accent = "from-primary/10 to-primary/5" }: TileProps) {
+function StatTile({ icon, label, value, sub, delta, accent = "from-primary/10 to-primary/5", footer }: TileProps) {
   return (
     <div className={cn("relative overflow-hidden rounded-2xl border bg-gradient-to-br p-3.5 backdrop-blur-sm", accent)}>
       <div className="flex items-center justify-between mb-2">
@@ -333,6 +389,7 @@ function StatTile({ icon, label, value, sub, delta, accent = "from-primary/10 to
       <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">{label}</p>
       <p className="font-heading font-bold text-xl text-foreground leading-tight mt-0.5">{value}</p>
       {sub && <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{sub}</p>}
+      {footer}
     </div>
   );
 }
