@@ -372,6 +372,9 @@ export default function DashboardPage() {
           </div>
         )}
 
+        {/* Painel Executivo - apenas Admin */}
+        {isAdmin && <AdminInsightsCard />}
+
         {/* Results released card */}
         {hasReleasedResults && !isAdmin && (
           <button
