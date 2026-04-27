@@ -228,7 +228,7 @@ export default function AdminInsightsCard() {
               <p className="text-[10px] uppercase font-bold tracking-widest text-primary/80">
                 Painel Executivo
               </p>
-              <h3 className="font-heading font-bold text-xl sm:text-2xl text-foreground leading-tight">
+              <h3 className="font-heading font-bold text-xl sm:text-2xl leading-tight text-primary">
                 Insights da Plataforma
               </h3>
             </div>
