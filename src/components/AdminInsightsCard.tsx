@@ -221,7 +221,7 @@ export default function AdminInsightsCard() {
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-5">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0 bg-primary">
               <BarChart3 className="w-5 h-5 text-primary-foreground" strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
