@@ -217,7 +217,7 @@ export default function AdminInsightsCard() {
       <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
 
-      <div className="relative p-5 sm:p-6">
+      <div className="relative p-5 sm:p-6 pb-0">
         {/* Header */}
         <div className="flex items-start justify-between gap-4 mb-5">
           <div className="flex items-center gap-3 min-w-0">
