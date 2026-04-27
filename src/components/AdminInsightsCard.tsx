@@ -204,118 +204,135 @@ export default function AdminInsightsCard() {
     });
   }
 
-  const toneDot = (tone: "positive" | "neutral" | "warning") =>
+  const toneClass = (tone: "positive" | "neutral" | "warning") =>
     tone === "positive"
-      ? "bg-emerald-500"
+      ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20"
       : tone === "warning"
-      ? "bg-amber-500"
-      : "bg-primary";
+      ? "bg-amber-500/10 text-amber-700 border-amber-500/20"
+      : "bg-primary/10 text-primary border-primary/20";
 
   return (
-    <div className="rounded-3xl border border-border/60 bg-card mb-8">
-      <div className="px-6 sm:px-8 pt-6 sm:pt-7 pb-2">
-        {/* Header — minimalista */}
-        <div className="flex items-end justify-between gap-4 mb-6">
-          <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 font-medium mb-1">
-              Painel Executivo
-            </p>
-            <h3 className="font-heading font-semibold text-2xl sm:text-[28px] text-foreground tracking-tight leading-tight">
-              Visão geral
-            </h3>
+    <div className="relative overflow-hidden rounded-3xl border border-primary/15 bg-gradient-to-br from-primary/8 via-card to-accent/8 mb-8 shadow-sm hover:shadow-md transition-shadow">
+      {/* Decorative gradient blobs */}
+      <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+
+      <div className="relative p-5 sm:p-6">
+        {/* Header */}
+        <div className="flex items-start justify-between gap-4 mb-5">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg shadow-primary/20 flex-shrink-0 bg-primary">
+              <BarChart3 className="w-5 h-5 text-primary-foreground" strokeWidth={2.2} />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] uppercase font-bold tracking-widest text-primary/80">
+                Painel Executivo
+              </p>
+              <h3 className="font-heading font-bold text-xl sm:text-2xl text-foreground leading-tight">
+                Insights da Plataforma
+              </h3>
+            </div>
           </div>
           <button
             onClick={() => navigate("/admin")}
-            className="hidden sm:inline-flex items-center gap-1 text-[13px] text-primary hover:opacity-70 transition-opacity whitespace-nowrap"
+            className="hidden sm:inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline whitespace-nowrap"
           >
-            Admin
-            <ArrowUpRight className="w-3.5 h-3.5" strokeWidth={1.8} />
+            Ir ao Admin <ArrowUpRight className="w-3 h-3" />
           </button>
         </div>
 
-        {/* Stat tiles — clean, sem cores de fundo */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-5 pb-6 border-b border-border/50">
+        {/* Stat tiles */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
           <StatTile
+            icon={<Heart className="w-4 h-4" />}
             label="Clima da semana"
-            value={stats.weeklyClimateAvg != null ? stats.weeklyClimateAvg.toFixed(1) : "—"}
-            unit={stats.weeklyClimateAvg != null ? "/ 5" : undefined}
-            sub={`${stats.weeklyClimateCount} ${stats.weeklyClimateCount === 1 ? "resposta" : "respostas"}`}
+            value={stats.weeklyClimateAvg != null ? `${moodEmoji(stats.weeklyClimateAvg)} ${stats.weeklyClimateAvg.toFixed(1)}` : "—"}
+            sub={`${stats.weeklyClimateCount} respostas`}
             delta={climateDelta}
+            accent="from-rose-500/15 to-rose-500/5"
           />
           <StatTile
+            icon={<Users className="w-4 h-4" />}
             label="Participação"
-            value={`${stats.participationRate}`}
-            unit="%"
-            sub={`${stats.weeklyClimateCount} de ${stats.totalLeaders} líderes`}
+            value={`${stats.participationRate}%`}
+            sub={`${stats.weeklyClimateCount}/${stats.totalLeaders} líderes`}
+            accent="from-primary/15 to-primary/5"
           />
           <StatTile
+            icon={<Activity className="w-4 h-4" />}
             label="Online agora"
             value={`${stats.activeOnline}`}
             sub="usuários ativos"
+            accent="from-emerald-500/15 to-emerald-500/5"
           />
           <StatTile
-            label="Engajamento · 7 dias"
+            icon={<MessageSquare className="w-4 h-4" />}
+            label="Engajamento 7d"
             value={`${stats.forumActivity7d + stats.noticesPublished7d}`}
             sub={`${stats.forumActivity7d} tópicos · ${stats.noticesPublished7d} avisos`}
+            accent="from-accent/15 to-accent/5"
           />
         </div>
-      </div>
 
-      {/* Smart insights — lista limpa com bullet points */}
-      {insights.length > 0 && (
-        <div className="px-6 sm:px-8 py-5">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground/80 font-medium mb-3">
-            Destaques
-          </p>
-          <ul className="space-y-2.5">
-            {insights.slice(0, 5).map((i, idx) => (
-              <li key={idx} className="flex items-center gap-3 text-[14px] text-foreground/90">
-                <span className={cn("w-1.5 h-1.5 rounded-full flex-shrink-0", toneDot(i.tone))} />
-                <span className="leading-snug">{i.text}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+        {/* Smart insights */}
+        {insights.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground mb-2 flex items-center gap-1.5">
+              <Sparkles className="w-3 h-3" /> Destaques inteligentes
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {insights.slice(0, 6).map((i, idx) => (
+                <div
+                  key={idx}
+                  className={cn(
+                    "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border",
+                    toneClass(i.tone)
+                  )}
+                >
+                  {i.icon}
+                  <span>{i.text}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
 interface TileProps {
+  icon: React.ReactNode;
   label: string;
   value: string;
-  unit?: string;
   sub?: string;
   delta?: number | null;
+  accent?: string;
 }
 
-function StatTile({ label, value, unit, sub, delta }: TileProps) {
+function StatTile({ icon, label, value, sub, delta, accent = "from-primary/10 to-primary/5" }: TileProps) {
   return (
-    <div className="min-w-0">
-      <p className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground/80 font-medium mb-1.5">
-        {label}
-      </p>
-      <div className="flex items-baseline gap-1.5">
-        <span className="font-heading font-semibold text-3xl text-foreground tracking-tight tabular-nums leading-none">
-          {value}
-        </span>
-        {unit && (
-          <span className="text-sm text-muted-foreground font-medium">{unit}</span>
-        )}
+    <div className={cn("relative overflow-hidden rounded-2xl border bg-gradient-to-br p-3.5 backdrop-blur-sm", accent)}>
+      <div className="flex items-center justify-between mb-2">
+        <div className="w-7 h-7 rounded-lg bg-card/80 flex items-center justify-center text-foreground/80">
+          {icon}
+        </div>
         {delta != null && Math.abs(delta) >= 0.05 && (
           <span
             className={cn(
-              "inline-flex items-center text-[11px] font-medium ml-1",
-              delta > 0 ? "text-emerald-600" : "text-red-600"
+              "inline-flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full",
+              delta > 0 ? "bg-emerald-500/15 text-emerald-700" : "bg-red-500/15 text-red-700"
             )}
           >
-            <TrendingUp className={cn("w-3 h-3 mr-0.5", delta < 0 && "rotate-180")} strokeWidth={2.2} />
+            <TrendingUp className={cn("w-2.5 h-2.5", delta < 0 && "rotate-180")} />
             {delta > 0 ? "+" : ""}
             {delta.toFixed(1)}
           </span>
         )}
       </div>
-      {sub && <p className="text-[12px] text-muted-foreground mt-1 truncate">{sub}</p>}
+      <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">{label}</p>
+      <p className="font-heading font-bold text-xl text-foreground leading-tight mt-0.5">{value}</p>
+      {sub && <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{sub}</p>}
     </div>
   );
 }
