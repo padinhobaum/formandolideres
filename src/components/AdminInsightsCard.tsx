@@ -363,9 +363,10 @@ interface TileProps {
   sub?: string;
   delta?: number | null;
   accent?: string;
+  footer?: React.ReactNode;
 }
 
-function StatTile({ icon, label, value, sub, delta, accent = "from-primary/10 to-primary/5" }: TileProps) {
+function StatTile({ icon, label, value, sub, delta, accent = "from-primary/10 to-primary/5", footer }: TileProps) {
   return (
     <div className={cn("relative overflow-hidden rounded-2xl border bg-gradient-to-br p-3.5 backdrop-blur-sm", accent)}>
       <div className="flex items-center justify-between mb-2">
@@ -388,6 +389,7 @@ function StatTile({ icon, label, value, sub, delta, accent = "from-primary/10 to
       <p className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">{label}</p>
       <p className="font-heading font-bold text-xl text-foreground leading-tight mt-0.5">{value}</p>
       {sub && <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{sub}</p>}
+      {footer}
     </div>
   );
 }
