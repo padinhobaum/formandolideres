@@ -178,6 +178,12 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
           </div>
         )}
 
+        {notice.requires_relay && (
+          <div className="mt-3">
+            <RelayAvatars noticeId={notice.id} maxVisible={4} size={22} />
+          </div>
+        )}
+
         <div className="mt-auto pt-3 flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
             <Avatar className="w-6 h-6 flex-shrink-0">
