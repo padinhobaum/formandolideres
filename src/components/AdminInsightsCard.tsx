@@ -84,9 +84,11 @@ export default function AdminInsightsCard() {
         supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "leader"),
         supabase
           .from("user_presence")
-          .select("user_id", { count: "exact", head: true })
+          .select("user_id")
           .eq("is_online", true)
-          .gte("last_seen", fiveMinAgo),
+          .gte("last_seen", fiveMinAgo)
+          .order("last_seen", { ascending: false })
+          .limit(50),
         supabase.from("class_climate_responses").select("mood_score, class_name").eq("week_start", weekStart),
         supabase.from("class_climate_responses").select("mood_score").eq("week_start", prevWeekStart),
         supabase.from("forum_topics").select("id", { count: "exact", head: true }).gte("created_at", sevenDaysAgo),
