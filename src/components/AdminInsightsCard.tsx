@@ -2,7 +2,15 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TrendingUp, Users, Activity, Heart, AlertTriangle, ArrowUpRight, Sparkles, BarChart3, MessageSquare } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+
+interface OnlineUser {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+}
 
 interface Stats {
   totalLeaders: number;
