@@ -289,8 +289,36 @@ export default function AdminInsightsCard() {
             icon={<Activity className="w-4 h-4" />}
             label="Online agora"
             value={`${stats.activeOnline}`}
-            sub="usuários ativos"
+            sub={stats.activeOnline === 0 ? "ninguém online" : undefined}
             accent="from-emerald-500/15 to-emerald-500/5"
+            footer={
+              onlineUsers.length > 0 ? (
+                <div className="flex items-center -space-x-2 mt-2">
+                  {onlineUsers.slice(0, 5).map((u) => (
+                    <Tooltip key={u.user_id}>
+                      <TooltipTrigger asChild>
+                        <Avatar className="w-6 h-6 ring-2 ring-card hover:scale-110 hover:z-10 transition-transform">
+                          <AvatarImage src={u.avatar_url || undefined} />
+                          <AvatarFallback className="text-[8px] font-bold bg-emerald-500/15 text-emerald-700">
+                            {u.full_name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">{u.full_name}</TooltipContent>
+                    </Tooltip>
+                  ))}
+                  {onlineUsers.length > 5 && (
+                    <div className="w-6 h-6 ring-2 ring-card rounded-full bg-emerald-500/20 text-emerald-700 flex items-center justify-center text-[9px] font-bold">
+                      +{onlineUsers.length - 5}
+                    </div>
+                  )}
+                  <span className="relative inline-flex w-2 h-2 ml-3 z-10">
+                    <span className="absolute inline-flex w-full h-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
+                    <span className="relative inline-flex w-2 h-2 rounded-full bg-emerald-500" />
+                  </span>
+                </div>
+              ) : null
+            }
           />
           <StatTile
             icon={<MessageSquare className="w-4 h-4" />}
