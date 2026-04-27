@@ -129,10 +129,26 @@ export default function AdminInsightsCard() {
       const participation =
         totalLeaders > 0 ? Math.round((climateWeek.length / totalLeaders) * 100) : 0;
 
+      // Buscar perfis dos usuários online
+      const onlineIds = (presenceRes.data || []).map((p: any) => p.user_id);
+      let online: OnlineUser[] = [];
+      if (onlineIds.length > 0) {
+        const { data: profs } = await supabase
+          .from("profiles")
+          .select("user_id, full_name, avatar_url")
+          .in("user_id", onlineIds);
+        // Preserva ordem original (mais recentes primeiro)
+        const map = new Map((profs || []).map((p: any) => [p.user_id, p]));
+        online = onlineIds
+          .map((id) => map.get(id))
+          .filter(Boolean) as OnlineUser[];
+      }
+
       if (!cancelled) {
+        setOnlineUsers(online);
         setStats({
           totalLeaders,
-          activeOnline: presenceRes.count || 0,
+          activeOnline: onlineIds.length,
           weeklyClimateAvg: weeklyAvg,
           weeklyClimateCount: climateWeek.length,
           prevClimateAvg: prevAvg,
