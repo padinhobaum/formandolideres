@@ -57,6 +57,7 @@ const moodLabel = (avg: number | null) => {
 export default function AdminInsightsCard() {
   const navigate = useNavigate();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
