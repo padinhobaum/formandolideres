@@ -233,6 +233,7 @@ function AdminNotices() {
   const [events, setEvents] = useState<any[]>([]);
   const [selectedEventId, setSelectedEventId] = useState<string>("");
   const [requiresRelay, setRequiresRelay] = useState(false);
+  const [userSearch, setUserSearch] = useState("");
 
   const fetchNotices = async () => {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
