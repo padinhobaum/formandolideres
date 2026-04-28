@@ -533,11 +533,20 @@ function AdminNotices() {
                 {noticeReads.length === 0 ? (
                   <p className="text-xs text-muted-foreground italic">Ninguém leu este aviso ainda.</p>
                 ) : (
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     {noticeReads.map((r: any) => (
-                      <p key={r.id} className="text-xs text-muted-foreground">
-                        {r.full_name} — {new Date(r.read_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
-                      </p>
+                      <div key={r.id} className="flex items-center gap-2">
+                        <Avatar className="w-6 h-6 flex-shrink-0">
+                          <AvatarImage src={r.avatar_url || undefined} />
+                          <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
+                            {r.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="text-xs font-medium text-foreground">{r.full_name}</span>
+                        <span className="text-[10px] text-muted-foreground">
+                          — {new Date(r.read_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 )}
