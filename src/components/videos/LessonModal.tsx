@@ -37,7 +37,8 @@ export default function LessonModal({ lesson, isCompleted, playlistTitle, onClos
     const { data, error } = await supabase.rpc("complete_video_lesson", { _lesson_id: lesson.id });
     setCompleting(false);
     if (error) {
-      toast.error("Erro ao registrar conclusão.");
+      console.error("complete_video_lesson error:", error);
+      toast.error(error.message || "Erro ao registrar conclusão.");
       return;
     }
     const r = data as unknown as CompletionResult;
