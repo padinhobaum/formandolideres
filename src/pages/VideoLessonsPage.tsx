@@ -4,6 +4,7 @@ import AppLayout from "@/components/AppLayout";
 import { useVideoOverview } from "@/hooks/useVideoLessons";
 import { GraduationCap, PlayCircle, CheckCircle2, ChevronRight, Sparkles, Crown, MessageCircle, Shield, Users, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import flPlayLogo from "@/assets/fl-play-logo.png";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   crown: Crown,
@@ -35,8 +36,12 @@ export default function VideoLessonsPage() {
     <AppLayout>
       <div className="w-full">
         <div className="mb-6">
-          <h2 className="font-heading font-bold text-4xl text-accent">Videoaulas</h2>
-          <p className="text-sm text-muted-foreground mt-1">Aprenda no seu ritmo e desenvolva sua liderança.</p>
+          <img
+            src={flPlayLogo}
+            alt="Formando Líderes Play"
+            className="h-12 sm:h-16 w-auto"
+          />
+          <p className="text-sm text-muted-foreground mt-2">Aprenda no seu ritmo e desenvolva sua liderança.</p>
         </div>
 
         {/* Search + filtros */}
