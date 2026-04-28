@@ -325,10 +325,14 @@ function AdminNotices() {
     const { data } = await supabase.from("notice_reads").select("*").eq("notice_id", noticeId);
     if (!data || data.length === 0) { setNoticeReads([]); return; }
     const userIds = (data as any[]).map((r: any) => r.user_id);
-    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name").in("user_id", userIds);
-    const profileMap: Record<string, string> = {};
-    profiles?.forEach((p: any) => { profileMap[p.user_id] = p.full_name; });
-    setNoticeReads((data as any[]).map((r: any) => ({ ...r, full_name: profileMap[r.user_id] || "Usuário" })));
+    const { data: profiles } = await supabase.from("profiles").select("user_id, full_name, avatar_url").in("user_id", userIds);
+    const profileMap: Record<string, { full_name: string; avatar_url: string | null }> = {};
+    profiles?.forEach((p: any) => { profileMap[p.user_id] = { full_name: p.full_name, avatar_url: p.avatar_url }; });
+    setNoticeReads((data as any[]).map((r: any) => ({
+      ...r,
+      full_name: profileMap[r.user_id]?.full_name || "Usuário",
+      avatar_url: profileMap[r.user_id]?.avatar_url || null,
+    })));
   };
 
   return (
