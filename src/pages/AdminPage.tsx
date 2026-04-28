@@ -382,28 +382,56 @@ function AdminNotices() {
             </label>
           </div>
           {sendType === "specific" && (
-            <div className="border bg-background rounded-lg p-3 max-h-48 overflow-y-auto space-y-1">
-              {allUsers.map((u: any) => (
-                <label key={u.user_id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-secondary/50 p-1.5 rounded-lg transition-colors">
-                  <input
-                    type="checkbox"
-                    checked={selectedUserIds.includes(u.user_id)}
-                    onChange={(e) => {
-                      if (e.target.checked) setSelectedUserIds([...selectedUserIds, u.user_id]);
-                      else setSelectedUserIds(selectedUserIds.filter((id) => id !== u.user_id));
-                    }}
-                  />
-                  <Avatar className="w-6 h-6 flex-shrink-0">
-                    <AvatarImage src={u.avatar_url || undefined} />
-                    <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
-                      {u.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span>{u.full_name}</span>
-                  {u.class_name && <span className="text-muted-foreground text-xs">({u.class_name})</span>}
-                </label>
-              ))}
-              {allUsers.length === 0 && <p className="text-xs text-muted-foreground">Nenhum usuário encontrado.</p>}
+            <div className="border bg-background rounded-lg p-3 space-y-2">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                <Input
+                  value={userSearch}
+                  onChange={(e) => setUserSearch(e.target.value)}
+                  placeholder="Buscar por nome ou turma..."
+                  className="h-8 text-xs pl-8"
+                />
+              </div>
+              {selectedUserIds.length > 0 && (
+                <div className="flex items-center justify-between text-[11px] text-muted-foreground px-1">
+                  <span>{selectedUserIds.length} selecionado(s)</span>
+                  <button type="button" onClick={() => setSelectedUserIds([])} className="text-destructive hover:underline">
+                    Limpar
+                  </button>
+                </div>
+              )}
+              <div className="max-h-48 overflow-y-auto space-y-1">
+                {allUsers
+                  .filter((u: any) => {
+                    if (!userSearch.trim()) return true;
+                    const q = userSearch.toLowerCase();
+                    return (
+                      u.full_name?.toLowerCase().includes(q) ||
+                      u.class_name?.toLowerCase().includes(q)
+                    );
+                  })
+                  .map((u: any) => (
+                    <label key={u.user_id} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-secondary/50 p-1.5 rounded-lg transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={selectedUserIds.includes(u.user_id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setSelectedUserIds([...selectedUserIds, u.user_id]);
+                          else setSelectedUserIds(selectedUserIds.filter((id) => id !== u.user_id));
+                        }}
+                      />
+                      <Avatar className="w-6 h-6 flex-shrink-0">
+                        <AvatarImage src={u.avatar_url || undefined} />
+                        <AvatarFallback className="text-[8px] font-bold bg-secondary text-secondary-foreground">
+                          {u.full_name?.split(" ").map((n: string) => n[0]).slice(0, 2).join("").toUpperCase() || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>{u.full_name}</span>
+                      {u.class_name && <span className="text-muted-foreground text-xs">({u.class_name})</span>}
+                    </label>
+                  ))}
+                {allUsers.length === 0 && <p className="text-xs text-muted-foreground">Nenhum usuário encontrado.</p>}
+              </div>
             </div>
           )}
         </div>
