@@ -41,7 +41,7 @@ export default function VideoLessonsPage() {
             alt="Formando Líderes Play"
             className="h-12 sm:h-16 w-auto"
           />
-          <p className="text-sm text-muted-foreground mt-2">Aprenda no seu ritmo e desenvolva sua liderança.</p>
+          
         </div>
 
         {/* Search + filtros */}
