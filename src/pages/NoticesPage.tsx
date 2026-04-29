@@ -175,7 +175,7 @@ export default function NoticesPage() {
           </div>
           <div>
             <h2 className="font-heading font-bold text-4xl text-accent">Mural de Avisos</h2>
-            <p className="text-sm text-muted-foreground">Comunicados e novidades da Formando Líderes</p>
+            <p className="text-sm text-muted-foreground">Comunicados e novidades do Formando Líderes</p>
           </div>
         </div>
 
