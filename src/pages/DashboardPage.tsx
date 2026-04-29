@@ -282,9 +282,10 @@ export default function DashboardPage() {
           {/* streak removed */}
           <Button
             onClick={() => navigate("/lider-ai")}
-            className="rounded-full bg-gradient-to-r from-primary to-accent hover:opacity-90 text-primary-foreground gap-2 px-6 shadow-lg">
-            <Sparkles className="w-4 h-4" />
-            Pergunte à LíderAI
+            className="group relative rounded-full bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_100%] bg-left hover:bg-right text-primary-foreground gap-2 px-6 shadow-lg hover:shadow-2xl hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-500 ease-out overflow-hidden">
+            <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out bg-gradient-to-r from-transparent via-white/25 to-transparent" />
+            <Sparkles className="w-4 h-4 transition-transform duration-500 group-hover:rotate-[360deg] group-hover:scale-110" />
+            <span className="relative">Pergunte à LíderAI</span>
           </Button>
         </div>
 
