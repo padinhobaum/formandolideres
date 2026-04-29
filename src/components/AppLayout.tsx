@@ -278,7 +278,7 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
             </Popover>
           </div>
         </header>
-        <div className="p-4 md:p-8 flex-1">{children}</div>
+        <div key={location.pathname} className="p-4 md:p-8 flex-1 page-transition">{children}</div>
 
         {/* Footer */}
         <footer className="border-t bg-card text-foreground py-6 md:py-8 md:px-10 px-[20px]">
