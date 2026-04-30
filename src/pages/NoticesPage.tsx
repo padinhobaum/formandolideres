@@ -185,45 +185,7 @@ export default function NoticesPage() {
         )}
       </div>
 
-      {/* Focus Mode */}
-      {focusedNotice && (
-        <>
-          <div className="focus-overlay" onClick={() => setFocusedId(null)} />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-            <div className="focus-content max-w-2xl w-full p-6 sm:p-8 pointer-events-auto max-h-[85vh] overflow-y-auto rounded-2xl relative">
-              <button
-                onClick={() => setFocusedId(null)}
-                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-secondary hover:bg-secondary/70 flex items-center justify-center transition-colors"
-                aria-label="Fechar"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              {focusedNotice.image_url && (
-                <img src={focusedNotice.image_url} alt="" className="w-full max-h-72 mb-4 object-cover rounded-xl" />
-              )}
-              <div className="flex items-center gap-2 mb-4 pr-10">
-                {focusedNotice.is_pinned && <Pin className="w-4 h-4 text-primary" strokeWidth={2} />}
-                <h2 className="font-heading font-bold text-2xl text-primary">{focusedNotice.title}</h2>
-              </div>
-              <div className="font-heading text-base leading-relaxed whitespace-pre-wrap mb-6">
-                <RichText content={focusedNotice.content} />
-              </div>
-              {renderEventBadge(focusedNotice.event)}
-              <NoticeRelayButton noticeId={focusedNotice.id} requiresRelay={focusedNotice.requires_relay} />
-              {renderCtaButtons(focusedNotice.cta_buttons)}
-              <button
-                onClick={() => shareWhatsApp(focusedNotice)}
-                className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium mt-3 transition-colors"
-              >
-                <Share2 className="w-3.5 h-3.5" /> Compartilhar no WhatsApp
-              </button>
-              <p className="text-xs text-muted-foreground mt-4 pt-4 border-t">
-                {focusedNotice.author_name} · {formatDate(focusedNotice.created_at)}
-              </p>
-            </div>
-          </div>
-        </>
-      )}
+      <NoticeViewer notice={focusedNotice as any} onClose={() => setFocusedId(null)} />
     </AppLayout>
   );
 }
