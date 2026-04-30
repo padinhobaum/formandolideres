@@ -2,12 +2,10 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
-import { Pin, Maximize2, ExternalLink, CalendarDays, Clock, Share2, Search, Megaphone, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, Megaphone } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { RichText } from "@/components/RichTextEditor";
-import NoticeRelayButton from "@/components/NoticeRelayButton";
 import NoticeCard, { type NoticeCardData } from "@/components/NoticeCard";
+import NoticeViewer from "@/components/NoticeViewer";
 
 interface CtaButton {
   text: string;
