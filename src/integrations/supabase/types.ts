@@ -545,6 +545,7 @@ export type Database = {
           created_at: string
           id: string
           notice_id: string
+          parent_id: string | null
         }
         Insert: {
           author_avatar_url?: string | null
@@ -554,6 +555,7 @@ export type Database = {
           created_at?: string
           id?: string
           notice_id: string
+          parent_id?: string | null
         }
         Update: {
           author_avatar_url?: string | null
@@ -563,6 +565,7 @@ export type Database = {
           created_at?: string
           id?: string
           notice_id?: string
+          parent_id?: string | null
         }
         Relationships: [
           {
@@ -570,6 +573,13 @@ export type Database = {
             columns: ["notice_id"]
             isOneToOne: false
             referencedRelation: "notices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notice_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "notice_comments"
             referencedColumns: ["id"]
           },
         ]
