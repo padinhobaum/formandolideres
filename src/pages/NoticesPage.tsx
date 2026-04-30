@@ -102,68 +102,7 @@ export default function NoticesPage() {
   const others = visibleNotices.filter((n) => n.id !== featured?.id);
   const focusedNotice = notices.find((n) => n.id === focusedId);
 
-  const renderCtaButtons = (ctas: CtaButton[]) => {
-    if (!ctas || ctas.length === 0) return null;
-    return (
-      <div className="flex flex-wrap gap-2 mt-4">
-        {ctas.map((cta, i) => (
-          <a key={i} href={cta.url} target={cta.newTab ? "_blank" : "_self"} rel={cta.newTab ? "noopener noreferrer" : undefined} onClick={(e) => e.stopPropagation()}>
-            <Button size="sm" className="gap-1.5">
-              {cta.text}
-              {cta.newTab && <ExternalLink className="w-3 h-3" strokeWidth={1.5} />}
-            </Button>
-          </a>
-        ))}
-      </div>
-    );
-  };
-
-  const shareWhatsApp = (notice: Notice) => {
-    const plain = notice.content
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/p>/gi, "\n\n")
-      .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
-    const text = `📢 *${notice.title}*\n\n${plain}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  };
-
-  const renderEventBadge = (event: NoticeEvent | null) => {
-    if (!event) return null;
-    const date = new Date(event.event_date + "T12:00:00");
-    const day = date.toLocaleDateString("pt-BR", { day: "2-digit" });
-    const month = date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
-    const time = event.event_time ? event.event_time.slice(0, 5) : null;
-    return (
-      <div className="mt-3 border border-primary/20 bg-primary/5 rounded-xl p-3 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-lg bg-primary/10 flex flex-col items-center justify-center flex-shrink-0">
-          <span className="text-sm font-heading font-bold text-primary leading-none">{day}</span>
-          <span className="text-[9px] font-bold text-primary/70">{month}</span>
-        </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <CalendarDays className="w-3 h-3 text-primary" strokeWidth={1.5} />
-            <span className="text-xs font-bold text-primary">Evento</span>
-          </div>
-          <p className="text-xs font-medium text-foreground line-clamp-1">{event.title}</p>
-          {time && (
-            <div className="flex items-center gap-1 mt-0.5">
-              <Clock className="w-2.5 h-2.5 text-muted-foreground" strokeWidth={1.5} />
-              <span className="text-[10px] text-muted-foreground">{time}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
+  // viewer handles cta, share, event rendering
   return (
     <AppLayout>
       <div className="w-full">
