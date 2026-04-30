@@ -15,6 +15,7 @@ import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
 import ClassClimateCard from "@/components/ClassClimateCard";
 import NoticeCard, { type NoticeCardData } from "@/components/NoticeCard";
+import NoticeViewer from "@/components/NoticeViewer";
 
 
 import NoticeRelayButton from "@/components/NoticeRelayButton";
@@ -485,60 +486,20 @@ export default function DashboardPage() {
           )}
         </section>
 
-        {/* Modal de Aviso Completo */}
-        <Dialog open={!!selectedNotice} onOpenChange={(open) => !open && setSelectedNotice(null)}>
-          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-            {selectedNotice &&
-            <>
-                <DialogHeader>
-                  <DialogTitle className="font-heading text-xl">{selectedNotice.title}</DialogTitle>
-                  <p className="text-xs text-muted-foreground">{selectedNotice.author_name} · {formatDate(selectedNotice.created_at)}</p>
-                </DialogHeader>
-                {selectedNotice.image_url &&
-              <img src={selectedNotice.image_url} alt={selectedNotice.title} className="w-full rounded-lg object-cover max-h-64" />
-              }
-                <div className="text-sm whitespace-pre-wrap leading-relaxed">
-                  <RichText content={selectedNotice.content} />
-                </div>
-                {selectedNoticeEvent && (
-                  <div className="mt-3 border rounded-lg p-3 bg-muted/30 flex items-start gap-3">
-                    <CalendarDays className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-heading font-semibold text-foreground">{selectedNoticeEvent.title}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {new Date(selectedNoticeEvent.event_date + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "long", year: "numeric" })}
-                        {selectedNoticeEvent.event_time && ` às ${selectedNoticeEvent.event_time.slice(0, 5)}`}
-                      </p>
-                      {selectedNoticeEvent.description && <p className="text-xs text-muted-foreground mt-1">{selectedNoticeEvent.description}</p>}
-                    </div>
-                  </div>
-                )}
-                {selectedNotice.cta_buttons?.length > 0 &&
-              <div className="flex flex-wrap gap-2 mt-2">
-                    {selectedNotice.cta_buttons.map((cta: any, i: number) =>
-                <a key={i} href={cta.url} target={cta.newTab ? "_blank" : "_self"} rel={cta.newTab ? "noopener noreferrer" : undefined}>
-                        <Button size="sm" className="gap-1.5">
-                          {cta.text}
-                          {cta.newTab && <ExternalLink className="w-3 h-3" strokeWidth={1.5} />}
-                        </Button>
-                      </a>
-                )}
-                  </div>
-              }
-                <NoticeRelayButton noticeId={selectedNotice.id} requiresRelay={selectedNotice.requires_relay} />
-                <button
-                  onClick={() => {
-                    const text = `📢 *${selectedNotice.title}*\n\n${selectedNotice.content.replace(/<[^>]*>/g, '').slice(0, 500)}`;
-                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-                  }}
-                  className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium mt-2 transition-colors"
-                >
-                  <Share2 className="w-3.5 h-3.5" /> Compartilhar no WhatsApp
-                </button>
-              </>
-            }
-          </DialogContent>
-        </Dialog>
+        {/* Visualizador de Aviso em tela cheia */}
+        <NoticeViewer
+          notice={selectedNotice ? {
+            ...selectedNotice,
+            event: selectedNoticeEvent ? {
+              id: selectedNoticeEvent.id,
+              title: selectedNoticeEvent.title,
+              event_date: selectedNoticeEvent.event_date,
+              event_time: selectedNoticeEvent.event_time,
+              description: selectedNoticeEvent.description,
+            } : null,
+          } as any : null}
+          onClose={() => { setSelectedNotice(null); setSelectedNoticeEvent(null); }}
+        />
 
         {/* Tópicos Recentes do Fórum */}
         <section className="mb-8 border bg-card rounded-xl p-4 md:p-6">

@@ -2,12 +2,10 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
-import { Pin, Maximize2, ExternalLink, CalendarDays, Clock, Share2, Search, Megaphone, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, Megaphone } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { RichText } from "@/components/RichTextEditor";
-import NoticeRelayButton from "@/components/NoticeRelayButton";
 import NoticeCard, { type NoticeCardData } from "@/components/NoticeCard";
+import NoticeViewer from "@/components/NoticeViewer";
 
 interface CtaButton {
   text: string;
@@ -104,68 +102,7 @@ export default function NoticesPage() {
   const others = visibleNotices.filter((n) => n.id !== featured?.id);
   const focusedNotice = notices.find((n) => n.id === focusedId);
 
-  const renderCtaButtons = (ctas: CtaButton[]) => {
-    if (!ctas || ctas.length === 0) return null;
-    return (
-      <div className="flex flex-wrap gap-2 mt-4">
-        {ctas.map((cta, i) => (
-          <a key={i} href={cta.url} target={cta.newTab ? "_blank" : "_self"} rel={cta.newTab ? "noopener noreferrer" : undefined} onClick={(e) => e.stopPropagation()}>
-            <Button size="sm" className="gap-1.5">
-              {cta.text}
-              {cta.newTab && <ExternalLink className="w-3 h-3" strokeWidth={1.5} />}
-            </Button>
-          </a>
-        ))}
-      </div>
-    );
-  };
-
-  const shareWhatsApp = (notice: Notice) => {
-    const plain = notice.content
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/p>/gi, "\n\n")
-      .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
-    const text = `📢 *${notice.title}*\n\n${plain}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  };
-
-  const renderEventBadge = (event: NoticeEvent | null) => {
-    if (!event) return null;
-    const date = new Date(event.event_date + "T12:00:00");
-    const day = date.toLocaleDateString("pt-BR", { day: "2-digit" });
-    const month = date.toLocaleDateString("pt-BR", { month: "short" }).replace(".", "").toUpperCase();
-    const time = event.event_time ? event.event_time.slice(0, 5) : null;
-    return (
-      <div className="mt-3 border border-primary/20 bg-primary/5 rounded-xl p-3 flex items-center gap-3">
-        <div className="w-11 h-11 rounded-lg bg-primary/10 flex flex-col items-center justify-center flex-shrink-0">
-          <span className="text-sm font-heading font-bold text-primary leading-none">{day}</span>
-          <span className="text-[9px] font-bold text-primary/70">{month}</span>
-        </div>
-        <div className="min-w-0">
-          <div className="flex items-center gap-1.5">
-            <CalendarDays className="w-3 h-3 text-primary" strokeWidth={1.5} />
-            <span className="text-xs font-bold text-primary">Evento</span>
-          </div>
-          <p className="text-xs font-medium text-foreground line-clamp-1">{event.title}</p>
-          {time && (
-            <div className="flex items-center gap-1 mt-0.5">
-              <Clock className="w-2.5 h-2.5 text-muted-foreground" strokeWidth={1.5} />
-              <span className="text-[10px] text-muted-foreground">{time}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
+  // viewer handles cta, share, event rendering
   return (
     <AppLayout>
       <div className="w-full">
@@ -248,45 +185,7 @@ export default function NoticesPage() {
         )}
       </div>
 
-      {/* Focus Mode */}
-      {focusedNotice && (
-        <>
-          <div className="focus-overlay" onClick={() => setFocusedId(null)} />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
-            <div className="focus-content max-w-2xl w-full p-6 sm:p-8 pointer-events-auto max-h-[85vh] overflow-y-auto rounded-2xl relative">
-              <button
-                onClick={() => setFocusedId(null)}
-                className="absolute top-4 right-4 w-9 h-9 rounded-full bg-secondary hover:bg-secondary/70 flex items-center justify-center transition-colors"
-                aria-label="Fechar"
-              >
-                <X className="w-4 h-4" />
-              </button>
-              {focusedNotice.image_url && (
-                <img src={focusedNotice.image_url} alt="" className="w-full max-h-72 mb-4 object-cover rounded-xl" />
-              )}
-              <div className="flex items-center gap-2 mb-4 pr-10">
-                {focusedNotice.is_pinned && <Pin className="w-4 h-4 text-primary" strokeWidth={2} />}
-                <h2 className="font-heading font-bold text-2xl text-primary">{focusedNotice.title}</h2>
-              </div>
-              <div className="font-heading text-base leading-relaxed whitespace-pre-wrap mb-6">
-                <RichText content={focusedNotice.content} />
-              </div>
-              {renderEventBadge(focusedNotice.event)}
-              <NoticeRelayButton noticeId={focusedNotice.id} requiresRelay={focusedNotice.requires_relay} />
-              {renderCtaButtons(focusedNotice.cta_buttons)}
-              <button
-                onClick={() => shareWhatsApp(focusedNotice)}
-                className="flex items-center gap-1.5 text-xs text-green-600 hover:text-green-700 font-medium mt-3 transition-colors"
-              >
-                <Share2 className="w-3.5 h-3.5" /> Compartilhar no WhatsApp
-              </button>
-              <p className="text-xs text-muted-foreground mt-4 pt-4 border-t">
-                {focusedNotice.author_name} · {formatDate(focusedNotice.created_at)}
-              </p>
-            </div>
-          </div>
-        </>
-      )}
+      <NoticeViewer notice={focusedNotice as any} onClose={() => setFocusedId(null)} />
     </AppLayout>
   );
 }
