@@ -75,7 +75,7 @@ export function RichText({ content, className = "" }: { content: string; classNa
   // Parse **bold** and *italic*
   const parts = content.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
   return (
-    <span className={className}>
+    <div className={`whitespace-pre-wrap ${className}`}>
       {parts.map((part, i) => {
         if (part.startsWith("**") && part.endsWith("**")) {
           return <strong key={i}>{part.slice(2, -2)}</strong>;
@@ -85,6 +85,6 @@ export function RichText({ content, className = "" }: { content: string; classNa
         }
         return <span key={i}>{part}</span>;
       })}
-    </span>
+    </div>
   );
 }
