@@ -1,10 +1,11 @@
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Pin, X, ExternalLink, CalendarDays, Clock, Share2 } from "lucide-react";
+import { Pin, X, ExternalLink, CalendarDays, Clock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { RichText } from "@/components/RichTextEditor";
 import NoticeRelayButton from "@/components/NoticeRelayButton";
+import NoticeComments from "@/components/NoticeComments";
 
 interface CtaButton { text: string; url: string; newTab?: boolean }
 
@@ -59,23 +60,6 @@ export default function NoticeViewer({ notice, onClose }: Props) {
     .slice(0, 2)
     .join("")
     .toUpperCase() || "?";
-
-  const shareWhatsApp = () => {
-    const plain = notice.content
-      .replace(/<br\s*\/?>/gi, "\n")
-      .replace(/<\/p>/gi, "\n\n")
-      .replace(/<[^>]*>/g, "")
-      .replace(/&nbsp;/g, " ")
-      .replace(/&amp;/g, "&")
-      .replace(/&lt;/g, "<")
-      .replace(/&gt;/g, ">")
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
-    const text = `📢 *${notice.title}*\n\n${plain}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
-  };
 
   const renderEvent = () => {
     if (!notice.event) return null;
@@ -202,13 +186,8 @@ export default function NoticeViewer({ notice, onClose }: Props) {
             </div>
           )}
 
-          {/* Share */}
-          <button
-            onClick={shareWhatsApp}
-            className="inline-flex items-center gap-1.5 text-sm text-green-600 hover:text-green-700 font-medium mt-8 transition-colors"
-          >
-            <Share2 className="w-4 h-4" /> Compartilhar no WhatsApp
-          </button>
+          {/* Comments */}
+          <NoticeComments noticeId={notice.id} />
         </div>
       </article>
     </div>,
