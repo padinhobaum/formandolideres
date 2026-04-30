@@ -1,0 +1,1 @@
+DELETE FROM public.class_climate_responses;
