@@ -536,6 +536,44 @@ export type Database = {
         }
         Relationships: []
       }
+      notice_comments: {
+        Row: {
+          author_avatar_url: string | null
+          author_id: string
+          author_name: string
+          content: string
+          created_at: string
+          id: string
+          notice_id: string
+        }
+        Insert: {
+          author_avatar_url?: string | null
+          author_id: string
+          author_name?: string
+          content: string
+          created_at?: string
+          id?: string
+          notice_id: string
+        }
+        Update: {
+          author_avatar_url?: string | null
+          author_id?: string
+          author_name?: string
+          content?: string
+          created_at?: string
+          id?: string
+          notice_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notice_comments_notice_id_fkey"
+            columns: ["notice_id"]
+            isOneToOne: false
+            referencedRelation: "notices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notice_reads: {
         Row: {
           id: string
