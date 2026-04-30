@@ -15,6 +15,7 @@ import LevelUpModal from "@/components/LevelUpModal";
 import EventCalendar from "@/components/EventCalendar";
 import ClassClimateCard from "@/components/ClassClimateCard";
 import NoticeCard, { type NoticeCardData } from "@/components/NoticeCard";
+import NoticeViewer from "@/components/NoticeViewer";
 
 
 import NoticeRelayButton from "@/components/NoticeRelayButton";
