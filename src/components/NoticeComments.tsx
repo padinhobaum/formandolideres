@@ -4,11 +4,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MessageSquare, Trash2, Send } from "lucide-react";
+import { MessageSquare, Trash2, Send, Reply, ShieldCheck, X } from "lucide-react";
 import { toast } from "sonner";
 
 interface Comment {
   id: string;
+  parent_id: string | null;
   author_id: string;
   author_name: string;
   author_avatar_url: string | null;
@@ -25,8 +26,12 @@ const formatDate = (d: string) =>
 export default function NoticeComments({ noticeId }: { noticeId: string }) {
   const { user, profile, isAdmin } = useAuth();
   const [comments, setComments] = useState<Comment[]>([]);
+  const [adminIds, setAdminIds] = useState<Set<string>>(new Set());
   const [content, setContent] = useState("");
   const [posting, setPosting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState("");
+  const [postingReply, setPostingReply] = useState(false);
 
   const fetchComments = async () => {
     const { data } = await (supabase as any)
@@ -34,7 +39,21 @@ export default function NoticeComments({ noticeId }: { noticeId: string }) {
       .select("*")
       .eq("notice_id", noticeId)
       .order("created_at", { ascending: true });
-    setComments((data || []) as Comment[]);
+    const list = (data || []) as Comment[];
+    setComments(list);
+
+    // Fetch admin role flags for authors
+    const authorIds = Array.from(new Set(list.map((c) => c.author_id)));
+    if (authorIds.length > 0) {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("user_id, role")
+        .in("user_id", authorIds)
+        .eq("role", "admin");
+      setAdminIds(new Set((roles || []).map((r: any) => r.user_id)));
+    } else {
+      setAdminIds(new Set());
+    }
   };
 
   useEffect(() => {
@@ -48,6 +67,7 @@ export default function NoticeComments({ noticeId }: { noticeId: string }) {
     setPosting(true);
     const { error } = await (supabase as any).from("notice_comments").insert({
       notice_id: noticeId,
+      parent_id: null,
       author_id: user.id,
       author_name: profile?.full_name || "Usuário",
       author_avatar_url: profile?.avatar_url || null,
@@ -59,6 +79,29 @@ export default function NoticeComments({ noticeId }: { noticeId: string }) {
       return;
     }
     setContent("");
+    fetchComments();
+  };
+
+  const handlePostReply = async (parentId: string) => {
+    if (!user || !isAdmin) return;
+    const text = replyContent.trim();
+    if (!text) return;
+    setPostingReply(true);
+    const { error } = await (supabase as any).from("notice_comments").insert({
+      notice_id: noticeId,
+      parent_id: parentId,
+      author_id: user.id,
+      author_name: profile?.full_name || "Coordenação",
+      author_avatar_url: profile?.avatar_url || null,
+      content: text,
+    });
+    setPostingReply(false);
+    if (error) {
+      toast.error("Erro ao publicar resposta");
+      return;
+    }
+    setReplyContent("");
+    setReplyingTo(null);
     fetchComments();
   };
 
@@ -74,6 +117,126 @@ export default function NoticeComments({ noticeId }: { noticeId: string }) {
 
   const myAvatar = profile?.avatar_url || undefined;
   const myInitials = initials(profile?.full_name || "U");
+
+  const topLevel = comments.filter((c) => !c.parent_id);
+  const repliesByParent = comments.reduce<Record<string, Comment[]>>((acc, c) => {
+    if (c.parent_id) {
+      (acc[c.parent_id] ||= []).push(c);
+    }
+    return acc;
+  }, {});
+
+  const renderComment = (c: Comment, isReply = false) => {
+    const canDelete = user && (c.author_id === user.id || isAdmin);
+    const isAdminAuthor = adminIds.has(c.author_id);
+    return (
+      <li key={c.id} className="flex gap-3 group">
+        <Avatar className="w-9 h-9 flex-shrink-0">
+          <AvatarImage src={c.author_avatar_url || undefined} />
+          <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
+            {initials(c.author_name)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div
+            className={`rounded-2xl px-4 py-2.5 ${
+              isAdminAuthor
+                ? "bg-primary/10 border border-primary/20"
+                : "bg-secondary/60"
+            }`}
+          >
+            <div className="flex items-center justify-between gap-2 mb-0.5 flex-wrap">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">{c.author_name}</p>
+                {isAdminAuthor && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wide flex-shrink-0">
+                    <ShieldCheck className="w-2.5 h-2.5" strokeWidth={2.5} />
+                    Coordenação
+                  </span>
+                )}
+              </div>
+              <span className="text-[11px] text-muted-foreground flex-shrink-0">{formatDate(c.created_at)}</span>
+            </div>
+            <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{c.content}</p>
+          </div>
+
+          <div className="flex items-center gap-3 mt-1 ml-2">
+            {/* Admins only: reply button (only on top-level) */}
+            {!isReply && isAdmin && (
+              <button
+                onClick={() => {
+                  setReplyingTo(replyingTo === c.id ? null : c.id);
+                  setReplyContent("");
+                }}
+                className="text-xs text-muted-foreground hover:text-primary inline-flex items-center gap-1 transition-colors"
+              >
+                <Reply className="w-3 h-3" /> Responder
+              </button>
+            )}
+            {canDelete && (
+              <button
+                onClick={() => handleDelete(c.id)}
+                className="text-xs text-muted-foreground hover:text-destructive inline-flex items-center gap-1 transition-colors"
+              >
+                <Trash2 className="w-3 h-3" /> Excluir
+              </button>
+            )}
+          </div>
+
+          {/* Reply composer */}
+          {!isReply && replyingTo === c.id && isAdmin && (
+            <div className="flex gap-3 mt-3">
+              <Avatar className="w-8 h-8 flex-shrink-0">
+                <AvatarImage src={myAvatar} />
+                <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-semibold">
+                  {myInitials}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <Textarea
+                  value={replyContent}
+                  onChange={(e) => setReplyContent(e.target.value.slice(0, 1000))}
+                  placeholder={`Responder ${c.author_name.split(" ")[0]}...`}
+                  rows={2}
+                  className="rounded-xl resize-none bg-background text-sm"
+                  autoFocus
+                />
+                <div className="flex items-center justify-between mt-2 gap-2">
+                  <span className="text-[11px] text-muted-foreground">{replyContent.length}/1000</span>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => { setReplyingTo(null); setReplyContent(""); }}
+                      variant="ghost"
+                      size="sm"
+                      className="rounded-xl gap-1"
+                    >
+                      <X className="w-3.5 h-3.5" /> Cancelar
+                    </Button>
+                    <Button
+                      onClick={() => handlePostReply(c.id)}
+                      disabled={postingReply || !replyContent.trim()}
+                      size="sm"
+                      className="rounded-xl gap-1.5"
+                    >
+                      {postingReply ? "Enviando..." : "Responder"}
+                      <Send className="w-3.5 h-3.5" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Replies (admin responses) */}
+          {!isReply && repliesByParent[c.id]?.length > 0 && (
+            <ul className="mt-3 space-y-3 pl-4 border-l-2 border-primary/20">
+              {repliesByParent[c.id].map((r) => renderComment(r, true))}
+            </ul>
+          )}
+        </div>
+      </li>
+    );
+  };
 
   return (
     <div className="mt-8 pt-6 border-t border-border">
@@ -111,42 +274,13 @@ export default function NoticeComments({ noticeId }: { noticeId: string }) {
       )}
 
       {/* List */}
-      {comments.length === 0 ? (
+      {topLevel.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-6">
           Seja o primeiro a comentar.
         </p>
       ) : (
         <ul className="space-y-4">
-          {comments.map((c) => {
-            const canDelete = user && (c.author_id === user.id || isAdmin);
-            return (
-              <li key={c.id} className="flex gap-3 group">
-                <Avatar className="w-9 h-9 flex-shrink-0">
-                  <AvatarImage src={c.author_avatar_url || undefined} />
-                  <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-                    {initials(c.author_name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1 min-w-0">
-                  <div className="bg-secondary/60 rounded-2xl px-4 py-2.5">
-                    <div className="flex items-center justify-between gap-2 mb-0.5">
-                      <p className="text-sm font-semibold text-foreground truncate">{c.author_name}</p>
-                      <span className="text-[11px] text-muted-foreground flex-shrink-0">{formatDate(c.created_at)}</span>
-                    </div>
-                    <p className="text-sm text-foreground/90 whitespace-pre-wrap break-words">{c.content}</p>
-                  </div>
-                  {canDelete && (
-                    <button
-                      onClick={() => handleDelete(c.id)}
-                      className="text-xs text-muted-foreground hover:text-destructive mt-1 ml-2 inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      <Trash2 className="w-3 h-3" /> Excluir
-                    </button>
-                  )}
-                </div>
-              </li>
-            );
-          })}
+          {topLevel.map((c) => renderComment(c))}
         </ul>
       )}
     </div>
