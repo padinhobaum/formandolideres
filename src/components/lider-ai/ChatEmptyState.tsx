@@ -23,7 +23,7 @@ export function ChatEmptyState({ onSelectSuggestion }: ChatEmptyStateProps) {
   const { profile } = useAuth();
   const firstName = profile?.full_name?.trim().split(" ")[0] || "";
   return (
-    <div className="flex flex-col items-center justify-center min-h-full gap-8 md:gap-10 px-4 py-8 md:py-12">
+    <div className="flex flex-col items-center justify-center min-h-full gap-6 md:gap-10 px-4 py-6 md:py-12">
       {/* Hero icon with glow */}
       <div className="relative animate-in zoom-in duration-500">
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-primary/40 via-accent/30 to-primary/40 blur-3xl scale-150 animate-pulse" />

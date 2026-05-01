@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from "react";
 import AppLayout from "@/components/AppLayout";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Sparkles, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
@@ -81,10 +80,14 @@ export default function LiderAIPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const scrollEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    scrollEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
+    // Use the inner scroll container so we don't bounce the whole page
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+  }, [messages, loading]);
 
   const send = async (text: string) => {
     if (!text.trim() || loading) return;
@@ -128,40 +131,57 @@ export default function LiderAIPage() {
 
   return (
     <AppLayout>
-      <div className="flex flex-col h-[calc(100dvh-8rem)] md:h-[calc(100vh-7rem)] max-w-3xl mx-auto w-full">
-        {/* Header — only shown when conversation has started */}
-        {!isEmpty && (
-          <header className="flex items-center justify-between gap-3 px-4 md:px-2 py-3 mb-2 animate-in fade-in slide-in-from-top-2 duration-300">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md">
-                <Sparkles className="w-4 h-4 text-primary-foreground" />
+      {/*
+        Cancel out AppLayout's mobile p-4 so the chat goes edge-to-edge on mobile.
+        Mobile height: 100dvh - mobile header (~65px) - bottom nav (~64px) - safe-areas.
+        Desktop height: viewport minus footer breathing room.
+      */}
+      <div
+        className="-m-4 md:m-0 flex flex-col"
+        style={{
+          height:
+            "calc(100dvh - 65px - 64px - env(safe-area-inset-top) - env(safe-area-inset-bottom))",
+        }}
+      >
+        <div className="md:h-[calc(100vh-7rem)] md:max-w-3xl md:mx-auto w-full flex flex-col flex-1 min-h-0">
+          {/* Header — only when conversation has started */}
+          {!isEmpty && (
+            <header className="flex items-center justify-between gap-3 px-4 md:px-2 py-3 border-b md:border-b-0 bg-background/95 backdrop-blur md:bg-transparent md:backdrop-blur-none animate-in fade-in slide-in-from-top-2 duration-300 flex-shrink-0">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md flex-shrink-0">
+                  <Sparkles className="w-4 h-4 text-primary-foreground" />
+                </div>
+                <div className="min-w-0">
+                  <h1 className="font-heading font-bold text-base md:text-lg text-foreground leading-tight truncate">
+                    LíderAI
+                  </h1>
+                  <p className="text-[11px] md:text-xs text-muted-foreground leading-tight truncate">
+                    Assistente de liderança
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="font-heading font-bold text-base md:text-lg text-foreground leading-tight">LíderAI</h1>
-                <p className="text-[11px] md:text-xs text-muted-foreground leading-tight">Assistente de liderança</p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleReset}
-              className="text-muted-foreground hover:text-foreground gap-1.5"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline text-xs">Nova conversa</span>
-            </Button>
-          </header>
-        )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleReset}
+                className="text-muted-foreground hover:text-foreground gap-1.5 flex-shrink-0"
+                aria-label="Nova conversa"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span className="hidden sm:inline text-xs">Nova conversa</span>
+              </Button>
+            </header>
+          )}
 
-        {/* Chat area */}
-        <div className="flex-1 min-h-0 overflow-hidden">
-          {isEmpty ? (
-            <ScrollArea className="h-full">
+          {/* Scrollable chat area */}
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 min-h-0 overflow-y-auto overscroll-contain"
+          >
+            {isEmpty ? (
               <ChatEmptyState onSelectSuggestion={send} />
-            </ScrollArea>
-          ) : (
-            <ScrollArea className="h-full">
-              <div className="space-y-5 md:space-y-6 px-4 md:px-2 py-4">
+            ) : (
+              <div className="space-y-5 md:space-y-6 px-4 md:px-2 py-4 pb-2">
                 {messages.map((m, i) => (
                   <ChatMessage
                     key={i}
@@ -172,13 +192,11 @@ export default function LiderAIPage() {
                 {loading && !lastIsAssistant && <TypingIndicator />}
                 <div ref={scrollEndRef} />
               </div>
-            </ScrollArea>
-          )}
-        </div>
+            )}
+          </div>
 
-        {/* Input — sticky bottom on mobile, integrated on desktop */}
-        <div className="md:pt-4 md:pb-2 fixed md:static bottom-[calc(4rem+env(safe-area-inset-bottom))] left-0 right-0 z-20 bg-background/95 backdrop-blur-md md:bg-transparent md:backdrop-blur-none border-t md:border-t-0 px-4 md:px-2 py-3 md:py-0 shadow-lg md:shadow-none">
-          <div className="max-w-3xl mx-auto">
+          {/* Input — sticky at bottom of chat container (not page-fixed) */}
+          <div className="flex-shrink-0 border-t md:border-t-0 bg-background/95 backdrop-blur md:bg-transparent md:backdrop-blur-none px-3 md:px-2 pt-2 pb-2 md:pt-4 md:pb-0">
             <ChatInput
               value={input}
               onChange={setInput}

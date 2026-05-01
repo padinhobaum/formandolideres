@@ -62,8 +62,11 @@ export function ChatInput({ value, onChange, onSubmit, loading }: ChatInputProps
           )}
         </Button>
       </div>
-      <p className="text-[11px] text-muted-foreground/60 text-center mt-2 px-2">
-        Pressione <kbd className="px-1.5 py-0.5 rounded bg-muted text-foreground/70 text-[10px] font-mono">Enter</kbd> para enviar · As respostas podem ser imprecisas. Verifique informações críticas.
+      <p className="text-[10px] md:text-[11px] text-muted-foreground/60 text-center mt-1.5 md:mt-2 px-2 leading-tight">
+        <span className="hidden md:inline">
+          Pressione <kbd className="px-1.5 py-0.5 rounded bg-muted text-foreground/70 text-[10px] font-mono">Enter</kbd> para enviar ·{" "}
+        </span>
+        As respostas podem ser imprecisas. Verifique informações críticas.
       </p>
     </form>
   );
