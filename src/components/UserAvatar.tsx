@@ -12,6 +12,7 @@ interface UserAvatarProps {
   sala?: string | null;
   className?: string;
   fallbackClassName?: string;
+  style?: React.CSSProperties;
   /** Disable the click-to-preview behavior */
   disablePreview?: boolean;
 }
@@ -33,6 +34,7 @@ export default function UserAvatar({
   sala,
   className = "w-9 h-9",
   fallbackClassName = "text-xs bg-primary/10 text-primary font-semibold",
+  style,
   disablePreview = false,
 }: UserAvatarProps) {
   const [open, setOpen] = useState(false);
