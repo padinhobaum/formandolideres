@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import AppLayout from "@/components/AppLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "@/components/UserAvatar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Radio, Tv, AlertCircle, Loader2, Users, Eye } from "lucide-react";
 
@@ -243,12 +244,13 @@ export default function LivePage() {
                             className={`relative transition-all duration-200 hover:scale-110 hover:-translate-y-1 cursor-default ${isMe ? "ring-2 ring-primary ring-offset-2 ring-offset-card rounded-full" : ""}`}
                             style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "both" }}
                           >
-                            <Avatar className="w-10 h-10 border-2 border-card shadow-md">
-                              <AvatarImage src={v.avatar_url || undefined} />
-                              <AvatarFallback className="text-[10px] font-bold bg-secondary text-secondary-foreground">
-                                {getInitials(v.full_name)}
-                              </AvatarFallback>
-                            </Avatar>
+                            <UserAvatar
+                              userId={v.user_id}
+                              name={v.full_name}
+                              avatarUrl={v.avatar_url}
+                              className="w-10 h-10 border-2 border-card shadow-md"
+                              fallbackClassName="text-[10px] font-bold bg-secondary text-secondary-foreground"
+                            />
                             {isMe && (
                               <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-accent border-2 border-card rounded-full" />
                             )}

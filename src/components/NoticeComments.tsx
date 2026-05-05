@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Trash2, Send, Reply, ShieldCheck, X } from "lucide-react";
@@ -131,12 +132,13 @@ export default function NoticeComments({ noticeId }: { noticeId: string }) {
     const isAdminAuthor = adminIds.has(c.author_id);
     return (
       <li key={c.id} className="flex gap-3 group">
-        <Avatar className="w-9 h-9 flex-shrink-0">
-          <AvatarImage src={c.author_avatar_url || undefined} />
-          <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
-            {initials(c.author_name)}
-          </AvatarFallback>
-        </Avatar>
+        <UserAvatar
+          userId={c.author_id}
+          name={c.author_name}
+          avatarUrl={c.author_avatar_url}
+          className="w-9 h-9 flex-shrink-0"
+          fallbackClassName="bg-primary/10 text-primary text-xs font-semibold"
+        />
         <div className="flex-1 min-w-0">
           <div
             className={`rounded-2xl px-4 py-2.5 ${

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "@/components/UserAvatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { MessageSquare, Reply, Trash2, Send } from "lucide-react";
@@ -211,12 +212,13 @@ function CommentBubble({
 }) {
   return (
     <div className="flex gap-3">
-      <Avatar className="w-8 h-8 flex-shrink-0">
-        <AvatarImage src={c.author_avatar_url || undefined} />
-        <AvatarFallback className="text-[10px] bg-secondary text-secondary-foreground font-bold">
-          {initials(c.author_name)}
-        </AvatarFallback>
-      </Avatar>
+      <UserAvatar
+        userId={c.author_id}
+        name={c.author_name}
+        avatarUrl={c.author_avatar_url}
+        className="w-8 h-8 flex-shrink-0"
+        fallbackClassName="text-[10px] bg-secondary text-secondary-foreground font-bold"
+      />
       <div className="flex-1 min-w-0">
         <div className="bg-secondary/50 rounded-2xl rounded-tl-sm px-3 py-2">
           <div className="flex items-center justify-between gap-2 mb-0.5">

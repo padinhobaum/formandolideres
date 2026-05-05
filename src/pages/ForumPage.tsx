@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "@/components/UserAvatar";
 import { toast } from "sonner";
 import {
   MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter, Pin } from
@@ -468,12 +469,14 @@ export default function ForumPage() {
 
   const renderReply = (reply: ForumReply, topicId: string, isChild = false) =>
   <div key={reply.id} className={`flex gap-2 sm:gap-3 ${isChild ? "pl-6 sm:pl-10" : ""} py-3 ${!isChild ? "border-t border-border" : ""}`}>
-      <Avatar className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 mt-0.5">
-        <AvatarImage src={reply.author_avatar_url || undefined} />
-        <AvatarFallback className="text-[9px] bg-primary text-primary-foreground font-bold">
-          {getInitials(reply.author_name)}
-        </AvatarFallback>
-      </Avatar>
+      <UserAvatar
+        userId={reply.author_id}
+        name={reply.author_name}
+        avatarUrl={reply.author_avatar_url}
+        sala={authorProfiles[reply.author_id]}
+        className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 mt-0.5"
+        fallbackClassName="text-[9px] bg-primary text-primary-foreground font-bold"
+      />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
           <span className="font-heading font-bold text-xs sm:text-sm">{reply.author_name}</span>
@@ -542,12 +545,14 @@ export default function ForumPage() {
                     {users.map((u) =>
                   <div key={u.user_id} className="flex items-center gap-2">
                         <div className="relative">
-                          <Avatar className="w-8 h-8">
-                            <AvatarImage src={u.avatar_url || undefined} />
-                            <AvatarFallback className="text-[10px] bg-primary text-primary-foreground">
-                              {getInitials(u.full_name)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <UserAvatar
+                            userId={u.user_id}
+                            name={u.full_name}
+                            avatarUrl={u.avatar_url}
+                            sala={u.class_name}
+                            className="w-8 h-8"
+                            fallbackClassName="text-[10px] bg-primary text-primary-foreground"
+                          />
                           <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
                         </div>
                         <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
@@ -683,12 +688,14 @@ export default function ForumPage() {
                       </div>
                     )}
                     <div className="flex gap-2 sm:gap-3 p-3 sm:p-4">
-                      <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-0.5">
-                        <AvatarImage src={topic.author_avatar_url || undefined} />
-                        <AvatarFallback className="text-[10px] sm:text-xs bg-primary text-primary-foreground font-bold">
-                          {getInitials(topic.author_name)}
-                        </AvatarFallback>
-                      </Avatar>
+                      <UserAvatar
+                        userId={topic.author_id}
+                        name={topic.author_name}
+                        avatarUrl={topic.author_avatar_url}
+                        sala={authorProfiles[topic.author_id]}
+                        className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-0.5"
+                        fallbackClassName="text-[10px] sm:text-xs bg-primary text-primary-foreground font-bold"
+                      />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
                           <span className="font-heading font-bold text-xs sm:text-sm text-foreground">{topic.author_name}</span>
@@ -853,10 +860,14 @@ export default function ForumPage() {
                     {users.map((u) =>
                   <div key={u.user_id} className="flex items-center gap-2">
                         <div className="relative">
-                          <Avatar className="w-7 h-7">
-                            <AvatarImage src={u.avatar_url || undefined} />
-                            <AvatarFallback className="text-[9px] bg-primary text-primary-foreground">{getInitials(u.full_name)}</AvatarFallback>
-                          </Avatar>
+                          <UserAvatar
+                            userId={u.user_id}
+                            name={u.full_name}
+                            avatarUrl={u.avatar_url}
+                            sala={u.class_name}
+                            className="w-7 h-7"
+                            fallbackClassName="text-[9px] bg-primary text-primary-foreground"
+                          />
                           <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 bg-accent rounded-full border-2 border-card" />
                         </div>
                         <span className="text-xs font-body truncate">{u.full_name.split(" ")[0]}</span>

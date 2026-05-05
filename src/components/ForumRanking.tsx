@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "@/components/UserAvatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Trophy, Medal, Award } from "lucide-react";
 
@@ -98,12 +99,13 @@ export default function ForumRanking() {
             <span className="w-5 text-xs font-bold text-muted-foreground text-center shrink-0">
               {getPodiumIcon(i) || `#${i + 1}`}
             </span>
-            <Avatar className="w-7 h-7 shrink-0">
-              <AvatarImage src={u.avatar_url || undefined} />
-              <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">
-                {getInitials(u.full_name)}
-              </AvatarFallback>
-            </Avatar>
+            <UserAvatar
+              userId={u.user_id}
+              name={u.full_name}
+              avatarUrl={u.avatar_url}
+              className="w-7 h-7 shrink-0"
+              fallbackClassName="text-[9px] bg-muted text-muted-foreground"
+            />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium truncate leading-tight">{u.full_name}</p>
             </div>
