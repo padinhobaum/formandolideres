@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "@/components/UserAvatar";
 import { CheckCircle2 } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
@@ -80,22 +81,16 @@ export default function RelayAvatars({
       )}
       <div className="flex -space-x-1.5">
         {visible.map((u) => (
-          <Tooltip key={u.user_id}>
-            <TooltipTrigger asChild>
-              <Avatar
-                className="ring-2 ring-card hover:scale-110 hover:z-10 transition-transform cursor-default"
-                style={{ width: size, height: size }}
-              >
-                <AvatarImage src={u.avatar_url || undefined} />
-                <AvatarFallback className="text-[8px] font-bold bg-emerald-500/15 text-emerald-700">
-                  {initials(u.full_name)}
-                </AvatarFallback>
-              </Avatar>
-            </TooltipTrigger>
-            <TooltipContent side="top" className="text-xs">
-              {u.full_name}
-            </TooltipContent>
-          </Tooltip>
+          <div key={u.user_id} className="ring-2 ring-card rounded-full hover:z-10">
+            <UserAvatar
+              userId={u.user_id}
+              name={u.full_name}
+              avatarUrl={u.avatar_url}
+              className=""
+              fallbackClassName="text-[8px] font-bold bg-emerald-500/15 text-emerald-700"
+            />
+            <style>{`/* size override */`}</style>
+          </div>
         ))}
         {overflow > 0 && (
           <div
