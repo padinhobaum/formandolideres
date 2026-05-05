@@ -81,15 +81,14 @@ export default function RelayAvatars({
       )}
       <div className="flex -space-x-1.5">
         {visible.map((u) => (
-          <div key={u.user_id} className="ring-2 ring-card rounded-full hover:z-10">
+          <div key={u.user_id} className="ring-2 ring-card rounded-full hover:z-10 transition-transform hover:scale-110">
             <UserAvatar
               userId={u.user_id}
               name={u.full_name}
               avatarUrl={u.avatar_url}
-              className=""
               fallbackClassName="text-[8px] font-bold bg-emerald-500/15 text-emerald-700"
+              style={{ width: size, height: size }}
             />
-            <style>{`/* size override */`}</style>
           </div>
         ))}
         {overflow > 0 && (
