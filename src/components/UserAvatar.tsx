@@ -64,7 +64,7 @@ export default function UserAvatar({
       className="rounded-full focus:outline-none focus:ring-2 focus:ring-primary/40 transition-transform hover:scale-105 active:scale-95"
       aria-label={name ? `Ver perfil de ${name}` : "Ver perfil"}
     >
-      <Avatar className={className}>
+      <Avatar className={className} style={style}>
         <AvatarImage src={avatarUrl || undefined} />
         <AvatarFallback className={fallbackClassName}>{getInitials(name)}</AvatarFallback>
       </Avatar>
@@ -73,7 +73,7 @@ export default function UserAvatar({
 
   if (disablePreview || !userId) {
     return (
-      <Avatar className={className}>
+      <Avatar className={className} style={style}>
         <AvatarImage src={avatarUrl || undefined} />
         <AvatarFallback className={fallbackClassName}>{getInitials(name)}</AvatarFallback>
       </Avatar>
