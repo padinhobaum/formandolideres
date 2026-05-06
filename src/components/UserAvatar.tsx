@@ -145,6 +145,22 @@ export default function UserAvatar({
               </div>
             </div>
           </div>
+          {presence && (
+            <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-center gap-1.5">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  presence.is_online ? "bg-green-500 animate-pulse" : "bg-muted-foreground/40"
+                }`}
+              />
+              <span className="text-[11px] text-muted-foreground">
+                {presence.is_online
+                  ? "Online agora"
+                  : presence.last_seen
+                  ? `Online pela última vez ${formatLastSeen(presence.last_seen)}`
+                  : "Offline"}
+              </span>
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>
