@@ -134,7 +134,7 @@ export default function NoticeViewer({ notice, onClose }: Props) {
           )}
 
           {/* Title */}
-          <h1 className="font-heading font-bold text-2xl sm:text-4xl text-foreground leading-tight mb-4">
+          <h1 className="font-heading font-bold text-2xl sm:text-4xl text-foreground leading-tight mb-4 text-[#1d4d7c]">
             {notice.title}
           </h1>
 
