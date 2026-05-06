@@ -41,20 +41,43 @@ export default function UserAvatar({
   const [data, setData] = useState<{ full_name: string; class_name: string | null; avatar_url: string | null } | null>(
     name ? { full_name: name, class_name: sala ?? null, avatar_url: avatarUrl ?? null } : null
   );
+  const [presence, setPresence] = useState<{ is_online: boolean; last_seen: string | null } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleOpenChange = async (next: boolean) => {
     setOpen(next);
-    if (next && userId && (!data || data.class_name == null)) {
-      setLoading(true);
-      const { data: p } = await supabase
-        .from("profiles")
-        .select("full_name, class_name, avatar_url")
-        .eq("user_id", userId)
-        .maybeSingle();
-      if (p) setData(p as any);
+    if (next && userId) {
+      const needsProfile = !data || data.class_name == null;
+      if (needsProfile) setLoading(true);
+      const [profileRes, presenceRes] = await Promise.all([
+        needsProfile
+          ? supabase.from("profiles").select("full_name, class_name, avatar_url").eq("user_id", userId).maybeSingle()
+          : Promise.resolve({ data: null } as any),
+        supabase.from("user_presence").select("is_online, last_seen").eq("user_id", userId).maybeSingle(),
+      ]);
+      if (profileRes.data) setData(profileRes.data as any);
+      if (presenceRes.data) setPresence(presenceRes.data as any);
       setLoading(false);
     }
+  };
+
+  const formatLastSeen = (iso: string | null) => {
+    if (!iso) return null;
+    const d = new Date(iso);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return "agora mesmo";
+    if (diffMin < 60) return `há ${diffMin} min`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `há ${diffH}h`;
+    const sameDay = d.toDateString() === now.toDateString();
+    const yesterday = new Date(now); yesterday.setDate(now.getDate() - 1);
+    const isYesterday = d.toDateString() === yesterday.toDateString();
+    const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    if (sameDay) return `hoje às ${time}`;
+    if (isYesterday) return `ontem às ${time}`;
+    return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" }) + ` às ${time}`;
   };
 
   const trigger = (
@@ -122,6 +145,22 @@ export default function UserAvatar({
               </div>
             </div>
           </div>
+          {presence && (
+            <div className="mt-3 pt-3 border-t border-border/50 flex items-center justify-center gap-1.5">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  presence.is_online ? "bg-green-500 animate-pulse" : "bg-muted-foreground/40"
+                }`}
+              />
+              <span className="text-[11px] text-muted-foreground">
+                {presence.is_online
+                  ? "Online agora"
+                  : presence.last_seen
+                  ? `Online pela última vez ${formatLastSeen(presence.last_seen)}`
+                  : "Offline"}
+              </span>
+            </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>
