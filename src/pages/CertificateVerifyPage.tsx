@@ -12,11 +12,11 @@ export default function CertificateVerifyPage() {
   useEffect(() => {
     if (!code) return;
     (async () => {
-      const { data } = await supabase.from("certificates").select("*").eq("verification_code", code).maybeSingle();
-      if (data) {
-        setCert(data);
-        const { data: profile } = await supabase.from("profiles").select("full_name").eq("user_id", (data as any).user_id).maybeSingle();
-        if (profile) setUserName((profile as any).full_name);
+      const { data } = await supabase.rpc("verify_certificate", { _code: code });
+      const row = Array.isArray(data) ? data[0] : null;
+      if (row) {
+        setCert(row);
+        if ((row as any).full_name) setUserName((row as any).full_name);
       }
       setLoading(false);
     })();
