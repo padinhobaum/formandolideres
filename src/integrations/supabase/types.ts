@@ -1676,6 +1676,18 @@ export type Database = {
         }
         Returns: boolean
       }
+      verify_certificate: {
+        Args: { _code: string }
+        Returns: {
+          body_text: string
+          full_name: string
+          id: string
+          issued_date: string
+          title: string
+          user_id: string
+          verification_code: string
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "leader"
