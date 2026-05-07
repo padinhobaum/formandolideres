@@ -868,7 +868,7 @@ export default function ForumPage() {
                             className="w-7 h-7"
                             fallbackClassName="text-[9px] bg-primary text-primary-foreground"
                           />
-                          <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-accent rounded-full ring-2 ring-card" />
+                          <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-accent rounded-full ring-2 ring-card" />
                         </div>
                         <span className="text-xs font-body truncate">{u.full_name.split(" ")[0]}</span>
                         <SalaBadge sala={u.class_name} />
