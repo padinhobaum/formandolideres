@@ -169,17 +169,15 @@ export default function LiderAIPage() {
           {/* Header */}
           <header className="flex items-center justify-between gap-3 px-4 md:px-2 py-3 border-b md:border-b-0 bg-background/95 backdrop-blur md:bg-transparent md:backdrop-blur-none flex-shrink-0">
             <div className="flex items-center gap-3 min-w-0 flex-1">
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="md:hidden h-9 w-9 flex-shrink-0"
-                  onClick={() => setMobileSidebarOpen(true)}
-                  aria-label="Abrir histórico"
-                >
-                  <Menu className="w-5 h-5" />
-                </Button>
-              </SheetTrigger>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="md:hidden h-9 w-9 flex-shrink-0"
+                onClick={() => setMobileSidebarOpen(true)}
+                aria-label="Abrir histórico"
+              >
+                <Menu className="w-5 h-5" />
+              </Button>
               <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md flex-shrink-0">
                 <Sparkles className="w-4 h-4 text-primary-foreground" />
               </div>
