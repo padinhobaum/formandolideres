@@ -26,6 +26,7 @@ Updated: today
 - [Forum User Categorization](mem://functional-corrections/forum-user-categorization) — Forum separation of Online Admins and Leaders
 - [Forum RLS for Roles](mem://technical-decisions/forum-rls-for-roles) — RLS rule allowing global read for user roles
 - [LíderAI Chatbot Interface](mem://features/lider-ai/chatbot-interface) — Glassmorphism UI, sticky header, animations and markdown support
+- [LíderAI Contextual Assistant](mem://features/lider-ai/contextual-assistant) — Persistent chat history, memory, and context-aware responses using survey/XP/profile data
 - [User Sala Badges](mem://ui-ux/user-sala-badges) — Badges indicating user's 'Sala' displayed globally
 - [Notice Targeting Logic](mem://features/notices/targeting-logic) — Global/targeted notices and pinned functionality
 - [Notification Redirection Logic](mem://features/notifications/redirection-logic) — Deep-linking and automatic redirection for notifications
