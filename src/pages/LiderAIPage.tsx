@@ -10,7 +10,7 @@ import { TypingIndicator } from "@/components/lider-ai/TypingIndicator";
 import { ConversationSidebar } from "@/components/lider-ai/ConversationSidebar";
 import { useAiConversations, loadMessages, type AiConversation } from "@/hooks/useAiConversations";
 import { useAuth } from "@/contexts/AuthContext";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 
 type Msg = { role: "user" | "assistant"; content: string };
