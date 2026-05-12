@@ -845,36 +845,50 @@ export default function ForumPage() {
           {(() => {
               const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
               const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
+              const LIMIT = 6;
 
-              const renderGroup = (users: OnlineUser[], label: string) =>
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Circle className="w-3 h-3 text-accent fill-accent" />
-                  <h3 className="font-heading font-bold text-xs">{label} ({users.length})</h3>
-                </div>
-                {users.length === 0 ?
-                <p className="text-xs text-muted-foreground">Nenhum online.</p> :
-                <div className="space-y-2">
-                    {users.map((u) =>
-                  <div key={u.user_id} className="flex items-center gap-2">
-                        <div className="relative">
-                          <UserAvatar
-                            userId={u.user_id}
-                            name={u.full_name}
-                            avatarUrl={u.avatar_url}
-                            sala={u.class_name}
-                            className="w-7 h-7"
-                            fallbackClassName="text-[9px] bg-primary text-primary-foreground"
-                          />
-                          <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-accent rounded-full ring-2 ring-card" />
-                        </div>
-                        <span className="text-xs font-body truncate">{u.full_name.split(" ")[0]}</span>
-                        <SalaBadge sala={u.class_name} />
-                      </div>
-                  )}
+              const renderGroup = (users: OnlineUser[], label: string) => {
+                const visible = users.slice(0, LIMIT);
+                const extra = users.length - visible.length;
+                return (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Circle className="w-3 h-3 text-accent fill-accent" />
+                    <h3 className="font-heading font-bold text-xs">{label} ({users.length})</h3>
                   </div>
-                }
-              </div>;
+                  {users.length === 0 ?
+                  <p className="text-xs text-muted-foreground">Nenhum online.</p> :
+                  <div className="space-y-2">
+                      {visible.map((u) =>
+                    <div key={u.user_id} className="flex items-center gap-2">
+                          <div className="relative">
+                            <UserAvatar
+                              userId={u.user_id}
+                              name={u.full_name}
+                              avatarUrl={u.avatar_url}
+                              sala={u.class_name}
+                              className="w-7 h-7"
+                              fallbackClassName="text-[9px] bg-primary text-primary-foreground"
+                            />
+                            <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-accent rounded-full ring-2 ring-card" />
+                          </div>
+                          <span className="text-xs font-body truncate">{u.full_name.split(" ")[0]}</span>
+                          <SalaBadge sala={u.class_name} />
+                        </div>
+                    )}
+                      {extra > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setOnlineDialog({ open: true, users, title: label })}
+                          className="text-xs font-semibold text-accent hover:underline pt-1"
+                        >
+                          +{extra} Ver mais
+                        </button>
+                      )}
+                    </div>
+                  }
+                </div>);
+              };
 
               return (
                 <>
@@ -886,6 +900,37 @@ export default function ForumPage() {
         <ForumRanking />
       </aside>
       </div>
+
+      {/* Dialog: lista completa de usuários online */}
+      <Dialog open={onlineDialog.open} onOpenChange={(open) => setOnlineDialog((s) => ({ ...s, open }))}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-heading flex items-center gap-2">
+              <Circle className="w-3 h-3 text-accent fill-accent" />
+              {onlineDialog.title} ({onlineDialog.users.length})
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            {onlineDialog.users.map((u) => (
+              <div key={u.user_id} className="flex items-center gap-3">
+                <div className="relative">
+                  <UserAvatar
+                    userId={u.user_id}
+                    name={u.full_name}
+                    avatarUrl={u.avatar_url}
+                    sala={u.class_name}
+                    className="w-9 h-9"
+                    fallbackClassName="text-[10px] bg-primary text-primary-foreground"
+                  />
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
+                </div>
+                <span className="text-sm font-body flex-1 truncate">{u.full_name}</span>
+                <SalaBadge sala={u.class_name} />
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </AppLayout>);
 
 }
