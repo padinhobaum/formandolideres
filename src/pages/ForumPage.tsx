@@ -16,6 +16,7 @@ import {
   MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter, Pin } from
 "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import RichTextEditor, { RichText } from "@/components/RichTextEditor";
 import SalaBadge from "@/components/SalaBadge";
 import ForumRanking from "@/components/ForumRanking";
