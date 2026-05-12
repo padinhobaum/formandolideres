@@ -206,7 +206,7 @@ export default function ForumPage() {
       )
       .subscribe();
 
-    const interval = setInterval(loadOnlineUsers, 60_000);
+    const interval = setInterval(loadOnlineUsers, 30_000);
 
     return () => {
       supabase.removeChannel(channel);
