@@ -83,6 +83,7 @@ export default function ForumPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
+  const [onlineDialog, setOnlineDialog] = useState<{ open: boolean; users: OnlineUser[]; title: string }>({ open: false, users: [], title: "" });
   const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
   const deepLinked = useRef(false);
   const [replies, setReplies] = useState<Record<string, ForumReply[]>>({});
