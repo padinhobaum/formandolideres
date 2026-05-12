@@ -161,10 +161,14 @@ export default function ForumPage() {
     if (!user) return;
 
     const loadOnlineUsers = async () => {
+      // Considera online apenas quem teve heartbeat nos últimos 90s
+      // (heartbeat real é a cada 30s; margem para latência/rede)
+      const cutoff = new Date(Date.now() - 90_000).toISOString();
       const { data: presenceData } = await supabase
         .from("user_presence")
-        .select("user_id")
-        .eq("is_online", true);
+        .select("user_id, last_seen")
+        .eq("is_online", true)
+        .gte("last_seen", cutoff);
 
       const userIds = (presenceData || []).map((p: any) => p.user_id);
       if (userIds.length === 0) {
