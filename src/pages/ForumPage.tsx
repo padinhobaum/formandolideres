@@ -514,38 +514,52 @@ export default function ForumPage() {
           {(() => {
               const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
               const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
+              const LIMIT = 8;
 
-              const renderGroup = (users: OnlineUser[], label: string) =>
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Circle className="w-3 h-3 text-accent fill-accent" />
-                  <h3 className="font-heading font-bold text-sm">
-                    {label} ({users.length})
-                  </h3>
-                </div>
-                {users.length === 0 ?
-                <p className="text-xs text-muted-foreground">Nenhum online no momento.</p> :
-                <div className="flex flex-wrap gap-3">
-                    {users.map((u) =>
-                  <div key={u.user_id} className="flex items-center gap-2">
-                        <div className="relative">
-                          <UserAvatar
-                            userId={u.user_id}
-                            name={u.full_name}
-                            avatarUrl={u.avatar_url}
-                            sala={u.class_name}
-                            className="w-8 h-8"
-                            fallbackClassName="text-[10px] bg-primary text-primary-foreground"
-                          />
-                          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
-                        </div>
-                        <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
-                        <SalaBadge sala={u.class_name} />
-                      </div>
-                  )}
+              const renderGroup = (users: OnlineUser[], label: string) => {
+                const visible = users.slice(0, LIMIT);
+                const extra = users.length - visible.length;
+                return (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Circle className="w-3 h-3 text-accent fill-accent" />
+                    <h3 className="font-heading font-bold text-sm">
+                      {label} ({users.length})
+                    </h3>
                   </div>
-                }
-              </div>;
+                  {users.length === 0 ?
+                  <p className="text-xs text-muted-foreground">Nenhum online no momento.</p> :
+                  <div className="flex flex-wrap gap-3 items-center">
+                      {visible.map((u) =>
+                    <div key={u.user_id} className="flex items-center gap-2">
+                          <div className="relative">
+                            <UserAvatar
+                              userId={u.user_id}
+                              name={u.full_name}
+                              avatarUrl={u.avatar_url}
+                              sala={u.class_name}
+                              className="w-8 h-8"
+                              fallbackClassName="text-[10px] bg-primary text-primary-foreground"
+                            />
+                            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
+                          </div>
+                          <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
+                          <SalaBadge sala={u.class_name} />
+                        </div>
+                    )}
+                      {extra > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setOnlineDialog({ open: true, users, title: label })}
+                          className="text-xs font-semibold text-accent hover:underline"
+                        >
+                          +{extra} Ver mais
+                        </button>
+                      )}
+                    </div>
+                  }
+                </div>);
+              };
 
               return (
                 <>
