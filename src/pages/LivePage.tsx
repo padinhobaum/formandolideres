@@ -241,7 +241,7 @@ export default function LivePage() {
                       <Tooltip key={v.user_id}>
                         <TooltipTrigger asChild>
                           <div
-                            className={`relative transition-all duration-200 hover:scale-110 hover:-translate-y-1 cursor-default ${isMe ? "ring-2 ring-primary ring-offset-2 ring-offset-card rounded-full" : ""}`}
+                            className="relative transition-all duration-200 hover:scale-110 hover:-translate-y-1 cursor-default"
                             style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "both" }}
                           >
                             <UserAvatar
