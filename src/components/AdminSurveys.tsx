@@ -24,6 +24,7 @@ export default function AdminSurveys() {
   const [leaders, setLeaders] = useState<any[]>([]);
   const [responseCounts, setResponseCounts] = useState<Record<string, number>>({});
   const [expandedSurvey, setExpandedSurvey] = useState<string | null>(null);
+  const [leaderSearch, setLeaderSearch] = useState("");
   const [surveyLeaders, setSurveyLeaders] = useState<Record<string, string[]>>({});
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
