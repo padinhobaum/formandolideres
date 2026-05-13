@@ -262,17 +262,40 @@ export default function AdminSurveys() {
                   {leaders.length === 0 ? (
                     <p className="text-xs text-muted-foreground">Nenhum líder cadastrado.</p>
                   ) : (
-                    <div className="space-y-1 max-h-40 overflow-y-auto">
-                      {leaders.map((l: any) => {
-                        const isAssociated = (surveyLeaders[s.id] || []).includes(l.user_id);
+                    <>
+                      <Input
+                        value={leaderSearch}
+                        onChange={e => setLeaderSearch(e.target.value)}
+                        placeholder="Buscar por nome ou turma..."
+                        className="mb-2 h-8 text-sm"
+                      />
+                      {(() => {
+                        const q = leaderSearch.trim().toLowerCase();
+                        const filtered = q
+                          ? leaders.filter((l: any) =>
+                              (l.full_name || "").toLowerCase().includes(q) ||
+                              (l.class_name || "").toLowerCase().includes(q)
+                            )
+                          : leaders;
+                        if (filtered.length === 0) {
+                          return <p className="text-xs text-muted-foreground">Nenhum líder encontrado.</p>;
+                        }
                         return (
-                          <label key={l.user_id} className="flex items-center gap-2 text-sm cursor-pointer p-1.5 rounded hover:bg-secondary/50">
-                            <input type="checkbox" checked={isAssociated} onChange={() => toggleLeader(s.id, l.user_id)} />
-                            <span>{l.full_name}</span>
-                          </label>
+                          <div className="space-y-1 max-h-40 overflow-y-auto">
+                            {filtered.map((l: any) => {
+                              const isAssociated = (surveyLeaders[s.id] || []).includes(l.user_id);
+                              return (
+                                <label key={l.user_id} className="flex items-center gap-2 text-sm cursor-pointer p-1.5 rounded hover:bg-secondary/50">
+                                  <input type="checkbox" checked={isAssociated} onChange={() => toggleLeader(s.id, l.user_id)} />
+                                  <span className="flex-1">{l.full_name}</span>
+                                  {l.class_name && <span className="text-xs text-muted-foreground">{l.class_name}</span>}
+                                </label>
+                              );
+                            })}
+                          </div>
                         );
-                      })}
-                    </div>
+                      })()}
+                    </>
                   )}
                 </div>
               )}
