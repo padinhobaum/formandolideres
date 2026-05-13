@@ -30,7 +30,7 @@ export default function AdminSurveys() {
   const fetchAll = async () => {
     const [surveysRes, leadersRes] = await Promise.all([
       supabase.from("surveys").select("*").order("created_at", { ascending: false }),
-      supabase.from("profiles").select("user_id, full_name, avatar_url").then(async (profilesRes) => {
+      supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").then(async (profilesRes) => {
         if (!profilesRes.data) return [];
         const { data: roles } = await supabase.from("user_roles").select("user_id, role").eq("role", "leader");
         const leaderIds = new Set((roles || []).map((r: any) => r.user_id));
