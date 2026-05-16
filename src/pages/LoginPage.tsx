@@ -221,6 +221,10 @@ export default function LoginPage() {
             </form>
           )}
 
+          <div className="mt-6">
+            <PWAInstallBanner />
+          </div>
+
           {/* Legal links */}
           <div className="mt-8 pt-6 border-t border-border/40 flex items-center justify-center gap-4 text-xs">
             <Link to="/politica-de-privacidade" className="text-muted-foreground hover:text-primary transition-colors">
