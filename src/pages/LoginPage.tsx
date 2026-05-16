@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
+import PWAInstallBanner from "@/components/PWAInstallBanner";
 
 export default function LoginPage() {
   const { signIn, resetPassword, session } = useAuth();
@@ -219,6 +220,10 @@ export default function LoginPage() {
               </button>
             </form>
           )}
+
+          <div className="mt-6">
+            <PWAInstallBanner />
+          </div>
 
           {/* Legal links */}
           <div className="mt-8 pt-6 border-t border-border/40 flex items-center justify-center gap-4 text-xs">
