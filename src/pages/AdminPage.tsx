@@ -992,6 +992,7 @@ function AdminUsers() {
     }
     toast.success("Usuário criado com sucesso.");
     setEmail(""); setPassword(""); setFullName(""); setClassName(""); setAvatarFile(null);
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
     fetchUsers();
   };
 
