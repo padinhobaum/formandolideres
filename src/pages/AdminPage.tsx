@@ -943,10 +943,12 @@ function AdminMaterials() {
 function AdminUsers() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [className, setClassName] = useState("");
   const [role, setRole] = useState<"admin" | "leader">("leader");
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
   const [creating, setCreating] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
