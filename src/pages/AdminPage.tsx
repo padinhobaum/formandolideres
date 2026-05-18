@@ -1028,7 +1028,7 @@ function AdminUsers() {
         </div>
         <div>
           <Label className="text-sm flex items-center gap-1"><ImageIcon className="w-3.5 h-3.5" strokeWidth={1.5} /> Foto de perfil (opcional)</Label>
-          <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
+          <input ref={avatarInputRef} type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} className="mt-1 block w-full text-sm font-body" />
         </div>
       </FormCard>
 
