@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { FileDown, Loader2 } from "lucide-react";
+import liceuLogoAsset from "@/assets/liceu-jardim.png.asset.json";
 
 export default function SurveyPdfReport() {
   const [generating, setGenerating] = useState(false);
@@ -214,7 +215,7 @@ export default function SurveyPdfReport() {
       `;
 
       const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
-      const logoLiceuUrl = window.location.origin + "/lovable-uploads/logolj.webp";
+      const logoLiceuUrl = window.location.origin + liceuLogoAsset.url;
 
       const html = `<html>
 <head>

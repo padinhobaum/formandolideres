@@ -7,6 +7,7 @@ import {
   Heart, TrendingUp, TrendingDown, Minus, ChevronLeft, ChevronRight, Printer, Download, Users, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import liceuLogoAsset from "@/assets/liceu-jardim.png.asset.json";
 
 const MOOD_META: Record<number, { emoji: string; label: string; color: string }> = {
   1: { emoji: "😢", label: "Muito ruim", color: "bg-red-500" },
@@ -174,7 +175,10 @@ export default function AdminClassClimate() {
       {/* Print header */}
       <div className="hidden print:block mb-6">
         <div className="flex items-center justify-between border-b pb-4 mb-4">
-          <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-10" />
+          <div className="flex items-center gap-4">
+            <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-10" />
+            <img src={liceuLogoAsset.url} alt="Liceu Jardim" className="h-12" />
+          </div>
           <div className="text-right">
             <h1 className="font-heading font-bold text-xl">Relatório Clima das Turmas</h1>
             <p className="text-xs text-muted-foreground">{fmtRange(week)}</p>
