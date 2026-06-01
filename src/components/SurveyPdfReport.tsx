@@ -214,7 +214,7 @@ export default function SurveyPdfReport() {
       `;
 
       const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
-      const logoLiceuUrl = window.location.origin + "/lovable-uploads/logolj.webp";
+      const logoLiceuUrl = window.location.origin + liceuLogoAsset.url;
 
       const html = `<html>
 <head>
