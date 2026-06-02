@@ -614,6 +614,33 @@ function AdminNotices() {
   );
 }
 
+function CategoryBadge({ category, onChange }: { category: "notice" | "article"; onChange?: (next: "notice" | "article") => void }) {
+  const isArticle = category === "article";
+  const styles = isArticle
+    ? "bg-accent/15 text-accent border-accent/30 hover:bg-accent/25"
+    : "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20";
+  const label = isArticle ? "Artigo" : "Aviso";
+  if (!onChange) {
+    return <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border ${styles}`}>{label}</span>;
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={() => onChange(isArticle ? "notice" : "article")}
+          className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border transition-colors ${styles}`}
+        >
+          {label}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>Clique para alternar categoria</TooltipContent>
+    </Tooltip>
+  );
+}
+
+
+
 function AdminNoticeRelayInfo({ noticeId }: { noticeId: string }) {
   const [relayUsers, setRelayUsers] = useState<{ user_id: string; full_name: string; avatar_url: string | null; created_at: string }[]>([]);
 
