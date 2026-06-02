@@ -133,6 +133,8 @@ export default function NoticesPage() {
           <div className="flex gap-2">
             {([
               { key: "todos", label: "Todos" },
+              { key: "avisos", label: "Avisos" },
+              { key: "artigos", label: "Artigos" },
               { key: "fixados", label: "Fixados" },
               { key: "eventos", label: "Eventos" },
             ] as const).map((f) => (
