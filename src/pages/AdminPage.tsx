@@ -340,7 +340,25 @@ function AdminNotices() {
 
   return (
     <div>
-      <FormCard title="Novo Aviso" onSubmit={handleCreate} submitLabel={uploading ? "Publicando..." : "Publicar"} loading={uploading} icon={Megaphone}>
+      <FormCard title="Nova Publicação" onSubmit={handleCreate} submitLabel={uploading ? "Publicando..." : "Publicar"} loading={uploading} icon={Megaphone}>
+        <div>
+          <Label className="text-sm">Categoria</Label>
+          <div className="mt-1 flex gap-2">
+            {([
+              { key: "notice", label: "Aviso", color: "bg-primary text-primary-foreground", inactive: "bg-secondary text-foreground hover:bg-secondary/70" },
+              { key: "article", label: "Artigo", color: "bg-accent text-accent-foreground", inactive: "bg-secondary text-foreground hover:bg-secondary/70" },
+            ] as const).map((opt) => (
+              <button
+                key={opt.key}
+                type="button"
+                onClick={() => setCategory(opt.key)}
+                className={`px-4 h-10 rounded-lg text-sm font-medium transition-all ${category === opt.key ? opt.color + " shadow-sm" : opt.inactive}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div>
           <Label className="text-sm">Título</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
