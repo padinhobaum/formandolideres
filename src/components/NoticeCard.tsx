@@ -133,8 +133,9 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
             {notice.is_pinned && <Pin className="w-3 h-3 text-primary flex-shrink-0" strokeWidth={2} />}
             <p className="font-heading font-semibold text-sm line-clamp-1 text-foreground">{notice.title}</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {notice.author_name} · {formatRelative(notice.created_at)}
+          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+            <CategoryTag category={notice.category} />
+            <span>{notice.author_name} · {formatRelative(notice.created_at)}</span>
           </p>
         </div>
         <ArrowRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
