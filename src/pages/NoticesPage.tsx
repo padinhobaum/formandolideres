@@ -92,6 +92,8 @@ export default function NoticesPage() {
     let arr = notices;
     if (filter === "fixados") arr = arr.filter((n) => n.is_pinned);
     if (filter === "eventos") arr = arr.filter((n) => !!n.event);
+    if (filter === "avisos") arr = arr.filter((n) => (n.category || "notice") === "notice");
+    if (filter === "artigos") arr = arr.filter((n) => n.category === "article");
     if (search.trim()) {
       const q = search.toLowerCase();
       arr = arr.filter((n) => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q));
