@@ -500,8 +500,29 @@ function AdminNotices() {
         </div>
       </FormCard>
 
+      <div className="flex gap-2 mb-3 flex-wrap">
+        {([
+          { key: "all", label: "Todos" },
+          { key: "notice", label: "Avisos" },
+          { key: "article", label: "Artigos" },
+        ] as const).map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`px-3 h-8 rounded-lg text-xs font-medium transition-all ${
+              filter === f.key ? "bg-primary text-primary-foreground shadow-sm" : "bg-secondary text-foreground hover:bg-secondary/70"
+            }`}
+          >
+            {f.label}
+            <span className="ml-1.5 opacity-70">
+              ({f.key === "all" ? notices.length : notices.filter((n: any) => (n.category || "notice") === f.key).length})
+            </span>
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-2">
-        {notices.map((n) => (
+        {notices.filter((n: any) => filter === "all" || (n.category || "notice") === filter).map((n) => (
           <ItemCard key={n.id}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0">
@@ -509,6 +530,14 @@ function AdminNotices() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-heading font-semibold">{n.title}</p>
+                    <CategoryBadge
+                      category={(n.category || "notice") as "notice" | "article"}
+                      onChange={async (next) => {
+                        await supabase.from("notices").update({ category: next } as any).eq("id", n.id);
+                        toast.success(`Alterado para "${next === "notice" ? "Aviso" : "Artigo"}".`);
+                        fetchNotices();
+                      }}
+                    />
                     {n.is_pinned && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-1"><Pin className="w-2.5 h-2.5" />Fixado</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{new Date(n.created_at).toLocaleDateString("pt-BR")}</p>
