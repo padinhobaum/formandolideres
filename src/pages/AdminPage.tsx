@@ -35,7 +35,7 @@ const tabGroups = [
   {
     label: "Conteúdo",
     tabs: [
-      { key: "notices" as Tab, label: "Avisos", icon: Megaphone, desc: "Publicar e gerenciar avisos" },
+      { key: "notices" as Tab, label: "Publicações", icon: Megaphone, desc: "Publicar avisos e artigos" },
       { key: "banners" as Tab, label: "Banners", icon: BannerIcon, desc: "Banners da página inicial" },
       { key: "lives" as Tab, label: "Ao Vivo", icon: Radio, desc: "Transmissões ao vivo" },
       { key: "events" as Tab, label: "Eventos", icon: CalendarDays, desc: "Calendário de eventos" },
