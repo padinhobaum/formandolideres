@@ -35,7 +35,7 @@ const tabGroups = [
   {
     label: "Conteúdo",
     tabs: [
-      { key: "notices" as Tab, label: "Avisos", icon: Megaphone, desc: "Publicar e gerenciar avisos" },
+      { key: "notices" as Tab, label: "Publicações", icon: Megaphone, desc: "Publicar avisos e artigos" },
       { key: "banners" as Tab, label: "Banners", icon: BannerIcon, desc: "Banners da página inicial" },
       { key: "lives" as Tab, label: "Ao Vivo", icon: Radio, desc: "Transmissões ao vivo" },
       { key: "events" as Tab, label: "Eventos", icon: CalendarDays, desc: "Calendário de eventos" },
@@ -234,6 +234,8 @@ function AdminNotices() {
   const [selectedEventId, setSelectedEventId] = useState<string>("");
   const [requiresRelay, setRequiresRelay] = useState(false);
   const [userSearch, setUserSearch] = useState("");
+  const [category, setCategory] = useState<"notice" | "article">("notice");
+  const [filter, setFilter] = useState<"all" | "notice" | "article">("all");
 
   const fetchNotices = async () => {
     const { data } = await supabase.from("notices").select("*").order("created_at", { ascending: false });
@@ -293,6 +295,7 @@ function AdminNotices() {
       target_user_ids: sendType === "specific" && selectedUserIds.length > 0 ? selectedUserIds : null,
       event_id: selectedEventId || null,
       requires_relay: requiresRelay,
+      category,
     } as any).select("id").single();
 
     setUploading(false);
@@ -308,7 +311,7 @@ function AdminNotices() {
         targetUserIds: sendType === "specific" ? selectedUserIds : undefined,
       });
     }
-    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId(""); setRequiresRelay(false);
+    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId(""); setRequiresRelay(false); setCategory("notice");
     fetchNotices();
   };
 
@@ -337,7 +340,25 @@ function AdminNotices() {
 
   return (
     <div>
-      <FormCard title="Novo Aviso" onSubmit={handleCreate} submitLabel={uploading ? "Publicando..." : "Publicar"} loading={uploading} icon={Megaphone}>
+      <FormCard title="Nova Publicação" onSubmit={handleCreate} submitLabel={uploading ? "Publicando..." : "Publicar"} loading={uploading} icon={Megaphone}>
+        <div>
+          <Label className="text-sm">Categoria</Label>
+          <div className="mt-1 flex gap-2">
+            {([
+              { key: "notice", label: "Aviso", color: "bg-primary text-primary-foreground", inactive: "bg-secondary text-foreground hover:bg-secondary/70" },
+              { key: "article", label: "Artigo", color: "bg-accent text-accent-foreground", inactive: "bg-secondary text-foreground hover:bg-secondary/70" },
+            ] as const).map((opt) => (
+              <button
+                key={opt.key}
+                type="button"
+                onClick={() => setCategory(opt.key)}
+                className={`px-4 h-10 rounded-lg text-sm font-medium transition-all ${category === opt.key ? opt.color + " shadow-sm" : opt.inactive}`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div>
           <Label className="text-sm">Título</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1" required />
@@ -479,8 +500,29 @@ function AdminNotices() {
         </div>
       </FormCard>
 
+      <div className="flex gap-2 mb-3 flex-wrap">
+        {([
+          { key: "all", label: "Todos" },
+          { key: "notice", label: "Avisos" },
+          { key: "article", label: "Artigos" },
+        ] as const).map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`px-3 h-8 rounded-lg text-xs font-medium transition-all ${
+              filter === f.key ? "bg-primary text-primary-foreground shadow-sm" : "bg-secondary text-foreground hover:bg-secondary/70"
+            }`}
+          >
+            {f.label}
+            <span className="ml-1.5 opacity-70">
+              ({f.key === "all" ? notices.length : notices.filter((n: any) => (n.category || "notice") === f.key).length})
+            </span>
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-2">
-        {notices.map((n) => (
+        {notices.filter((n: any) => filter === "all" || (n.category || "notice") === filter).map((n) => (
           <ItemCard key={n.id}>
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-start gap-3 min-w-0">
@@ -488,6 +530,14 @@ function AdminNotices() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-sm font-heading font-semibold">{n.title}</p>
+                    <CategoryBadge
+                      category={(n.category || "notice") as "notice" | "article"}
+                      onChange={async (next) => {
+                        await supabase.from("notices").update({ category: next } as any).eq("id", n.id);
+                        toast.success(`Alterado para "${next === "notice" ? "Aviso" : "Artigo"}".`);
+                        fetchNotices();
+                      }}
+                    />
                     {n.is_pinned && <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-1"><Pin className="w-2.5 h-2.5" />Fixado</Badge>}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{new Date(n.created_at).toLocaleDateString("pt-BR")}</p>
@@ -556,11 +606,40 @@ function AdminNotices() {
             )}
           </ItemCard>
         ))}
-        {notices.length === 0 && <EmptyState message="Nenhum aviso criado ainda." />}
+        {notices.filter((n: any) => filter === "all" || (n.category || "notice") === filter).length === 0 && (
+          <EmptyState message={filter === "all" ? "Nenhuma publicação criada ainda." : `Nenhum ${filter === "notice" ? "aviso" : "artigo"} encontrado.`} />
+        )}
       </div>
     </div>
   );
 }
+
+function CategoryBadge({ category, onChange }: { category: "notice" | "article"; onChange?: (next: "notice" | "article") => void }) {
+  const isArticle = category === "article";
+  const styles = isArticle
+    ? "bg-accent/15 text-accent border-accent/30 hover:bg-accent/25"
+    : "bg-primary/10 text-primary border-primary/30 hover:bg-primary/20";
+  const label = isArticle ? "Artigo" : "Aviso";
+  if (!onChange) {
+    return <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border ${styles}`}>{label}</span>;
+  }
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={() => onChange(isArticle ? "notice" : "article")}
+          className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full border transition-colors ${styles}`}
+        >
+          {label}
+        </button>
+      </TooltipTrigger>
+      <TooltipContent>Clique para alternar categoria</TooltipContent>
+    </Tooltip>
+  );
+}
+
+
 
 function AdminNoticeRelayInfo({ noticeId }: { noticeId: string }) {
   const [relayUsers, setRelayUsers] = useState<{ user_id: string; full_name: string; avatar_url: string | null; created_at: string }[]>([]);

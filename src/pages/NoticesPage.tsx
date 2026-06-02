@@ -32,6 +32,7 @@ interface Notice {
   cta_buttons: CtaButton[];
   event: NoticeEvent | null;
   requires_relay: boolean;
+  category?: "notice" | "article" | null;
 }
 
 export default function NoticesPage() {
@@ -39,7 +40,7 @@ export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"todos" | "fixados" | "eventos">("todos");
+  const [filter, setFilter] = useState<"todos" | "avisos" | "artigos" | "fixados" | "eventos">("todos");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,6 +92,8 @@ export default function NoticesPage() {
     let arr = notices;
     if (filter === "fixados") arr = arr.filter((n) => n.is_pinned);
     if (filter === "eventos") arr = arr.filter((n) => !!n.event);
+    if (filter === "avisos") arr = arr.filter((n) => (n.category || "notice") === "notice");
+    if (filter === "artigos") arr = arr.filter((n) => n.category === "article");
     if (search.trim()) {
       const q = search.toLowerCase();
       arr = arr.filter((n) => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q));
@@ -130,6 +133,8 @@ export default function NoticesPage() {
           <div className="flex gap-2">
             {([
               { key: "todos", label: "Todos" },
+              { key: "avisos", label: "Avisos" },
+              { key: "artigos", label: "Artigos" },
               { key: "fixados", label: "Fixados" },
               { key: "eventos", label: "Eventos" },
             ] as const).map((f) => (

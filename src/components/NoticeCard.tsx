@@ -21,12 +21,29 @@ export interface NoticeCardData {
   image_url: string | null;
   requires_relay?: boolean;
   event?: NoticeEvent | null;
+  category?: "notice" | "article" | null;
 }
 
 interface Props {
   notice: NoticeCardData;
   onOpen?: (n: NoticeCardData) => void;
   variant?: "default" | "featured" | "compact";
+}
+
+function CategoryTag({ category, dark = false }: { category?: "notice" | "article" | null; dark?: boolean }) {
+  const isArticle = category === "article";
+  const label = isArticle ? "Artigo" : "Aviso";
+  const baseLight = isArticle
+    ? "bg-accent/15 text-accent border-accent/30"
+    : "bg-primary/10 text-primary border-primary/30";
+  const baseDark = isArticle
+    ? "bg-accent text-accent-foreground border-accent"
+    : "bg-primary text-primary-foreground border-primary";
+  return (
+    <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${dark ? baseDark : baseLight}`}>
+      {label}
+    </span>
+  );
 }
 
 const initials = (name?: string) =>
@@ -64,11 +81,14 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/30 to-transparent" />
-          {notice.is_pinned && (
-            <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-primary-foreground text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg bg-accent">
-              <Pin className="w-3 h-3" /> Destaque
-            </span>
-          )}
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            <CategoryTag category={notice.category} dark />
+            {notice.is_pinned && (
+              <span className="inline-flex items-center gap-1.5 text-primary-foreground text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg bg-accent">
+                <Pin className="w-3 h-3" /> Destaque
+              </span>
+            )}
+          </div>
           <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
             <h3 className="font-heading font-bold text-xl sm:text-2xl text-background mb-2 line-clamp-2 drop-shadow-lg">
               {notice.title}
@@ -113,8 +133,9 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
             {notice.is_pinned && <Pin className="w-3 h-3 text-primary flex-shrink-0" strokeWidth={2} />}
             <p className="font-heading font-semibold text-sm line-clamp-1 text-foreground">{notice.title}</p>
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {notice.author_name} · {formatRelative(notice.created_at)}
+          <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+            <CategoryTag category={notice.category} />
+            <span>{notice.author_name} · {formatRelative(notice.created_at)}</span>
           </p>
         </div>
         <ArrowRight className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
@@ -138,20 +159,26 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          {notice.is_pinned && (
-            <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
-              <Pin className="w-3 h-3" /> Fixado
-            </span>
-          )}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
+            <CategoryTag category={notice.category} dark />
+            {notice.is_pinned && (
+              <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                <Pin className="w-3 h-3" /> Fixado
+              </span>
+            )}
+          </div>
         </div>
       ) : (
         <div className="relative aspect-[16/7] bg-gradient-to-br from-primary/15 via-accent/10 to-transparent flex items-center justify-center">
           <Megaphone className="w-10 h-10 text-primary/40" strokeWidth={1.3} />
-          {notice.is_pinned && (
-            <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
-              <Pin className="w-3 h-3" /> Fixado
-            </span>
-          )}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
+            <CategoryTag category={notice.category} />
+            {notice.is_pinned && (
+              <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                <Pin className="w-3 h-3" /> Fixado
+              </span>
+            )}
+          </div>
         </div>
       )}
 

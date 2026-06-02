@@ -29,6 +29,7 @@ export interface NoticeViewerData {
   cta_buttons?: CtaButton[];
   event?: NoticeViewerEvent | null;
   requires_relay?: boolean;
+  category?: "notice" | "article" | null;
 }
 
 interface Props {
@@ -125,13 +126,24 @@ export default function NoticeViewer({ notice, onClose }: Props) {
       {/* Content container */}
       <article className="relative max-w-3xl mx-auto px-5 sm:px-8 -mt-16 sm:-mt-24 pb-16 animate-fade-in">
         <div className="bg-card border border-border rounded-3xl shadow-xl p-6 sm:p-10">
-          {/* Pinned badge */}
-          {notice.is_pinned && (
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-4">
-              <Pin className="w-3 h-3" strokeWidth={2.5} />
-              FIXADO
-            </div>
-          )}
+          {/* Tags */}
+          <div className="flex items-center gap-2 flex-wrap mb-4">
+            <span
+              className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${
+                notice.category === "article"
+                  ? "bg-accent/15 text-accent border-accent/30"
+                  : "bg-primary/10 text-primary border-primary/30"
+              }`}
+            >
+              {notice.category === "article" ? "Artigo" : "Aviso"}
+            </span>
+            {notice.is_pinned && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                <Pin className="w-3 h-3" strokeWidth={2.5} />
+                FIXADO
+              </div>
+            )}
+          </div>
 
           {/* Title */}
           <h1 className="font-heading font-bold text-2xl sm:text-4xl text-foreground leading-tight mb-4 text-[#1d4d7c]">
