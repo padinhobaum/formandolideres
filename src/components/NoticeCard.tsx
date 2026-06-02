@@ -81,11 +81,14 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
             </div>
           )}
           <div className="absolute inset-0 bg-gradient-to-t from-foreground/80 via-foreground/30 to-transparent" />
-          {notice.is_pinned && (
-            <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 text-primary-foreground text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg bg-accent">
-              <Pin className="w-3 h-3" /> Destaque
-            </span>
-          )}
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            <CategoryTag category={notice.category} dark />
+            {notice.is_pinned && (
+              <span className="inline-flex items-center gap-1.5 text-primary-foreground text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full shadow-lg bg-accent">
+                <Pin className="w-3 h-3" /> Destaque
+              </span>
+            )}
+          </div>
           <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-6">
             <h3 className="font-heading font-bold text-xl sm:text-2xl text-background mb-2 line-clamp-2 drop-shadow-lg">
               {notice.title}
