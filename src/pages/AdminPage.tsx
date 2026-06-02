@@ -311,7 +311,7 @@ function AdminNotices() {
         targetUserIds: sendType === "specific" ? selectedUserIds : undefined,
       });
     }
-    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId(""); setRequiresRelay(false);
+    setTitle(""); setContent(""); setPinned(false); setImageFile(null); setCtaButtons([]); setSendType("global"); setSelectedUserIds([]); setSelectedEventId(""); setRequiresRelay(false); setCategory("notice");
     fetchNotices();
   };
 
