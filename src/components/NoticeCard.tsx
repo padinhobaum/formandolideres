@@ -21,12 +21,29 @@ export interface NoticeCardData {
   image_url: string | null;
   requires_relay?: boolean;
   event?: NoticeEvent | null;
+  category?: "notice" | "article" | null;
 }
 
 interface Props {
   notice: NoticeCardData;
   onOpen?: (n: NoticeCardData) => void;
   variant?: "default" | "featured" | "compact";
+}
+
+function CategoryTag({ category, dark = false }: { category?: "notice" | "article" | null; dark?: boolean }) {
+  const isArticle = category === "article";
+  const label = isArticle ? "Artigo" : "Aviso";
+  const baseLight = isArticle
+    ? "bg-accent/15 text-accent border-accent/30"
+    : "bg-primary/10 text-primary border-primary/30";
+  const baseDark = isArticle
+    ? "bg-accent text-accent-foreground border-accent"
+    : "bg-primary text-primary-foreground border-primary";
+  return (
+    <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${dark ? baseDark : baseLight}`}>
+      {label}
+    </span>
+  );
 }
 
 const initials = (name?: string) =>
