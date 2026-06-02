@@ -40,7 +40,7 @@ export default function NoticesPage() {
   const [notices, setNotices] = useState<Notice[]>([]);
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"todos" | "fixados" | "eventos">("todos");
+  const [filter, setFilter] = useState<"todos" | "avisos" | "artigos" | "fixados" | "eventos">("todos");
 
   useEffect(() => {
     const fetchData = async () => {
