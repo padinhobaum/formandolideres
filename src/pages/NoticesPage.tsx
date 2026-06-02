@@ -32,6 +32,7 @@ interface Notice {
   cta_buttons: CtaButton[];
   event: NoticeEvent | null;
   requires_relay: boolean;
+  category?: "notice" | "article" | null;
 }
 
 export default function NoticesPage() {
