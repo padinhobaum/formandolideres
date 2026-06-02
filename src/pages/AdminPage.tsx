@@ -606,7 +606,9 @@ function AdminNotices() {
             )}
           </ItemCard>
         ))}
-        {notices.length === 0 && <EmptyState message="Nenhum aviso criado ainda." />}
+        {notices.filter((n: any) => filter === "all" || (n.category || "notice") === filter).length === 0 && (
+          <EmptyState message={filter === "all" ? "Nenhuma publicação criada ainda." : `Nenhum ${filter === "notice" ? "aviso" : "artigo"} encontrado.`} />
+        )}
       </div>
     </div>
   );
