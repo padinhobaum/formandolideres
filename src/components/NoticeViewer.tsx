@@ -29,6 +29,7 @@ export interface NoticeViewerData {
   cta_buttons?: CtaButton[];
   event?: NoticeViewerEvent | null;
   requires_relay?: boolean;
+  category?: "notice" | "article" | null;
 }
 
 interface Props {
