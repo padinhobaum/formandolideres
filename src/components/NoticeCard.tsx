@@ -159,20 +159,26 @@ export default function NoticeCard({ notice, onOpen, variant = "default" }: Prop
             loading="lazy"
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
           />
-          {notice.is_pinned && (
-            <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
-              <Pin className="w-3 h-3" /> Fixado
-            </span>
-          )}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
+            <CategoryTag category={notice.category} dark />
+            {notice.is_pinned && (
+              <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                <Pin className="w-3 h-3" /> Fixado
+              </span>
+            )}
+          </div>
         </div>
       ) : (
         <div className="relative aspect-[16/7] bg-gradient-to-br from-primary/15 via-accent/10 to-transparent flex items-center justify-center">
           <Megaphone className="w-10 h-10 text-primary/40" strokeWidth={1.3} />
-          {notice.is_pinned && (
-            <span className="absolute top-3 left-3 inline-flex items-center gap-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
-              <Pin className="w-3 h-3" /> Fixado
-            </span>
-          )}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5">
+            <CategoryTag category={notice.category} />
+            {notice.is_pinned && (
+              <span className="inline-flex items-center gap-1 bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow">
+                <Pin className="w-3 h-3" /> Fixado
+              </span>
+            )}
+          </div>
         </div>
       )}
 
