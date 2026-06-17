@@ -1,740 +1,936 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useUserXp } from "@/hooks/useUserXp";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useUserXp } from "@/hooks/useUserXp";
 import AppLayout from "@/components/AppLayout";
-import UserAvatar from "@/components/UserAvatar";
-import SalaBadge from "@/components/SalaBadge";
-import { RichText } from "@/components/RichTextEditor";
-import ForumRanking from "@/components/ForumRanking";
-import ForumComposer from "@/components/forum/ForumComposer";
-import PostCard, { FeaturedCard, FeedTopic } from "@/components/forum/PostCard";
-import DiscoveryRow from "@/components/forum/DiscoveryRow";
-import ReactionBar from "@/components/forum/ReactionBar";
-import SaveButton from "@/components/forum/SaveButton";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Search, Compass, Users, GraduationCap, Bookmark, Send, ImagePlus, Reply, Heart, X, Trash2, Circle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserAvatar from "@/components/UserAvatar";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import {
+  MessageSquare, Plus, ThumbsUp, BarChart3, Send, Trash2, ChevronDown, ChevronUp, Circle, ImagePlus, Reply, Heart, X, Filter, Pin } from
+"lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import RichTextEditor, { RichText } from "@/components/RichTextEditor";
+import SalaBadge from "@/components/SalaBadge";
+import ForumRanking from "@/components/ForumRanking";
 import { sendPushNotification } from "@/lib/sendPushNotification";
 
-interface ForumCategory { id: string; name: string; color: string | null; }
-interface ForumReply {
-  id: string; topic_id: string; content: string; author_id: string;
-  author_name: string; author_avatar_url: string | null; image_url: string | null;
-  parent_reply_id: string | null; created_at: string;
-  like_count: number; liked_by_me: boolean;
+interface ForumCategory {
+  id: string;
+  name: string;
+  description: string | null;
+  color: string | null;
 }
-interface PollOption { id: string; topic_id: string; label: string; sort_order: number; vote_count: number; voted: boolean; }
-interface OnlineUser { user_id: string; full_name: string; avatar_url: string | null; class_name: string | null; role?: string; }
 
-type TabKey = "explorar" | "minha-escola" | "seguindo" | "salvos";
+interface ForumTopic {
+  id: string;
+  title: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  author_avatar_url: string | null;
+  image_url: string | null;
+  is_poll: boolean;
+  is_pinned: boolean;
+  category_id: string | null;
+  category_name?: string;
+  category_color?: string | null;
+  created_at: string;
+  reply_count?: number;
+}
 
-const TABS: { key: TabKey; label: string; icon: any }[] = [
-  { key: "explorar", label: "Explorar", icon: Compass },
-  { key: "minha-escola", label: "Minha Escola", icon: GraduationCap },
-  { key: "seguindo", label: "Seguindo", icon: Users },
-  { key: "salvos", label: "Salvos", icon: Bookmark },
-];
+interface ForumReply {
+  id: string;
+  topic_id: string;
+  content: string;
+  author_id: string;
+  author_name: string;
+  author_avatar_url: string | null;
+  image_url: string | null;
+  parent_reply_id: string | null;
+  created_at: string;
+  like_count: number;
+  liked_by_me: boolean;
+}
 
-function formatDate(d: string) {
-  return new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+interface PollOption {
+  id: string;
+  topic_id: string;
+  label: string;
+  sort_order: number;
+  vote_count: number;
+  voted: boolean;
+}
+
+interface OnlineUser {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  role?: string;
+  class_name?: string | null;
 }
 
 export default function ForumPage() {
   const { user, profile, isAdmin } = useAuth();
   const { awardXp } = useUserXp();
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const [topics, setTopics] = useState<FeedTopic[]>([]);
-  const [categories, setCategories] = useState<ForumCategory[]>([]);
-  const [authorProfiles, setAuthorProfiles] = useState<Record<string, string | null>>({});
-  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
-  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
+  const [topics, setTopics] = useState<ForumTopic[]>([]);
   const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
-
-  const [activeTab, setActiveTab] = useState<TabKey>("explorar");
-  const [search, setSearch] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | "all">("all");
-
-  // Detail dialog
-  const [detailTopicId, setDetailTopicId] = useState<string | null>(null);
-  const [detailReplies, setDetailReplies] = useState<ForumReply[]>([]);
-  const [detailPoll, setDetailPoll] = useState<PollOption[]>([]);
+  const [onlineDialog, setOnlineDialog] = useState<{ open: boolean; users: OnlineUser[]; title: string }>({ open: false, users: [], title: "" });
+  const [expandedTopicId, setExpandedTopicId] = useState<string | null>(null);
+  const deepLinked = useRef(false);
+  const [replies, setReplies] = useState<Record<string, ForumReply[]>>({});
+  const [authorProfiles, setAuthorProfiles] = useState<Record<string, string | null>>({});
+  const [pollData, setPollData] = useState<Record<string, PollOption[]>>({});
   const [replyText, setReplyText] = useState("");
   const [replyImage, setReplyImage] = useState<File | null>(null);
-  const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
-  const deepLinked = useRef(false);
+  const [replyingTo, setReplyingTo] = useState<{id: string;name: string;} | null>(null);
+  const [showNewTopic, setShowNewTopic] = useState(false);
+  const [categories, setCategories] = useState<ForumCategory[]>([]);
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState<string>("all");
 
-  // ---------- Fetchers ----------
+  // New topic form
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  const [newImage, setNewImage] = useState<File | null>(null);
+  const [isPoll, setIsPoll] = useState(false);
+  const [pollOptions, setPollOptions] = useState<string[]>(["", ""]);
+  const [newCategoryId, setNewCategoryId] = useState<string>("");
+
+  const uploadImage = async (file: File): Promise<string | null> => {
+    const path = `${user!.id}/${Date.now()}_${file.name}`;
+    const { error } = await supabase.storage.from("forum_images").upload(path, file);
+    if (error) {toast.error("Erro ao enviar imagem.");return null;}
+    const { data } = supabase.storage.from("forum_images").getPublicUrl(path);
+    return data.publicUrl;
+  };
+
   const fetchCategories = async () => {
     const { data } = await supabase.from("forum_categories").select("*").order("sort_order");
     if (data) setCategories(data as ForumCategory[]);
   };
 
   const fetchTopics = async () => {
-    const { data } = await supabase
-      .from("forum_topics")
-      .select("*, forum_categories(name, color)")
-      .order("is_pinned", { ascending: false })
-      .order("created_at", { ascending: false })
-      .limit(120);
+    const { data } = await supabase.
+    from("forum_topics").
+    select("*, forum_categories(name, color)").
+    order("is_pinned", { ascending: false }).
+    order("created_at", { ascending: false });
     if (!data) return;
 
     const topicIds = data.map((t: any) => t.id);
-    const safeIds = topicIds.length > 0 ? topicIds : ["__none__"];
+    const { data: repliesData } = await supabase.
+    from("forum_replies").
+    select("topic_id").
+    in("topic_id", topicIds.length > 0 ? topicIds : ["__none__"]);
 
-    const [repliesRes, reactionsRes, authorsRes] = await Promise.all([
-      supabase.from("forum_replies").select("topic_id").in("topic_id", safeIds),
-      (supabase as any).from("topic_reactions").select("topic_id").in("topic_id", safeIds),
-      supabase.from("profiles").select("user_id, class_name").in("user_id", [...new Set(data.map((t: any) => t.author_id))]),
-    ]);
+    const countMap: Record<string, number> = {};
+    repliesData?.forEach((r: any) => {
+      countMap[r.topic_id] = (countMap[r.topic_id] || 0) + 1;
+    });
 
-    const replyCounts: Record<string, number> = {};
-    repliesRes.data?.forEach((r: any) => { replyCounts[r.topic_id] = (replyCounts[r.topic_id] || 0) + 1; });
-    const rxCounts: Record<string, number> = {};
-    reactionsRes.data?.forEach((r: any) => { rxCounts[r.topic_id] = (rxCounts[r.topic_id] || 0) + 1; });
-    setReactionCounts(rxCounts);
-
-    const classMap: Record<string, string | null> = {};
-    authorsRes.data?.forEach((p: any) => { classMap[p.user_id] = p.class_name; });
-    setAuthorProfiles(classMap);
-
-    const enriched: FeedTopic[] = data.map((t: any) => ({
+    const topicsData = data.map((t: any) => ({
       ...t,
-      reply_count: replyCounts[t.id] || 0,
-      author_class: classMap[t.author_id] || null,
+      reply_count: countMap[t.id] || 0,
       category_name: t.forum_categories?.name || null,
-      category_color: t.forum_categories?.color || null,
+      category_color: t.forum_categories?.color || null
     }));
-    setTopics(enriched);
+    setTopics(topicsData);
+
+    // Fetch class_name for all topic authors
+    const authorIds = [...new Set(topicsData.map((t: any) => t.author_id))];
+    if (authorIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, class_name").in("user_id", authorIds);
+      if (profs) {
+        setAuthorProfiles((prev) => {
+          const next = { ...prev };
+          profs.forEach((p: any) => {next[p.user_id] = p.class_name;});
+          return next;
+        });
+      }
+    }
   };
 
-  const fetchSaved = async () => {
-    if (!user) return;
-    const { data } = await (supabase as any).from("topic_saves").select("topic_id").eq("user_id", user.id);
-    setSavedIds(new Set((data || []).map((d: any) => d.topic_id)));
-  };
-
-  const fetchOnline = async () => {
-    const cutoff = new Date(Date.now() - 90_000).toISOString();
-    const { data: presence } = await supabase
-      .from("user_presence").select("user_id, last_seen")
-      .eq("is_online", true).gte("last_seen", cutoff);
-    const ids = (presence || []).map((p: any) => p.user_id);
-    if (ids.length === 0) { setOnlineUsers([]); return; }
-    const [profsRes, rolesRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").in("user_id", ids),
-      supabase.from("user_roles").select("user_id, role").in("user_id", ids),
-    ]);
-    const rmap: Record<string, string> = {};
-    rolesRes.data?.forEach((r: any) => { rmap[r.user_id] = r.role; });
-    setOnlineUsers((profsRes.data || []).map((p: any) => ({ ...p, role: rmap[p.user_id] || "leader" })));
-  };
-
-  useEffect(() => { fetchCategories(); fetchTopics(); }, []);
-  useEffect(() => { if (user) { fetchSaved(); fetchOnline(); } }, [user?.id]);
-
-  // Realtime: refresh feed on new topics
+  // Global online users: query user_presence table (all online users system-wide)
   useEffect(() => {
-    const ch = supabase.channel("forum-feed")
-      .on("postgres_changes", { event: "*", schema: "public", table: "forum_topics" }, () => fetchTopics())
+    if (!user) return;
+
+    const loadOnlineUsers = async () => {
+      // Considera online apenas quem teve heartbeat nos últimos 90s
+      // (heartbeat real é a cada 30s; margem para latência/rede)
+      const cutoff = new Date(Date.now() - 90_000).toISOString();
+      const { data: presenceData } = await supabase
+        .from("user_presence")
+        .select("user_id, last_seen")
+        .eq("is_online", true)
+        .gte("last_seen", cutoff);
+
+      const userIds = (presenceData || []).map((p: any) => p.user_id);
+      if (userIds.length === 0) {
+        setOnlineUsers([]);
+        return;
+      }
+
+      const [profilesRes, rolesRes] = await Promise.all([
+        supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").in("user_id", userIds),
+        supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
+      ]);
+
+      const rolesMap: Record<string, string> = {};
+      rolesRes.data?.forEach((r: any) => { rolesMap[r.user_id] = r.role; });
+
+      setOnlineUsers(
+        (profilesRes.data || []).map((p: any) => ({
+          user_id: p.user_id,
+          full_name: p.full_name,
+          avatar_url: p.avatar_url,
+          class_name: p.class_name,
+          role: rolesMap[p.user_id] || "leader",
+        }))
+      );
+    };
+
+    loadOnlineUsers();
+
+    const channel = supabase
+      .channel("user-presence-changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "user_presence" },
+        () => loadOnlineUsers()
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+
+    const interval = setInterval(loadOnlineUsers, 30_000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
+  }, [user?.id]);
+
+  // Fetch categories and topics on mount
+  useEffect(() => {
+    fetchCategories();
+    fetchTopics();
   }, []);
 
-  // Deep link
+  // Deep-link: auto-expand topic from URL param
   useEffect(() => {
-    const t = searchParams.get("topic");
-    if (t && topics.length && !deepLinked.current) {
+    const topicId = searchParams.get("topic");
+    if (topicId && topics.length > 0 && !deepLinked.current) {
       deepLinked.current = true;
-      openDetail(t);
+      handleExpandTopic(topicId);
       searchParams.delete("topic");
       setSearchParams(searchParams, { replace: true });
+      setTimeout(() => {
+        document.getElementById(`topic-${topicId}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 300);
     }
   }, [topics, searchParams]);
 
-  // ---------- Actions ----------
-  const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("forum_topics").delete().eq("id", id);
-    if (error) return toast.error("Erro ao excluir.");
-    toast.success("Publicação excluída.");
-    fetchTopics();
-    if (detailTopicId === id) setDetailTopicId(null);
-  };
+  const handleCreateTopic = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim() || !newContent.trim() || !user) return;
 
-  const handleTogglePin = async (id: string, current: boolean) => {
-    const { error } = await supabase.from("forum_topics").update({ is_pinned: !current } as any).eq("id", id);
-    if (error) return toast.error("Erro.");
-    toast.success(current ? "Desafixado." : "Fixado!");
-    fetchTopics();
-  };
-
-  // ---------- Detail dialog ----------
-  const openDetail = async (id: string) => {
-    setDetailTopicId(id);
-    setReplyingTo(null); setReplyText(""); setReplyImage(null);
-    await loadReplies(id);
-    const topic = topics.find((t) => t.id === id);
-    if (topic?.is_poll) await loadPoll(id);
-    else setDetailPoll([]);
-  };
-
-  const loadReplies = async (topicId: string) => {
-    const { data: rd } = await supabase.from("forum_replies").select("*").eq("topic_id", topicId).order("created_at");
-    if (!rd) return;
-    const ids = rd.map((r: any) => r.id);
-    let likes: any[] = [];
-    if (ids.length) {
-      const { data } = await supabase.from("reply_likes").select("reply_id, user_id").in("reply_id", ids);
-      likes = data || [];
+    let imageUrl: string | null = null;
+    if (newImage) {
+      imageUrl = await uploadImage(newImage);
     }
-    const enriched = rd.map((r: any) => ({
+
+    const { data: topicData, error } = await supabase.from("forum_topics").insert({
+      title: newTitle.trim(),
+      content: newContent.trim(),
+      author_id: user.id,
+      author_name: profile?.full_name || "",
+      author_avatar_url: profile?.avatar_url || null,
+      is_poll: isPoll,
+      image_url: imageUrl,
+      category_id: newCategoryId || null
+    } as any).select().single();
+
+    if (error) {toast.error("Erro ao criar tópico.");return;}
+
+    if (isPoll && topicData) {
+      const validOptions = pollOptions.filter((o) => o.trim());
+      if (validOptions.length >= 2) {
+        await supabase.from("poll_options").insert(
+          validOptions.map((label, i) => ({
+            topic_id: (topicData as any).id,
+            label: label.trim(),
+            sort_order: i
+          })) as any
+        );
+      }
+    }
+
+    toast.success("Tópico criado!");
+    // Award 20 XP for creating a topic
+    if (topicData && !isAdmin) await awardXp("create_topic", (topicData as any).id, 20);
+    if (topicData) {
+      await sendPushNotification({
+        title: "💬 Novo tópico no fórum",
+        body: newTitle.trim(),
+        url: `/forum?topic=${(topicData as any).id}`,
+        contentType: "forum_topic",
+        referenceId: (topicData as any).id,
+      });
+    }
+    setNewTitle("");setNewContent("");setNewImage(null);setIsPoll(false);setPollOptions(["", ""]);setNewCategoryId("");setShowNewTopic(false);
+    fetchTopics();
+  };
+
+  const fetchRepliesWithLikes = async (topicId: string) => {
+    const { data: repliesData } = await supabase.
+    from("forum_replies").
+    select("*").
+    eq("topic_id", topicId).
+    order("created_at");
+
+    if (!repliesData) return;
+
+    const replyIds = repliesData.map((r: any) => r.id);
+    let likesData: any[] = [];
+    if (replyIds.length > 0) {
+      const { data } = await supabase.
+      from("reply_likes").
+      select("reply_id, user_id").
+      in("reply_id", replyIds);
+      likesData = data || [];
+    }
+
+    const enriched: ForumReply[] = repliesData.map((r: any) => ({
       ...r,
-      like_count: likes.filter((l) => l.reply_id === r.id).length,
-      liked_by_me: likes.some((l) => l.reply_id === r.id && l.user_id === user?.id),
+      like_count: likesData.filter((l) => l.reply_id === r.id).length,
+      liked_by_me: likesData.some((l) => l.reply_id === r.id && l.user_id === user?.id)
     }));
-    setDetailReplies(enriched);
-    const authorIds = [...new Set(rd.map((r: any) => r.author_id))];
-    if (authorIds.length) {
-      const { data: profs } = await supabase.from("profiles").select("user_id, class_name").in("user_id", authorIds);
-      profs?.forEach((p: any) => { setAuthorProfiles((prev) => ({ ...prev, [p.user_id]: p.class_name })); });
+
+    setReplies((prev) => ({ ...prev, [topicId]: enriched }));
+
+    // Fetch class_name for reply authors
+    const replyAuthorIds = [...new Set(repliesData.map((r: any) => r.author_id))];
+    if (replyAuthorIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, class_name").in("user_id", replyAuthorIds);
+      if (profs) {
+        setAuthorProfiles((prev) => {
+          const next = { ...prev };
+          profs.forEach((p: any) => {next[p.user_id] = p.class_name;});
+          return next;
+        });
+      }
     }
   };
 
-  const loadPoll = async (topicId: string) => {
-    const { data: options } = await supabase.from("poll_options").select("*").eq("topic_id", topicId).order("sort_order");
-    if (!options?.length) return;
-    const optIds = options.map((o: any) => o.id);
-    const { data: votes } = await supabase.from("poll_votes").select("option_id, user_id").in("option_id", optIds);
-    setDetailPoll(options.map((o: any) => ({
-      ...o,
-      vote_count: votes?.filter((v: any) => v.option_id === o.id).length || 0,
-      voted: votes?.some((v: any) => v.option_id === o.id && v.user_id === user?.id) || false,
-    })));
+  const handleExpandTopic = async (topicId: string) => {
+    if (expandedTopicId === topicId) {
+      setExpandedTopicId(null);
+      return;
+    }
+    setExpandedTopicId(topicId);
+    setReplyingTo(null);
+    setReplyText("");
+    setReplyImage(null);
+
+    await fetchRepliesWithLikes(topicId);
+
+    const topic = topics.find((t) => t.id === topicId);
+    if (topic?.is_poll) {
+      const { data: options } = await supabase.
+      from("poll_options").
+      select("*").
+      eq("topic_id", topicId).
+      order("sort_order");
+
+      if (options && options.length > 0) {
+        const optionIds = options.map((o: any) => o.id);
+        const { data: votes } = await supabase.
+        from("poll_votes").
+        select("option_id, user_id").
+        in("option_id", optionIds);
+
+        const enriched = options.map((o: any) => ({
+          ...o,
+          vote_count: votes?.filter((v: any) => v.option_id === o.id).length || 0,
+          voted: votes?.some((v: any) => v.option_id === o.id && v.user_id === user?.id) || false
+        }));
+        setPollData((prev) => ({ ...prev, [topicId]: enriched }));
+      }
+    }
   };
 
-  const handleVote = async (optionId: string, voted: boolean) => {
-    if (!user || !detailTopicId) return;
-    if (voted) await supabase.from("poll_votes").delete().eq("option_id", optionId).eq("user_id", user.id);
-    else await supabase.from("poll_votes").insert({ option_id: optionId, user_id: user.id } as any);
-    loadPoll(detailTopicId);
-  };
+  const handleReply = async (topicId: string) => {
+    if (!replyText.trim() || !user) return;
 
-  const uploadReplyImage = async (file: File) => {
-    const path = `${user!.id}/${Date.now()}_${file.name}`;
-    const { error } = await supabase.storage.from("forum_images").upload(path, file);
-    if (error) { toast.error("Erro ao enviar imagem."); return null; }
-    return supabase.storage.from("forum_images").getPublicUrl(path).data.publicUrl;
-  };
+    let imageUrl: string | null = null;
+    if (replyImage) {
+      imageUrl = await uploadImage(replyImage);
+    }
 
-  const handleReply = async () => {
-    if (!replyText.trim() || !user || !detailTopicId) return;
-    let img: string | null = null;
-    if (replyImage) img = await uploadReplyImage(replyImage);
     const { error } = await supabase.from("forum_replies").insert({
-      topic_id: detailTopicId, content: replyText.trim(), author_id: user.id,
-      author_name: profile?.full_name || "", author_avatar_url: profile?.avatar_url || null,
-      image_url: img, parent_reply_id: replyingTo?.id || null,
+      topic_id: topicId,
+      content: replyText.trim(),
+      author_id: user.id,
+      author_name: profile?.full_name || "",
+      author_avatar_url: profile?.avatar_url || null,
+      image_url: imageUrl,
+      parent_reply_id: replyingTo?.id || null
     } as any);
-    if (error) return toast.error("Erro ao responder.");
-    if (!isAdmin) await awardXp("reply_topic", `${detailTopicId}_${Date.now()}`, 10);
-    setReplyText(""); setReplyImage(null); setReplyingTo(null);
-    await loadReplies(detailTopicId);
+    if (error) {toast.error("Erro ao responder.");return;}
+    // Award 10 XP for replying
+    if (!isAdmin) await awardXp("reply_topic", `${topicId}_${Date.now()}`, 10);
+    setReplyText("");
+    setReplyImage(null);
+    setReplyingTo(null);
+    await fetchRepliesWithLikes(topicId);
     fetchTopics();
   };
 
-  const handleToggleLike = async (replyId: string, liked: boolean) => {
-    if (!user || !detailTopicId) return;
-    if (liked) await supabase.from("reply_likes").delete().eq("reply_id", replyId).eq("user_id", user.id);
-    else await supabase.from("reply_likes").insert({ reply_id: replyId, user_id: user.id } as any);
-    loadReplies(detailTopicId);
+  const handleToggleLike = async (replyId: string, topicId: string, alreadyLiked: boolean) => {
+    if (!user) return;
+    if (alreadyLiked) {
+      await supabase.from("reply_likes").delete().eq("reply_id", replyId).eq("user_id", user.id);
+    } else {
+      await supabase.from("reply_likes").insert({ reply_id: replyId, user_id: user.id } as any);
+    }
+    await fetchRepliesWithLikes(topicId);
   };
 
-  const handleDeleteReply = async (id: string) => {
-    const { error } = await supabase.from("forum_replies").delete().eq("id", id);
-    if (error) return toast.error("Erro.");
-    if (detailTopicId) loadReplies(detailTopicId);
+  const handleVote = async (optionId: string, topicId: string, alreadyVoted: boolean) => {
+    if (!user) return;
+    if (alreadyVoted) {
+      await supabase.from("poll_votes").delete().eq("option_id", optionId).eq("user_id", user.id);
+    } else {
+      await supabase.from("poll_votes").insert({ option_id: optionId, user_id: user.id } as any);
+    }
+    handleExpandTopic(topicId);
   };
 
-  // ---------- Filtering / sections ----------
-  const filtered = useMemo(() => {
-    let arr = topics;
-    if (selectedCategory !== "all") arr = arr.filter((t) => t.category_id === selectedCategory);
-    if (search.trim()) {
-      const q = search.toLowerCase();
-      arr = arr.filter((t) =>
-        t.title.toLowerCase().includes(q) ||
-        t.content.toLowerCase().includes(q) ||
-        t.author_name.toLowerCase().includes(q)
-      );
-    }
-    if (activeTab === "minha-escola" && profile?.class_name) {
-      arr = arr.filter((t) => authorProfiles[t.author_id] === profile.class_name);
-    }
-    if (activeTab === "salvos") {
-      arr = arr.filter((t) => savedIds.has(t.id));
-    }
-    if (activeTab === "seguindo") {
-      // No follow data yet — show self + pinned
-      arr = arr.filter((t) => t.author_id === user?.id || t.is_pinned);
-    }
-    return arr;
-  }, [topics, selectedCategory, search, activeTab, profile, authorProfiles, savedIds, user]);
+  const handleDeleteTopic = async (id: string) => {
+    const { error } = await supabase.from("forum_topics").delete().eq("id", id);
+    if (error) {toast.error("Erro ao excluir.");return;}
+    toast.success("Tópico excluído.");
+    fetchTopics();
+  };
 
-  const sections = useMemo(() => {
-    if (activeTab !== "explorar" || search.trim() || selectedCategory !== "all") return null;
-    const sevenDaysAgo = Date.now() - 7 * 86400_000;
-    const oneDayAgo = Date.now() - 86400_000;
+  const handleTogglePin = async (topicId: string, currentlyPinned: boolean) => {
+    const { error } = await supabase.from("forum_topics").update({ is_pinned: !currentlyPinned } as any).eq("id", topicId);
+    if (error) {toast.error("Erro ao fixar/desafixar.");return;}
+    toast.success(currentlyPinned ? "Tópico desafixado." : "Tópico fixado!");
+    fetchTopics();
+  };
 
-    const featured = [...topics]
-      .filter((t) => t.is_pinned || (reactionCounts[t.id] || 0) >= 3)
-      .sort((a, b) => (reactionCounts[b.id] || 0) - (reactionCounts[a.id] || 0))
-      .slice(0, 6);
+  const handleDeleteReply = async (replyId: string, topicId: string) => {
+    const { error } = await supabase.from("forum_replies").delete().eq("id", replyId);
+    if (error) {toast.error("Erro ao excluir resposta.");return;}
+    toast.success("Resposta excluída.");
+    await fetchRepliesWithLikes(topicId);
+  };
 
-    const fromSchool = profile?.class_name
-      ? topics.filter((t) => authorProfiles[t.author_id] === profile.class_name).slice(0, 6)
-      : [];
+  const formatDate = (d: string) =>
+  new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
 
-    const recent = [...topics]
-      .filter((t) => new Date(t.created_at).getTime() > oneDayAgo)
-      .slice(0, 6);
+  const getInitials = (name: string) =>
+  name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
 
-    const mostLiked = [...topics]
-      .filter((t) => new Date(t.created_at).getTime() > sevenDaysAgo)
-      .sort((a, b) => (reactionCounts[b.id] || 0) - (reactionCounts[a.id] || 0))
-      .filter((t) => (reactionCounts[t.id] || 0) > 0)
-      .slice(0, 6);
-
-    const newLeaders = topics
-      .filter((t) => !t.is_pinned)
-      .reduce<FeedTopic[]>((acc, t) => {
-        if (!acc.find((x) => x.author_id === t.author_id)) acc.push(t);
-        return acc;
-      }, [])
-      .slice(-6)
-      .reverse();
-
-    return { featured, fromSchool, recent, mostLiked, newLeaders };
-  }, [topics, reactionCounts, profile, authorProfiles, activeTab, search, selectedCategory]);
-
-  const currentTopic = topics.find((t) => t.id === detailTopicId) || null;
-  const threadedReplies = useMemo(() => {
-    const top = detailReplies.filter((r) => !r.parent_reply_id);
-    const children: Record<string, ForumReply[]> = {};
-    detailReplies.filter((r) => r.parent_reply_id).forEach((r) => {
-      (children[r.parent_reply_id!] ||= []).push(r);
+  // Group replies: top-level and nested
+  const getThreadedReplies = (topicId: string) => {
+    const all = replies[topicId] || [];
+    const topLevel = all.filter((r) => !r.parent_reply_id);
+    const childrenMap: Record<string, ForumReply[]> = {};
+    all.filter((r) => r.parent_reply_id).forEach((r) => {
+      if (!childrenMap[r.parent_reply_id!]) childrenMap[r.parent_reply_id!] = [];
+      childrenMap[r.parent_reply_id!].push(r);
     });
-    return { top, children };
-  }, [detailReplies]);
+    return { topLevel, childrenMap };
+  };
 
-  // ---------- Render ----------
+  const renderReply = (reply: ForumReply, topicId: string, isChild = false) =>
+  <div key={reply.id} className={`flex gap-2 sm:gap-3 ${isChild ? "pl-6 sm:pl-10" : ""} py-3 ${!isChild ? "border-t border-border" : ""}`}>
+      <UserAvatar
+        userId={reply.author_id}
+        name={reply.author_name}
+        avatarUrl={reply.author_avatar_url}
+        sala={authorProfiles[reply.author_id]}
+        className="w-7 h-7 sm:w-8 sm:h-8 flex-shrink-0 mt-0.5"
+        fallbackClassName="text-[9px] bg-primary text-primary-foreground font-bold"
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+          <span className="font-heading font-bold text-xs sm:text-sm">{reply.author_name}</span>
+          <SalaBadge sala={authorProfiles[reply.author_id]} />
+          <span className="text-muted-foreground text-[10px] sm:text-xs">· {formatDate(reply.created_at)}</span>
+        </div>
+        {reply.parent_reply_id &&
+      <p className="text-muted-foreground text-[10px] sm:text-xs mt-0.5">
+            respondendo a <span className="text-primary font-medium">{replies[topicId]?.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}</span>
+          </p>
+      }
+        <div className="font-heading mt-1 text-sm sm:text-sm leading-relaxed break-words"><RichText content={reply.content} /></div>
+      {reply.image_url &&
+      <img src={reply.image_url} alt="" className="mt-2 max-w-full sm:max-w-xs max-h-48 rounded-xl object-contain" loading="lazy" />
+      }
+        <div className="flex items-center gap-3 sm:gap-4 mt-2">
+          <button
+          onClick={() => handleToggleLike(reply.id, topicId, reply.liked_by_me)}
+          className={`flex items-center gap-1 text-xs transition-colors ${
+          reply.liked_by_me ? "text-destructive" : "text-muted-foreground hover:text-destructive"}`
+          }>
+            <Heart className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${reply.liked_by_me ? "fill-current" : ""}`} />
+            {reply.like_count > 0 && <span>{reply.like_count}</span>}
+          </button>
+          <button
+          onClick={() => setReplyingTo({ id: reply.id, name: reply.author_name })}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors">
+            <Reply className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span className="hidden xs:inline">Responder</span>
+          </button>
+          {(reply.author_id === user?.id || isAdmin) &&
+        <button
+          onClick={() => handleDeleteReply(reply.id, topicId)}
+          className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive transition-colors">
+              <Trash2 className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+            </button>
+        }
+        </div>
+      </div>
+    </div>;
+
   return (
     <AppLayout>
-      <div className="w-full flex flex-col lg:flex-row gap-6">
-        {/* Main column */}
-        <div className="flex-1 min-w-0 max-w-3xl w-full space-y-5">
-          {/* Header: title + search */}
-          <header className="space-y-3">
-            <div>
-              <h1 className="font-heading font-bold text-2xl sm:text-3xl lg:text-4xl text-accent leading-tight">
-                Fórum de Líderes
-              </h1>
-              <p className="text-muted-foreground text-sm sm:text-base">
-                Conecte, inspire e construa junto com a comunidade ✨
-              </p>
-            </div>
-            <div className="relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Buscar discussões, líderes, ideias..."
-                className="pl-10 h-11 rounded-full bg-muted/40 border-border focus-visible:ring-primary/30"
-              />
-            </div>
-          </header>
+      <div className="w-full flex flex-col lg:flex-row gap-4 lg:gap-6">
+      <div className="flex-1 min-w-0 max-w-3xl w-full">
+        <h2 className="font-heading font-bold mb-1 text-2xl sm:text-3xl lg:text-4xl text-accent">Fórum de Líderes</h2>
+        <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base lg:text-lg">Discussões, perguntas e enquetes</p>
 
-          {/* Sticky tabs */}
-          <nav className="sticky top-0 z-20 -mx-4 px-4 sm:mx-0 sm:px-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 py-2 border-b border-border">
-            <div className="flex gap-1 overflow-x-auto scrollbar-hide">
-              {TABS.map((tab) => {
-                const active = activeTab === tab.key;
+        {/* Online Users - mobile/tablet only */}
+        <section className="mb-4 border bg-card rounded-xl p-3 sm:p-4 space-y-4 lg:hidden">
+          {(() => {
+              const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
+              const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
+              const LIMIT = 8;
+
+              const renderGroup = (users: OnlineUser[], label: string) => {
+                const visible = users.slice(0, LIMIT);
+                const extra = users.length - visible.length;
                 return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={cn(
-                      "relative flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-all",
-                      active
-                        ? "bg-primary text-primary-foreground shadow-md"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Circle className="w-3 h-3 text-accent fill-accent" />
+                    <h3 className="font-heading font-bold text-sm">
+                      {label} ({users.length})
+                    </h3>
+                  </div>
+                  {users.length === 0 ?
+                  <p className="text-xs text-muted-foreground">Nenhum online no momento.</p> :
+                  <div className="flex flex-wrap gap-3 items-center">
+                      {visible.map((u) =>
+                    <div key={u.user_id} className="flex items-center gap-2">
+                          <div className="relative">
+                            <UserAvatar
+                              userId={u.user_id}
+                              name={u.full_name}
+                              avatarUrl={u.avatar_url}
+                              sala={u.class_name}
+                              className="w-8 h-8"
+                              fallbackClassName="text-[10px] bg-primary text-primary-foreground"
+                            />
+                            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
+                          </div>
+                          <span className="text-xs font-body">{u.full_name.split(" ")[0]}</span>
+                          <SalaBadge sala={u.class_name} />
+                        </div>
                     )}
-                  >
-                    <tab.icon className="w-4 h-4" />
-                    {tab.label}
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
+                      {extra > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setOnlineDialog({ open: true, users, title: label })}
+                          className="text-xs font-semibold text-accent hover:underline"
+                        >
+                          +{extra} Ver mais
+                        </button>
+                      )}
+                    </div>
+                  }
+                </div>);
+              };
 
-          {/* Composer */}
-          <ForumComposer categories={categories} onCreated={fetchTopics} />
+              return (
+                <>
+                {renderGroup(adminsOnline, "Administradores Online")}
+                {renderGroup(leadersOnline, "Líderes Online")}
+              </>);
+            })()}
+        </section>
 
-          {/* Category chips */}
-          {categories.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
-              <button
-                onClick={() => setSelectedCategory("all")}
-                className={cn(
-                  "px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all",
-                  selectedCategory === "all"
-                    ? "bg-foreground text-background border-foreground"
-                    : "bg-card border-border hover:border-foreground/40"
+        {/* New Topic + Category Filter */}
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <Button onClick={() => setShowNewTopic(!showNewTopic)} size="sm" className="rounded-full px-5">
+            <Plus className="w-4 h-4 mr-1" strokeWidth={1.5} />
+            Novo Tópico
+          </Button>
+          {categories.length > 0 &&
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-muted-foreground" />
+              <select
+                value={selectedCategoryFilter}
+                onChange={(e) => setSelectedCategoryFilter(e.target.value)}
+                className="border bg-background px-3 py-1.5 text-sm font-body rounded-full h-9">
+                <option value="all">Todas</option>
+                {categories.map((c) =>
+                <option key={c.id} value={c.id}>{c.name}</option>
                 )}
-              >
-                Todas
-              </button>
-              {categories.map((c) => {
-                const active = selectedCategory === c.id;
-                return (
-                  <button
-                    key={c.id}
-                    onClick={() => setSelectedCategory(c.id)}
-                    className={cn(
-                      "px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border transition-all",
-                      active ? "text-white" : "hover:opacity-80"
-                    )}
-                    style={
-                      active && c.color
-                        ? { backgroundColor: c.color, borderColor: c.color }
-                        : c.color
-                        ? { color: c.color, borderColor: `${c.color}50`, backgroundColor: `${c.color}10` }
-                        : {}
-                    }
-                  >
-                    {c.name}
-                  </button>
-                );
-              })}
+              </select>
             </div>
-          )}
-
-          {/* Discovery sections (only on Explorar/no filter) */}
-          {sections && (
-            <div className="space-y-6">
-              {sections.featured.length > 0 && (
-                <DiscoveryRow title="Em destaque" emoji="🔥" hint="Hot" pulse>
-                  {sections.featured.map((t, i) => (
-                    <FeaturedCard
-                      key={t.id}
-                      topic={t}
-                      onOpen={openDetail}
-                      accent={(["primary", "accent", "purple", "rose"] as const)[i % 4]}
-                    />
-                  ))}
-                </DiscoveryRow>
-              )}
-              {sections.fromSchool.length > 0 && (
-                <DiscoveryRow title="Da sua escola" emoji="👥" hint={profile?.class_name || ""}>
-                  {sections.fromSchool.map((t) => (
-                    <FeaturedCard key={t.id} topic={t} onOpen={openDetail} accent="accent" />
-                  ))}
-                </DiscoveryRow>
-              )}
-              {sections.mostLiked.length > 0 && (
-                <DiscoveryRow title="Mais curtidos" emoji="⭐" hint="7 dias">
-                  {sections.mostLiked.map((t) => (
-                    <FeaturedCard key={t.id} topic={t} onOpen={openDetail} accent="purple" />
-                  ))}
-                </DiscoveryRow>
-              )}
-              {sections.newLeaders.length > 0 && (
-                <DiscoveryRow title="Novos líderes participando" emoji="🚀">
-                  {sections.newLeaders.map((t) => (
-                    <FeaturedCard key={t.id} topic={t} onOpen={openDetail} accent="rose" />
-                  ))}
-                </DiscoveryRow>
-              )}
-            </div>
-          )}
-
-          {/* Main feed */}
-          <section className="space-y-1">
-            <h2 className="font-heading font-bold text-base sm:text-lg flex items-center gap-2 pt-2">
-              <span aria-hidden>💬</span> Conversas recentes
-              <span className="text-xs font-normal text-muted-foreground ml-1">
-                ({filtered.length})
-              </span>
-            </h2>
-            {filtered.length === 0 ? (
-              <div className="border bg-card rounded-3xl p-10 text-center">
-                <p className="text-4xl mb-3">🌱</p>
-                <p className="font-heading font-bold text-base">Nada por aqui ainda</p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {activeTab === "salvos"
-                    ? "Você ainda não salvou nenhuma publicação."
-                    : "Seja o primeiro a publicar algo!"}
-                </p>
-              </div>
-            ) : (
-              <div className="grid gap-4 mt-3">
-                {filtered.map((t) => (
-                  <PostCard
-                    key={t.id}
-                    topic={t}
-                    onOpen={openDetail}
-                    onDelete={handleDelete}
-                    onTogglePin={handleTogglePin}
-                    canManage={t.author_id === user?.id || isAdmin}
-                    isAdmin={isAdmin}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
+            }
         </div>
 
-        {/* Sidebar */}
-        <aside className="hidden lg:block w-72 shrink-0 space-y-4 mt-[6.5rem]">
-          {/* Online users */}
-          <section className="border bg-card rounded-2xl p-4 space-y-4">
-            <div className="flex items-center gap-2">
-              <Circle className="w-3 h-3 text-accent fill-accent" />
-              <h3 className="font-heading font-bold text-sm">
-                Online agora ({onlineUsers.length})
-              </h3>
+        {/* New Topic Form */}
+        {showNewTopic &&
+          <form onSubmit={handleCreateTopic} className="border bg-card rounded-xl p-3 sm:p-5 mb-4 space-y-3">
+            <h3 className="font-heading font-bold text-sm">Criar Tópico</h3>
+            <div>
+              <Label className="text-sm">Título</Label>
+              <Input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} className="mt-1" required />
             </div>
-            {onlineUsers.length === 0 ? (
-              <p className="text-xs text-muted-foreground">Ninguém por aqui ainda.</p>
-            ) : (
-              <div className="space-y-2">
-                {onlineUsers.slice(0, 8).map((u) => (
-                  <div key={u.user_id} className="flex items-center gap-2">
-                    <div className="relative">
-                      <UserAvatar
-                        userId={u.user_id} name={u.full_name} avatarUrl={u.avatar_url}
-                        sala={u.class_name}
-                        className="w-7 h-7"
-                        fallbackClassName="text-[9px] bg-primary text-primary-foreground"
-                      />
-                      <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-accent rounded-full ring-2 ring-card" />
-                    </div>
-                    <span className="text-xs font-body truncate flex-1">{u.full_name.split(" ")[0]}</span>
-                    {u.role === "admin" && (
-                      <span className="text-[9px] font-bold bg-primary/10 text-primary px-1.5 rounded uppercase">Admin</span>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </section>
-          <ForumRanking />
-        </aside>
-      </div>
-
-      {/* Detail Dialog */}
-      <Dialog open={!!detailTopicId} onOpenChange={(o) => !o && setDetailTopicId(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0">
-          {currentTopic && (
-            <>
-              <DialogHeader className="px-5 sm:px-6 pt-5 pb-3 border-b border-border sticky top-0 bg-card/95 backdrop-blur z-10">
-                <DialogTitle className="font-heading text-base sm:text-lg pr-8 text-left">
-                  {currentTopic.title}
-                </DialogTitle>
-              </DialogHeader>
-
-              <div className="px-5 sm:px-6 py-4 space-y-4">
-                {/* Author */}
-                <div className="flex items-center gap-3">
-                  <UserAvatar
-                    userId={currentTopic.author_id}
-                    name={currentTopic.author_name}
-                    avatarUrl={currentTopic.author_avatar_url}
-                    sala={authorProfiles[currentTopic.author_id]}
-                    className="w-11 h-11"
-                    fallbackClassName="bg-primary text-primary-foreground"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-heading font-bold text-sm">{currentTopic.author_name}</span>
-                      <SalaBadge sala={authorProfiles[currentTopic.author_id]} />
-                    </div>
-                    <p className="text-xs text-muted-foreground">{formatDate(currentTopic.created_at)}</p>
-                  </div>
-                  <SaveButton topicId={currentTopic.id} />
-                </div>
-
-                {/* Image */}
-                {currentTopic.image_url && (
-                  <img
-                    src={currentTopic.image_url} alt=""
-                    className="w-full max-h-96 object-contain rounded-2xl bg-muted"
-                    loading="lazy"
-                  />
+            <div>
+              <Label className="text-sm">Conteúdo</Label>
+              <RichTextEditor value={newContent} onChange={setNewContent} placeholder="Escreva o conteúdo..." />
+            </div>
+            <div>
+              <Label className="text-sm">Categoria</Label>
+              <select
+                value={newCategoryId}
+                onChange={(e) => setNewCategoryId(e.target.value)}
+                className="mt-1 w-full border bg-background px-3 py-2 text-sm font-body rounded h-10">
+                <option value="">Sem categoria</option>
+                {categories.map((c) =>
+                <option key={c.id} value={c.id}>{c.name}</option>
                 )}
-
-                {/* Content */}
-                <div className="font-heading text-base leading-relaxed break-words">
-                  <RichText content={currentTopic.content} />
+              </select>
+            </div>
+            <div>
+              <Label className="text-sm flex items-center gap-1">
+                <ImagePlus className="w-4 h-4" /> Imagem (opcional)
+              </Label>
+              <Input type="file" accept="image/*" onChange={(e) => setNewImage(e.target.files?.[0] || null)} className="mt-1" />
+              {newImage &&
+              <div className="mt-2 relative inline-block">
+                  <img src={URL.createObjectURL(newImage)} alt="Preview" className="max-h-32 rounded-lg" />
+                  <button type="button" onClick={() => setNewImage(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5">
+                    <X className="w-3 h-3" />
+                  </button>
                 </div>
+              }
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={isPoll} onChange={(e) => setIsPoll(e.target.checked)} />
+              <BarChart3 className="w-4 h-4" strokeWidth={1.5} />
+              Incluir enquete/votação
+            </label>
+            {isPoll &&
+            <div className="space-y-2 pl-6">
+                <Label className="text-sm">Opções da enquete</Label>
+                {pollOptions.map((opt, i) =>
+              <div key={i} className="flex gap-2">
+                    <Input placeholder={`Opção ${i + 1}`} value={opt} onChange={(e) => {const updated = [...pollOptions];updated[i] = e.target.value;setPollOptions(updated);}} className="h-8 text-sm" />
+                    {i >= 2 && <button type="button" onClick={() => setPollOptions(pollOptions.filter((_, idx) => idx !== i))} className="text-destructive"><Trash2 className="w-3.5 h-3.5" /></button>}
+                  </div>
+              )}
+                {pollOptions.length < 6 &&
+              <button type="button" onClick={() => setPollOptions([...pollOptions, ""])} className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <Plus className="w-3 h-3" /> Adicionar opção
+                  </button>
+              }
+              </div>
+            }
+            <Button type="submit" size="sm">Publicar</Button>
+          </form>
+          }
 
-                {/* Poll */}
-                {currentTopic.is_poll && detailPoll.length > 0 && (
-                  <div className="border bg-muted/30 rounded-2xl p-3 space-y-2">
-                    {(() => {
-                      const total = detailPoll.reduce((s, o) => s + o.vote_count, 0);
-                      return (
-                        <>
-                          {detailPoll.map((opt) => {
-                            const pct = total > 0 ? Math.round((opt.vote_count / total) * 100) : 0;
-                            return (
-                              <button
-                                key={opt.id}
-                                onClick={() => handleVote(opt.id, opt.voted)}
-                                className={cn(
-                                  "w-full text-left rounded-xl p-3 text-sm relative overflow-hidden transition-colors border",
-                                  opt.voted ? "bg-primary/10 border-primary" : "bg-card hover:bg-muted"
-                                )}
-                              >
+        {/* Topics Feed */}
+        {topics.length === 0 ?
+          <p className="text-sm text-muted-foreground">Nenhum tópico ainda. Seja o primeiro a criar!</p> :
+
+          <div className="border bg-card rounded-xl overflow-hidden divide-y divide-border">
+            {topics.filter((t) => selectedCategoryFilter === "all" || t.category_id === selectedCategoryFilter).map((topic) => {
+              const isExpanded = expandedTopicId === topic.id;
+              const { topLevel, childrenMap } = getThreadedReplies(topic.id);
+              const topicPoll = pollData[topic.id] || [];
+              const canDelete = topic.author_id === user?.id || isAdmin;
+              const totalVotes = topicPoll.reduce((sum, o) => sum + o.vote_count, 0);
+              const catColor = topic.category_color || null;
+
+              return (
+                <div key={topic.id} id={`topic-${topic.id}`}>
+                  <button
+                    onClick={() => handleExpandTopic(topic.id)}
+                    className="w-full text-left hover:bg-muted/50 transition-colors"
+                    style={catColor ? { borderLeft: `3px solid ${catColor}` } : {}}>
+                    {/* Image preview - shown when topic has image and is collapsed */}
+                    {topic.image_url && !isExpanded && (
+                      <div className="relative w-full h-40 sm:h-48 overflow-hidden bg-muted">
+                        <img
+                          src={topic.image_url}
+                          alt=""
+                          className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent pointer-events-none" />
+                      </div>
+                    )}
+                    <div className="flex gap-2 sm:gap-3 p-3 sm:p-4">
+                      <UserAvatar
+                        userId={topic.author_id}
+                        name={topic.author_name}
+                        avatarUrl={topic.author_avatar_url}
+                        sala={authorProfiles[topic.author_id]}
+                        className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0 mt-0.5"
+                        fallbackClassName="text-[10px] sm:text-xs bg-primary text-primary-foreground font-bold"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+                          <span className="font-heading font-bold text-xs sm:text-sm text-foreground">{topic.author_name}</span>
+                          <SalaBadge sala={authorProfiles[topic.author_id]} />
+                          <span className="text-muted-foreground text-[10px] sm:text-xs">· {formatDate(topic.created_at)}</span>
+                        </div>
+                        <h4 className="font-heading font-bold text-sm sm:text-base mt-1 text-primary break-words">{topic.title}</h4>
+                        <div className="flex items-center gap-1.5 sm:gap-2 mt-1.5 flex-wrap">
+                          {topic.is_pinned &&
+                          <Badge variant="default" className="gap-1 text-[10px] px-1.5 py-0.5 h-5">
+                              <Pin className="w-3 h-3" strokeWidth={2} /> Fixado
+                            </Badge>
+                          }
+                          {topic.category_name &&
+                          <span
+                            className="text-[10px] px-2 py-0.5 rounded-full font-medium border"
+                            style={catColor ? { backgroundColor: `${catColor}20`, color: catColor, borderColor: `${catColor}40` } : {}}>
+                              {topic.category_name}
+                            </span>
+                          }
+                          {topic.is_poll &&
+                          <span className="text-[10px] bg-accent/10 text-accent px-2 py-0.5 rounded-full font-medium">
+                              Enquete
+                            </span>
+                          }
+                          {topic.image_url && !isExpanded && (
+                            <span className="text-[10px] bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full font-medium">
+                              📷 com imagem
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-4 mt-2">
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <MessageSquare className="w-3.5 h-3.5" /> {topic.reply_count || 0}
+                          </span>
+                          {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+
+                  {isExpanded &&
+                  <div className="px-3 sm:px-4 pb-3 sm:pb-4">
+                      {/* Topic content */}
+                      <div className="font-heading text-base whitespace-pre-wrap leading-relaxed pl-0 sm:pl-[52px] break-words sm:text-base py-[12px] pr-[20px]"><RichText content={topic.content} /></div>
+                    {topic.image_url &&
+                    <img src={topic.image_url} alt="" className="mb-3 sm:ml-[52px] max-w-full max-h-72 object-contain rounded-xl" loading="lazy" />
+                    }
+
+                      {/* Poll */}
+                      {topic.is_poll && topicPoll.length > 0 &&
+                    <div className="space-y-2 mb-4 sm:ml-[52px] border bg-muted/30 rounded-xl p-3">
+                          {topicPoll.map((opt) => {
+                        const pct = totalVotes > 0 ? Math.round(opt.vote_count / totalVotes * 100) : 0;
+                        return (
+                          <button
+                            key={opt.id}
+                            onClick={() => handleVote(opt.id, topic.id, opt.voted)}
+                            className={`w-full text-left rounded-lg p-2.5 text-sm transition-colors relative overflow-hidden ${
+                            opt.voted ? "bg-primary/10 border border-primary" : "bg-card border hover:bg-secondary"}`
+                            }>
                                 <div className="absolute inset-y-0 left-0 bg-primary/10 transition-all" style={{ width: `${pct}%` }} />
                                 <div className="relative flex justify-between items-center">
                                   <span className="font-body">{opt.label}</span>
                                   <span className="text-xs text-muted-foreground">{opt.vote_count} ({pct}%)</span>
                                 </div>
-                              </button>
-                            );
-                          })}
-                          <p className="text-xs text-muted-foreground text-center">{total} voto(s)</p>
-                        </>
-                      );
-                    })()}
-                  </div>
-                )}
-
-                {/* Reactions */}
-                <div className="pt-2 border-t border-border">
-                  <ReactionBar topicId={currentTopic.id} />
-                </div>
-
-                {/* Replies */}
-                <div className="pt-2">
-                  <h4 className="font-heading font-bold text-sm mb-2">
-                    {detailReplies.length} comentário{detailReplies.length !== 1 ? "s" : ""}
-                  </h4>
-                  {threadedReplies.top.length > 0 && (
-                    <div className="space-y-1">
-                      {threadedReplies.top.map((reply) => (
-                        <div key={reply.id}>
-                          {renderReply(reply, false)}
-                          {threadedReplies.children[reply.id]?.map((c) => renderReply(c, true))}
+                              </button>);
+                      })}
+                          <p className="text-xs text-muted-foreground text-center">{totalVotes} voto(s)</p>
                         </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
+                    }
 
-              {/* Reply composer */}
-              <div className="sticky bottom-0 bg-card/95 backdrop-blur border-t border-border p-3 space-y-2">
-                {replyingTo && (
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5">
-                    <Reply className="w-3 h-3" />
-                    Respondendo a <strong className="text-foreground">{replyingTo.name}</strong>
-                    <button onClick={() => setReplyingTo(null)} className="ml-auto"><X className="w-3 h-3" /></button>
-                  </div>
-                )}
-                {replyImage && (
-                  <div className="relative inline-block">
-                    <img src={URL.createObjectURL(replyImage)} alt="" className="max-h-24 rounded-lg" />
-                    <button onClick={() => setReplyImage(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5">
-                      <X className="w-3 h-3" />
+                      {/* Threaded Replies */}
+                      {topLevel.length > 0 &&
+                    <div className="sm:ml-[52px]">
+                          {topLevel.map((reply) =>
+                      <div key={reply.id}>
+                              {renderReply(reply, topic.id)}
+                              {childrenMap[reply.id]?.map((child) => renderReply(child, topic.id, true))}
+                            </div>
+                      )}
+                        </div>
+                    }
+
+                      {/* Replying-to indicator */}
+                      {replyingTo &&
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-1.5 mb-2 sm:ml-[52px]">
+                          <Reply className="w-3 h-3" />
+                          <span>Respondendo a <strong>{replyingTo.name}</strong></span>
+                          <button onClick={() => setReplyingTo(null)} className="ml-auto"><X className="w-3 h-3" /></button>
+                        </div>
+                    }
+
+                      {/* Reply input */}
+                      <div className="space-y-2 mt-3 sm:ml-[52px]">
+                        {replyImage &&
+                      <div className="relative inline-block">
+                            <img src={URL.createObjectURL(replyImage)} alt="Preview" className="max-h-24 rounded-lg" />
+                            <button onClick={() => setReplyImage(null)} className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-0.5">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </div>
+                      }
+                        <div className="flex gap-2">
+                          <label className="flex-shrink-0 cursor-pointer flex items-center justify-center h-9 w-9 rounded-full border border-input hover:bg-secondary transition-colors">
+                            <ImagePlus className="w-4 h-4 text-muted-foreground" />
+                            <input type="file" accept="image/*" className="hidden" onChange={(e) => setReplyImage(e.target.files?.[0] || null)} />
+                          </label>
+                          <Input
+                          placeholder={replyingTo ? `Respondendo a ${replyingTo.name}...` : "Escreva uma resposta..."}
+                          value={expandedTopicId === topic.id ? replyText : ""}
+                          onChange={(e) => setReplyText(e.target.value)}
+                          className="h-9 text-sm rounded-full"
+                          onKeyDown={(e) => {if (e.key === "Enter" && !e.shiftKey) handleReply(topic.id);}} />
+                          <Button size="sm" onClick={() => handleReply(topic.id)} className="h-9 px-3 rounded-full">
+                            <Send className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 mt-3 sm:ml-[52px]">
+                        {isAdmin &&
+                      <button
+                        onClick={() => handleTogglePin(topic.id, topic.is_pinned)}
+                        className="text-xs text-primary hover:underline flex items-center gap-1">
+                      <Pin className="w-3 h-3" /> {topic.is_pinned ? "Desafixar" : "Fixar"}
                     </button>
+                      }
+                        {canDelete &&
+                      <button
+                        onClick={() => handleDeleteTopic(topic.id)}
+                        className="text-xs text-destructive hover:underline flex items-center gap-1">
+                      <Trash2 className="w-3 h-3" /> Excluir
+                    </button>
+                      }
+                      </div>
+                    </div>
+                  }
+                </div>);
+
+            })}
+          </div>
+          }
+      </div>
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:block w-72 shrink-0 space-y-4 mt-[6.75rem]">
+        {/* Online users desktop */}
+        <section className="border bg-card rounded-xl p-4 space-y-4">
+          {(() => {
+              const adminsOnline = onlineUsers.filter((u) => u.role === "admin");
+              const leadersOnline = onlineUsers.filter((u) => u.role !== "admin");
+              const LIMIT = 6;
+
+              const renderGroup = (users: OnlineUser[], label: string) => {
+                const visible = users.slice(0, LIMIT);
+                const extra = users.length - visible.length;
+                return (
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <Circle className="w-3 h-3 text-accent fill-accent" />
+                    <h3 className="font-heading font-bold text-xs">{label} ({users.length})</h3>
                   </div>
-                )}
-                <div className="flex gap-2 items-center">
-                  <label className="flex-shrink-0 cursor-pointer flex items-center justify-center h-10 w-10 rounded-full border border-input hover:bg-muted">
-                    <ImagePlus className="w-4 h-4 text-muted-foreground" />
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => setReplyImage(e.target.files?.[0] || null)} />
-                  </label>
-                  <Input
-                    placeholder={replyingTo ? `Resposta para ${replyingTo.name}...` : "Escreva um comentário..."}
-                    value={replyText}
-                    onChange={(e) => setReplyText(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleReply(); } }}
-                    className="h-10 rounded-full"
+                  {users.length === 0 ?
+                  <p className="text-xs text-muted-foreground">Nenhum online.</p> :
+                  <div className="space-y-2">
+                      {visible.map((u) =>
+                    <div key={u.user_id} className="flex items-center gap-2">
+                          <div className="relative">
+                            <UserAvatar
+                              userId={u.user_id}
+                              name={u.full_name}
+                              avatarUrl={u.avatar_url}
+                              sala={u.class_name}
+                              className="w-7 h-7"
+                              fallbackClassName="text-[9px] bg-primary text-primary-foreground"
+                            />
+                            <span className="absolute bottom-0 right-0 w-1.5 h-1.5 bg-accent rounded-full ring-2 ring-card" />
+                          </div>
+                          <span className="text-xs font-body truncate">{u.full_name.split(" ")[0]}</span>
+                          <SalaBadge sala={u.class_name} />
+                        </div>
+                    )}
+                      {extra > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setOnlineDialog({ open: true, users, title: label })}
+                          className="text-xs font-semibold text-accent hover:underline pt-1"
+                        >
+                          +{extra} Ver mais
+                        </button>
+                      )}
+                    </div>
+                  }
+                </div>);
+              };
+
+              return (
+                <>
+                {renderGroup(adminsOnline, "Admins Online")}
+                {renderGroup(leadersOnline, "Líderes Online")}
+              </>);
+            })()}
+        </section>
+        <ForumRanking />
+      </aside>
+      </div>
+
+      {/* Dialog: lista completa de usuários online */}
+      <Dialog open={onlineDialog.open} onOpenChange={(open) => setOnlineDialog((s) => ({ ...s, open }))}>
+        <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="font-heading flex items-center gap-2">
+              <Circle className="w-3 h-3 text-accent fill-accent" />
+              {onlineDialog.title} ({onlineDialog.users.length})
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 mt-2">
+            {onlineDialog.users.map((u) => (
+              <div key={u.user_id} className="flex items-center gap-3">
+                <div className="relative">
+                  <UserAvatar
+                    userId={u.user_id}
+                    name={u.full_name}
+                    avatarUrl={u.avatar_url}
+                    sala={u.class_name}
+                    className="w-9 h-9"
+                    fallbackClassName="text-[10px] bg-primary text-primary-foreground"
                   />
-                  <Button onClick={handleReply} size="icon" className="rounded-full h-10 w-10 flex-shrink-0">
-                    <Send className="w-4 h-4" />
-                  </Button>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-accent rounded-full border-2 border-card" />
                 </div>
+                <span className="text-sm font-body flex-1 truncate">{u.full_name}</span>
+                <SalaBadge sala={u.class_name} />
               </div>
-            </>
-          )}
+            ))}
+          </div>
         </DialogContent>
       </Dialog>
-    </AppLayout>
-  );
+    </AppLayout>);
 
-  // ---------- Reply renderer ----------
-  function renderReply(reply: ForumReply, isChild: boolean) {
-    return (
-      <div key={reply.id} className={cn("flex gap-2.5 py-3", isChild ? "pl-10" : "border-t border-border first:border-t-0")}>
-        <UserAvatar
-          userId={reply.author_id} name={reply.author_name} avatarUrl={reply.author_avatar_url}
-          sala={authorProfiles[reply.author_id]}
-          className="w-8 h-8 flex-shrink-0 mt-0.5"
-          fallbackClassName="text-[9px] bg-primary text-primary-foreground"
-        />
-        <div className="flex-1 min-w-0">
-          <div className="bg-muted/40 rounded-2xl rounded-tl-md px-3 py-2">
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="font-heading font-bold text-xs">{reply.author_name}</span>
-              <SalaBadge sala={authorProfiles[reply.author_id]} />
-            </div>
-            {reply.parent_reply_id && (
-              <p className="text-[10px] text-muted-foreground">
-                respondendo a <span className="text-primary font-semibold">
-                  {detailReplies.find((r) => r.id === reply.parent_reply_id)?.author_name || "..."}
-                </span>
-              </p>
-            )}
-            <div className="mt-1 text-sm break-words"><RichText content={reply.content} /></div>
-            {reply.image_url && (
-              <img src={reply.image_url} alt="" className="mt-2 max-w-xs max-h-48 rounded-xl" loading="lazy" />
-            )}
-          </div>
-          <div className="flex items-center gap-3 mt-1 px-2">
-            <span className="text-[10px] text-muted-foreground">{formatDate(reply.created_at)}</span>
-            <button
-              onClick={() => handleToggleLike(reply.id, reply.liked_by_me)}
-              className={cn("flex items-center gap-1 text-[11px] font-semibold transition-colors",
-                reply.liked_by_me ? "text-destructive" : "text-muted-foreground hover:text-destructive")}
-            >
-              <Heart className={cn("w-3 h-3", reply.liked_by_me && "fill-current")} />
-              {reply.like_count > 0 && reply.like_count}
-            </button>
-            <button
-              onClick={() => setReplyingTo({ id: reply.id, name: reply.author_name })}
-              className="text-[11px] font-semibold text-muted-foreground hover:text-primary"
-            >
-              Responder
-            </button>
-            {(reply.author_id === user?.id || isAdmin) && (
-              <button
-                onClick={() => handleDeleteReply(reply.id)}
-                className="text-muted-foreground hover:text-destructive ml-auto"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
 }

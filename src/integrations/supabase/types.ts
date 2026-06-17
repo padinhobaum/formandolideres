@@ -515,7 +515,6 @@ export type Database = {
           image_url: string | null
           is_pinned: boolean
           is_poll: boolean
-          post_type: string
           title: string
           updated_at: string
         }
@@ -530,7 +529,6 @@ export type Database = {
           image_url?: string | null
           is_pinned?: boolean
           is_poll?: boolean
-          post_type?: string
           title: string
           updated_at?: string
         }
@@ -545,7 +543,6 @@ export type Database = {
           image_url?: string | null
           is_pinned?: boolean
           is_poll?: boolean
-          post_type?: string
           title?: string
           updated_at?: string
         }
@@ -1394,67 +1391,6 @@ export type Database = {
         }
         Relationships: []
       }
-      topic_reactions: {
-        Row: {
-          created_at: string
-          id: string
-          reaction_type: string
-          topic_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          reaction_type: string
-          topic_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          reaction_type?: string
-          topic_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "topic_reactions_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "forum_topics"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      topic_saves: {
-        Row: {
-          created_at: string
-          id: string
-          topic_id: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          topic_id: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          topic_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "topic_saves_topic_id_fkey"
-            columns: ["topic_id"]
-            isOneToOne: false
-            referencedRelation: "forum_topics"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_achievements: {
         Row: {
           achievement_id: string
@@ -1483,27 +1419,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      user_follows: {
-        Row: {
-          created_at: string
-          follower_id: string
-          following_id: string
-          id: string
-        }
-        Insert: {
-          created_at?: string
-          follower_id: string
-          following_id: string
-          id?: string
-        }
-        Update: {
-          created_at?: string
-          follower_id?: string
-          following_id?: string
-          id?: string
-        }
-        Relationships: []
       }
       user_presence: {
         Row: {
