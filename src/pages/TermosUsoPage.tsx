@@ -39,7 +39,25 @@ export default function TermosUsoPage() {
         <div className="space-y-8 text-foreground/90 leading-relaxed">
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              1. Objeto
+              1. Dados da Empresa
+            </h2>
+            <p className="mb-2">
+              A plataforma <strong>Formando Líderes</strong> é operada por:
+            </p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>
+                <strong>Razão social:</strong> Formando Líderes Educação e Tecnologia
+                LTDA.
+              </li>
+              <li>
+                <strong>CNPJ:</strong> 68.002.639/0001-40
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="font-heading font-bold text-xl text-foreground mb-3">
+              2. Objeto
             </h2>
             <p>
               Os presentes Termos de Uso regulam o acesso e a utilização da plataforma{" "}
