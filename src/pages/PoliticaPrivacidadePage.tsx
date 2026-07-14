@@ -39,7 +39,25 @@ export default function PoliticaPrivacidadePage() {
         <div className="space-y-8 text-foreground/90 leading-relaxed">
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              1. Disposições Gerais
+              1. Dados da Empresa
+            </h2>
+            <p className="mb-2">
+              A plataforma <strong>Formando Líderes</strong> é operada por:
+            </p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>
+                <strong>Razão social:</strong> Formando Líderes Educação e Tecnologia
+                LTDA.
+              </li>
+              <li>
+                <strong>CNPJ:</strong> 68.002.639/0001-40
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="font-heading font-bold text-xl text-foreground mb-3">
+              2. Disposições Gerais
             </h2>
             <p className="mb-3">
               A presente Política de Privacidade tem por finalidade estabelecer as regras
@@ -56,7 +74,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              2. Definições
+              3. Definições
             </h2>
             <p className="mb-3">Para os fins desta Política, consideram-se:</p>
             <ul className="list-disc pl-6 space-y-1.5">
@@ -87,14 +105,14 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              3. Coleta de Dados Pessoais
+              4. Coleta de Dados Pessoais
             </h2>
             <p className="mb-3">
               A coleta de dados pessoais poderá ocorrer nas seguintes hipóteses:
             </p>
 
             <h3 className="font-heading font-semibold text-base text-foreground mt-4 mb-2">
-              3.1 Dados fornecidos diretamente pelo titular
+              4.1 Dados fornecidos diretamente pelo titular
             </h3>
             <ul className="list-disc pl-6 space-y-1">
               <li>Nome completo</li>
@@ -106,7 +124,7 @@ export default function PoliticaPrivacidadePage() {
             </ul>
 
             <h3 className="font-heading font-semibold text-base text-foreground mt-4 mb-2">
-              3.2 Dados coletados automaticamente
+              4.2 Dados coletados automaticamente
             </h3>
             <ul className="list-disc pl-6 space-y-1">
               <li>Endereço IP</li>
@@ -116,7 +134,7 @@ export default function PoliticaPrivacidadePage() {
             </ul>
 
             <h3 className="font-heading font-semibold text-base text-foreground mt-4 mb-2">
-              3.3 Dados decorrentes da utilização da plataforma
+              4.3 Dados decorrentes da utilização da plataforma
             </h3>
             <ul className="list-disc pl-6 space-y-1">
               <li>Respostas a formulários e pesquisas</li>
@@ -128,7 +146,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              4. Finalidade do Tratamento
+              5. Finalidade do Tratamento
             </h2>
             <p className="mb-3">O tratamento dos dados pessoais tem por finalidade:</p>
             <ul className="list-disc pl-6 space-y-1.5">
@@ -144,7 +162,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              5. Base Legal para o Tratamento
+              6. Base Legal para o Tratamento
             </h2>
             <p className="mb-3">
               O tratamento de dados pessoais fundamenta-se nas seguintes bases legais
@@ -166,7 +184,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              6. Compartilhamento de Dados
+              7. Compartilhamento de Dados
             </h2>
             <p className="mb-3">Os dados pessoais poderão ser compartilhados com:</p>
             <ul className="list-disc pl-6 space-y-1.5 mb-3">
@@ -184,7 +202,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              7. Armazenamento e Segurança
+              8. Armazenamento e Segurança
             </h2>
             <p className="mb-3">
               Os dados pessoais serão armazenados pelo período necessário ao cumprimento
@@ -200,7 +218,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              8. Direitos do Titular
+              9. Direitos do Titular
             </h2>
             <p className="mb-3">
               Nos termos do art. 18 da LGPD, o titular poderá, a qualquer tempo e
@@ -226,7 +244,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              9. Tratamento de Dados de Menores
+              10. Tratamento de Dados de Menores
             </h2>
             <p>
               Nos casos em que houver tratamento de dados pessoais de menores de idade,
@@ -238,7 +256,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              10. Uso de Cookies
+              11. Uso de Cookies
             </h2>
             <p className="mb-3">
               A plataforma poderá utilizar cookies e tecnologias similares para:
@@ -256,7 +274,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              11. Alterações da Política
+              12. Alterações da Política
             </h2>
             <p>
               O Formando Líderes reserva-se o direito de alterar esta Política a qualquer
@@ -266,7 +284,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              12. Contato
+              13. Contato
             </h2>
             <p className="mb-3">
               Para exercício de direitos ou esclarecimento de dúvidas:

@@ -39,7 +39,25 @@ export default function TermosUsoPage() {
         <div className="space-y-8 text-foreground/90 leading-relaxed">
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              1. Objeto
+              1. Dados da Empresa
+            </h2>
+            <p className="mb-2">
+              A plataforma <strong>Formando Líderes</strong> é operada por:
+            </p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>
+                <strong>Razão social:</strong> Formando Líderes Educação e Tecnologia
+                LTDA.
+              </li>
+              <li>
+                <strong>CNPJ:</strong> 68.002.639/0001-40
+              </li>
+            </ul>
+          </section>
+
+          <section>
+            <h2 className="font-heading font-bold text-xl text-foreground mb-3">
+              2. Objeto
             </h2>
             <p>
               Os presentes Termos de Uso regulam o acesso e a utilização da plataforma{" "}
@@ -50,7 +68,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              2. Aceitação
+              3. Aceitação
             </h2>
             <p>
               O acesso e a utilização da plataforma implicam a aceitação integral e
@@ -60,7 +78,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              3. Cadastro e Responsabilidade do Usuário
+              4. Cadastro e Responsabilidade do Usuário
             </h2>
             <p className="mb-3">O usuário compromete-se a:</p>
             <ul className="list-disc pl-6 space-y-1.5">
@@ -72,7 +90,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              4. Condutas Vedadas
+              5. Condutas Vedadas
             </h2>
             <p className="mb-3">É expressamente vedado ao usuário:</p>
             <ul className="list-disc pl-6 space-y-1.5 mb-3">
@@ -97,7 +115,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              5. Conteúdo Gerado pelo Usuário
+              6. Conteúdo Gerado pelo Usuário
             </h2>
             <p className="mb-3">
               O usuário é integralmente responsável pelo conteúdo por ele inserido na
@@ -112,7 +130,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              6. Propriedade Intelectual
+              7. Propriedade Intelectual
             </h2>
             <p>
               Todos os direitos relativos à plataforma, incluindo software, design,
@@ -124,7 +142,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              7. Privacidade
+              8. Privacidade
             </h2>
             <p>
               O tratamento de dados pessoais é realizado conforme disposto na{" "}
@@ -140,7 +158,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              8. Disponibilidade e Funcionamento
+              9. Disponibilidade e Funcionamento
             </h2>
             <p className="mb-3">
               A plataforma poderá sofrer interrupções, suspensões ou alterações
@@ -156,7 +174,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              9. Limitação de Responsabilidade
+              10. Limitação de Responsabilidade
             </h2>
             <p className="mb-3">O Formando Líderes não se responsabiliza por:</p>
             <ul className="list-disc pl-6 space-y-1.5">
@@ -170,7 +188,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              10. Suspensão e Encerramento
+              11. Suspensão e Encerramento
             </h2>
             <p className="mb-3">
               O Formando Líderes poderá, a seu exclusivo critério, suspender ou encerrar
@@ -181,7 +199,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              11. Alterações dos Termos
+              12. Alterações dos Termos
             </h2>
             <p>
               Os presentes Termos poderão ser modificados a qualquer tempo, mediante
@@ -191,7 +209,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              12. Legislação e Foro
+              13. Legislação e Foro
             </h2>
             <p className="mb-3">
               Estes Termos são regidos pelas leis da República Federativa do Brasil.
