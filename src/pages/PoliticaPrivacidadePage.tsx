@@ -74,7 +74,7 @@ export default function PoliticaPrivacidadePage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              2. Definições
+              3. Definições
             </h2>
             <p className="mb-3">Para os fins desta Política, consideram-se:</p>
             <ul className="list-disc pl-6 space-y-1.5">

@@ -68,7 +68,7 @@ export default function TermosUsoPage() {
 
           <section>
             <h2 className="font-heading font-bold text-xl text-foreground mb-3">
-              2. Aceitação
+              3. Aceitação
             </h2>
             <p>
               O acesso e a utilização da plataforma implicam a aceitação integral e
