@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { maintenanceConfig } from "@/config/maintenance";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +19,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   if (session) {
-    navigate("/dashboard", { replace: true });
+    navigate(
+      maintenanceConfig.enabled ? maintenanceConfig.redirectPath : "/dashboard",
+      { replace: true }
+    );
     return null;
   }
 
@@ -30,7 +34,9 @@ export default function LoginPage() {
     if (error) {
       toast.error("Credenciais inválidas. Verifique seu e-mail e senha.");
     } else {
-      navigate("/dashboard");
+      navigate(
+        maintenanceConfig.enabled ? maintenanceConfig.redirectPath : "/dashboard"
+      );
     }
   };
 
