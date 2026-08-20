@@ -40,6 +40,14 @@ const App = () => (
             <Route path="/dashboard" element={<Navigate to="/home" replace />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
+            <Route
+              path={maintenanceConfig.redirectPath}
+              element={
+                <ProtectedRoute>
+                  <TemporaryRedirectPage />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/pesquisa/:code" element={<PublicSurveyPage />} />
             <Route path="/verificar/:code" element={<CertificateVerifyPage />} />
             <Route path="/politica-de-privacidade" element={<PoliticaPrivacidadePage />} />
