@@ -5,6 +5,7 @@ import { maintenanceConfig } from "@/config/maintenance";
 
 export default function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { session, loading, isAdmin, profile } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return <LoadingScreen persistent />;
@@ -15,6 +16,10 @@ export default function ProtectedRoute({ children, adminOnly = false }: { childr
   // Wait for profile to be loaded before rendering content
   if (!profile) {
     return <LoadingScreen persistent />;
+  }
+
+  if (maintenanceConfig.enabled && location.pathname !== maintenanceConfig.redirectPath) {
+    return <Navigate to={maintenanceConfig.redirectPath} replace />;
   }
 
   if (adminOnly && !isAdmin) return <Navigate to="/dashboard" replace />;
