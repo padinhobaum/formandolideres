@@ -41,15 +41,15 @@ export default function LeaderSimplePage() {
       </header>
 
       <main className="flex-1 w-full max-w-2xl mx-auto px-4 sm:px-6 pb-10 space-y-6">
-        <section className="flex flex-col items-center text-center gap-3 pt-2">
-          <Avatar className="w-24 h-24 ring-4 ring-primary/10">
+        <section className="flex items-center gap-4 pt-2">
+          <Avatar className="w-20 h-20 shrink-0 ring-4 ring-primary/10">
             <AvatarImage src={profile?.avatar_url || undefined} />
             <AvatarFallback className="text-xl font-body font-semibold bg-primary text-primary-foreground">
               {initials}
             </AvatarFallback>
           </Avatar>
-          <div>
-            <h1 className="font-heading font-bold text-2xl sm:text-3xl leading-tight text-primary">
+          <div className="min-w-0">
+            <h1 className="font-heading font-bold text-xl sm:text-3xl leading-tight text-primary truncate">
               {profile?.full_name}
             </h1>
             {profile?.class_name && (
