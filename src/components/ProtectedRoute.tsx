@@ -2,6 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import LoadingScreen from "@/components/LoadingScreen";
 import { maintenanceConfig } from "@/config/maintenance";
+import { leaderSimpleViewConfig } from "@/config/leaderView";
 
 export default function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { session, loading, isAdmin, profile } = useAuth();
@@ -23,6 +24,16 @@ export default function ProtectedRoute({ children, adminOnly = false }: { childr
   }
 
   if (adminOnly && !isAdmin) return <Navigate to="/dashboard" replace />;
+
+  // Temporary simplified view for leaders: only climate + own results
+  if (
+    leaderSimpleViewConfig.enabled &&
+    !isAdmin &&
+    location.pathname !== leaderSimpleViewConfig.path &&
+    location.pathname !== "/meus-resultados"
+  ) {
+    return <Navigate to={leaderSimpleViewConfig.path} replace />;
+  }
 
   return <>{children}</>;
 }
