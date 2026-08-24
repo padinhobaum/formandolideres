@@ -64,7 +64,7 @@ export default function LoginPage() {
           style={{ backgroundImage: `url(${garotoAsset.url})` }}
         />
         {/* Blue gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/92 via-[hsl(207,100%,22%)]/88 to-accent/86" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/95 via-[hsl(207,100%,24%)]/95 to-[hsl(207,100%,18%)]/95" />
 
         {/* Decorative circles - floating animation */}
         <div className="absolute top-[-10%] right-[-10%] w-[50%] aspect-square rounded-full bg-primary-foreground/5 animate-[float_8s_ease-in-out_infinite]" />
