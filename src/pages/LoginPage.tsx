@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
+import garotoAsset from "@/assets/Garoto_usando_iPad.png.asset.json";
 import PWAInstallBanner from "@/components/PWAInstallBanner";
 
 export default function LoginPage() {
@@ -56,7 +57,15 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left side - Branding (desktop only) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-[hsl(207,100%,22%)] to-accent relative overflow-hidden flex-col items-center justify-center p-12">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col items-center justify-center p-12">
+        {/* Background image */}
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{ backgroundImage: `url(${garotoAsset.url})` }}
+        />
+        {/* Blue gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/92 via-[hsl(207,100%,22%)]/88 to-accent/86" />
+
         {/* Decorative circles - floating animation */}
         <div className="absolute top-[-10%] right-[-10%] w-[50%] aspect-square rounded-full bg-primary-foreground/5 animate-[float_8s_ease-in-out_infinite]" />
         <div className="absolute bottom-[-15%] left-[-10%] w-[60%] aspect-square rounded-full bg-primary-foreground/5 animate-[float_10s_ease-in-out_infinite_reverse]" />
