@@ -37,20 +37,20 @@ export default function LeaderSimplePage() {
       <header className="bg-white border-b shadow-sm">
         <div style={{ paddingTop: "env(safe-area-inset-top)" }} />
         <div className="px-6 py-5 flex justify-center">
-          <img src={logoFl.url} alt="Formando Líderes" className="h-14 sm:h-20 w-auto" />
+          <img src={logoFl.url} alt="Formando Líderes" className="h-14 sm:h-16 w-auto" />
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-2xl mx-auto px-4 sm:px-6 pt-6 pb-10 space-y-6">
-        <section className="flex flex-col items-center text-center gap-3 sm:flex-row sm:items-center sm:text-left sm:gap-4">
-          <Avatar className="w-20 h-20 shrink-0 ring-4 ring-primary/10">
+      <main className="flex-1 w-full max-w-2xl mx-auto px-4 sm:px-6 pt-10 pb-10 space-y-8">
+        <section className="flex flex-row items-center justify-center gap-4 sm:gap-6 sm:justify-start text-left">
+          <Avatar className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 ring-4 ring-primary/10">
             <AvatarImage src={profile?.avatar_url || undefined} />
             <AvatarFallback className="text-xl font-body font-semibold bg-primary text-primary-foreground">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0">
-            <h1 className="font-heading font-bold text-xl sm:text-3xl leading-tight text-primary truncate">
+            <h1 className="font-heading font-bold text-xl sm:text-3xl leading-tight text-primary">
               {profile?.full_name}
             </h1>
             {profile?.class_name && (

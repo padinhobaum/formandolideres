@@ -14,8 +14,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        heading: ['Rawline', 'sans-serif'],
-        body: ['"Helvetica Neue"', 'Helvetica', 'Arial', 'sans-serif'],
+        heading: ['Ubuntu', 'sans-serif'],
+        body: ['Ubuntu', 'sans-serif'],
+        sans: ['Ubuntu', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

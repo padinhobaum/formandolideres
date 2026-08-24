@@ -11,6 +11,7 @@ import NotificationPopover from "@/components/NotificationPopover";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 import { usePushSubscription } from "@/hooks/usePushSubscription";
 import { useEditalConfig } from "@/hooks/useEditalConfig";
+import sidebarLogo from "@/assets/logo-fl-full.png.asset.json";
 
 
 interface NavItem {
@@ -145,11 +146,11 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
     <div className="min-h-screen flex flex-col md:flex-row md:pl-72">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex fixed inset-y-0 left-0 z-40 w-72 flex-col border-r bg-sidebar text-sidebar-foreground">
-        <div className="p-4 border-b border-sidebar-border flex items-center justify-center group cursor-pointer">
+        <div className="p-5 border-b border-sidebar-border flex items-center justify-center group cursor-pointer">
           <img
             alt="Formando Líderes"
-            src="/lovable-uploads/bfd69f6a-f0cc-4d2a-80c7-be444a67f5d9.png"
-            className="h-14 w-auto brightness-0 invert transition-transform duration-500 ease-out group-hover:scale-110"
+            src={sidebarLogo.url}
+            className="h-12 w-auto transition-transform duration-500 ease-out group-hover:scale-110"
           />
         </div>
 
@@ -192,10 +193,11 @@ export default function AppLayout({ children }: {children: ReactNode;}) {
               href={link.url}
               target={isExternal(link.url) ? "_blank" : "_self"}
               rel={isExternal(link.url) ? "noopener noreferrer" : undefined}
-              className="w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body transition-colors text-sidebar-foreground/70 hover:text-sidebar-foreground bg-secondary-foreground rounded-xl">
+              className="w-full flex items-center gap-3 px-3 py-2.5 mb-1 text-sm font-body transition-colors text-primary-foreground/90 hover:text-primary-foreground bg-secondary-foreground rounded-xl">
               
                   {link.icon_url ?
-              <img src={link.icon_url} alt="" className="w-[20px] h-[20px] object-contain brightness-0 invert" /> :
+              <img src={link.icon_url} alt="" className="w-[20px] h-[20px] object-contain" /> :
+
 
               <ExternalLink className="w-[20px] h-[20px]" strokeWidth={1.5} />
               }
