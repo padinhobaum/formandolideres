@@ -1845,6 +1845,7 @@ export type Database = {
       }
       calculate_level: { Args: { xp: number }; Returns: number }
       complete_video_lesson: { Args: { _lesson_id: string }; Returns: Json }
+      get_admin_user_ids: { Args: never; Returns: string[] }
       get_week_start: { Args: { _d?: string }; Returns: string }
       has_role: {
         Args: {
