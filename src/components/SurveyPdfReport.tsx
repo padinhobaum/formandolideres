@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { FileDown, Loader2 } from "lucide-react";
 import liceuLogoAsset from "@/assets/liceu-jardim.png.asset.json";
+import bornToLeadAsset from "@/assets/born-to-lead.png.asset.json";
 
 export default function SurveyPdfReport() {
   const [generating, setGenerating] = useState(false);
@@ -216,6 +217,7 @@ export default function SurveyPdfReport() {
 
       const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
       const logoLiceuUrl = window.location.origin + liceuLogoAsset.url;
+      const logoBornToLeadUrl = window.location.origin + bornToLeadAsset.url;
 
       const html = `<html>
 <head>
@@ -275,6 +277,7 @@ export default function SurveyPdfReport() {
     <!-- Footer -->
     <div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:10px;display:flex;justify-content:space-between;align-items:center;">
       <p style="font-size:10px;color:#94a3b8;">© ${new Date().getFullYear()} Formando Líderes — Todos os direitos reservados.</p>
+      <img src="${logoBornToLeadUrl}" alt="Born to Lead" style="height:28px;" crossorigin="anonymous" />
       <p style="font-size:10px;color:#94a3b8;">www.formandolideres.org</p>
     </div>
   </div>
