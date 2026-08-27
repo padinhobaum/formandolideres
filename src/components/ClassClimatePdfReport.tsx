@@ -193,11 +193,8 @@ export default function ClassClimatePdfReport({ week, weekLabel, current, previo
 </head>
 <body>
   <div class="page-footer">
-    <p>© ${new Date().getFullYear()} Formando Líderes — Todos os direitos reservados.</p>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <p style="font-size:10px;color:#94a3b8;">Relatório Clima das Turmas — ${weekLabel}</p>
-      <img src="${logoBornToLeadUrl}" alt="Born to Lead" style="height:28px;" crossorigin="anonymous" />
-    </div>
+    <img src="${logoBornToLeadUrl}" alt="Born to Lead" style="height:22px;" crossorigin="anonymous" />
+    <p style="flex:1;text-align:center;">© ${new Date().getFullYear()} Formando Líderes — Todos os direitos reservados.</p>
     <p>www.formandolideres.org</p>
   </div>
 
@@ -205,7 +202,7 @@ export default function ClassClimatePdfReport({ week, weekLabel, current, previo
     <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #003d7a;padding-bottom:14px;margin-bottom:20px;">
       <div style="display:flex;align-items:center;gap:16px;">
         <img src="${logoFormandoUrl}" alt="Formando Líderes" style="height:48px;" crossorigin="anonymous" />
-        <img src="${logoLiceuUrl}" alt="Liceu Jardim" style="height:56px;" crossorigin="anonymous" />
+        <img src="${logoLiceuUrl}" alt="Liceu Jardim" style="height:48px;" crossorigin="anonymous" />
       </div>
       <div style="flex:1;margin-left:24px;">
         <h1 style="font-size:22px;font-weight:700;color:#003d7a;margin:0;">Relatório Clima das Turmas</h1>
