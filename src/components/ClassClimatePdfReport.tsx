@@ -194,7 +194,10 @@ export default function ClassClimatePdfReport({ week, weekLabel, current, previo
 <body>
   <div class="page-footer">
     <p>© ${new Date().getFullYear()} Formando Líderes — Todos os direitos reservados.</p>
-    <p>Relatório Clima das Turmas — ${weekLabel}</p>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <p style="font-size:10px;color:#94a3b8;">Relatório Clima das Turmas — ${weekLabel}</p>
+      <img src="${logoBornToLeadUrl}" alt="Born to Lead" style="height:28px;" crossorigin="anonymous" />
+    </div>
     <p>www.formandolideres.org</p>
   </div>
 
