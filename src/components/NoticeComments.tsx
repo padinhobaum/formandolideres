@@ -46,16 +46,16 @@ export default function NoticeComments({ noticeId }: { noticeId: string }) {
     // Fetch admin role flags for authors
     const authorIds = Array.from(new Set(list.map((c) => c.author_id)));
     if (authorIds.length > 0) {
-      const { data: roles } = await supabase
-        .from("user_roles")
-        .select("user_id, role")
-        .in("user_id", authorIds)
-        .eq("role", "admin");
-      setAdminIds(new Set((roles || []).map((r: any) => r.user_id)));
+      const { data: admins } = await (supabase as any).rpc("get_admin_user_ids");
+      const adminSet = new Set(
+        ((admins || []) as any[]).map((r: any) => (typeof r === "string" ? r : r.user_id))
+      );
+      setAdminIds(new Set(authorIds.filter((id) => adminSet.has(id))));
     } else {
       setAdminIds(new Set());
     }
   };
+
 
   useEffect(() => {
     fetchComments();

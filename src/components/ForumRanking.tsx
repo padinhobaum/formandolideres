@@ -18,12 +18,10 @@ export default function ForumRanking() {
 
   useEffect(() => {
     const fetch = async () => {
-      // Get admin user IDs to exclude
-      const { data: adminRoles } = await supabase
-        .from("user_roles")
-        .select("user_id")
-        .eq("role", "admin");
-      const adminIds = new Set((adminRoles || []).map((r: any) => r.user_id));
+      // Get admin user IDs to exclude (via secure RPC, roles table is private)
+      const { data: adminRoles } = await (supabase as any).rpc("get_admin_user_ids");
+      const adminIds = new Set(((adminRoles || []) as any[]).map((r: any) => (typeof r === "string" ? r : r.user_id)));
+
 
       const { data: xpRows } = await supabase
         .from("user_xp")

@@ -8,7 +8,7 @@ Updated: today
 - **Aesthetics**: 'Playful-educational' design. Circular avatars, fade/slide animations, full-width layouts, custom green scrollbar (#1a5632).
 - **Typography**: Rawline for web body text (larger on mobile), Ubuntu for PDF documents. No custom OS cursors.
 - **Mobile Safe Areas**: Always use `env(safe-area-inset-top)` and `env(safe-area-inset-bottom)` to prevent notch/gesture overlap.
-- **Security**: Strict RLS. Admins only for `students` view and `materials` bucket. `user_roles` is globally readable.
+- **Security**: Strict RLS. Admins only for `students` view e bucket `materials` (privado). `user_roles`: leitura só do próprio papel + admins; use a função `get_admin_user_ids()` para selos/ranking.
 - **Tech Stack**: Vite PWA plugin. Supabase Realtime Channels for instant user presence sync (no polling).
 - **Roles**: Gamification (XP, ranking, levels) is strictly disabled for Admin accounts.
 - **Avatars**: Always circular, globally used, with initials fallback.
