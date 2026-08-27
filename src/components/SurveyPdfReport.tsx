@@ -235,7 +235,7 @@ export default function SurveyPdfReport() {
     <div style="display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid #003d7a;padding-bottom:14px;margin-bottom:20px;">
       <div style="display:flex;align-items:center;gap:16px;">
         <img src="${logoFormandoUrl}" alt="Formando Líderes" style="height:48px;" crossorigin="anonymous" />
-        <img src="${logoLiceuUrl}" alt="Liceu Jardim" style="height:56px;" crossorigin="anonymous" />
+        <img src="${logoLiceuUrl}" alt="Liceu Jardim" style="height:48px;" crossorigin="anonymous" />
       </div>
       <div style="flex:1;margin-left:24px;">
         <h1 style="font-size:22px;font-weight:700;color:#003d7a;margin:0;text-align:left;">Relatório Consolidado</h1>
