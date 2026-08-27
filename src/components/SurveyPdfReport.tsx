@@ -275,9 +275,9 @@ export default function SurveyPdfReport() {
     ${commentsHtml}
 
     <!-- Footer -->
-    <div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:10px;display:flex;justify-content:space-between;align-items:center;">
-      <p style="font-size:10px;color:#94a3b8;">© ${new Date().getFullYear()} Formando Líderes — Todos os direitos reservados.</p>
-      <img src="${logoBornToLeadUrl}" alt="Born to Lead" style="height:28px;" crossorigin="anonymous" />
+    <div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:16px;">
+      <img src="${logoBornToLeadUrl}" alt="Born to Lead" style="height:22px;" crossorigin="anonymous" />
+      <p style="font-size:10px;color:#94a3b8;flex:1;text-align:center;">© ${new Date().getFullYear()} Formando Líderes — Todos os direitos reservados.</p>
       <p style="font-size:10px;color:#94a3b8;">www.formandolideres.org</p>
     </div>
   </div>
