@@ -178,13 +178,17 @@ export default function ForumPage() {
         return;
       }
 
-      const [profilesRes, rolesRes] = await Promise.all([
+      const [profilesRes, adminsRes] = await Promise.all([
         supabase.from("profiles").select("user_id, full_name, avatar_url, class_name").in("user_id", userIds),
-        supabase.from("user_roles").select("user_id, role").in("user_id", userIds),
+        (supabase as any).rpc("get_admin_user_ids"),
       ]);
 
       const rolesMap: Record<string, string> = {};
-      rolesRes.data?.forEach((r: any) => { rolesMap[r.user_id] = r.role; });
+      ((adminsRes.data || []) as any[]).forEach((r: any) => {
+        const id = typeof r === "string" ? r : r.user_id;
+        rolesMap[id] = "admin";
+      });
+
 
       setOnlineUsers(
         (profilesRes.data || []).map((p: any) => ({
