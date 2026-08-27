@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import liceuLogoAsset from "@/assets/liceu-jardim.png.asset.json";
+import ClassClimatePdfReport from "@/components/ClassClimatePdfReport";
 
 const MOOD_META: Record<number, { emoji: string; label: string; color: string }> = {
   1: { emoji: "😢", label: "Muito ruim", color: "bg-red-500" },
@@ -167,9 +168,13 @@ export default function AdminClassClimate() {
             </Button>
           )}
         </div>
-        <Button onClick={() => window.print()} variant="outline" size="sm" className="gap-1.5 rounded-xl">
-          <Printer className="w-4 h-4" /> Imprimir / PDF
-        </Button>
+        <ClassClimatePdfReport
+          week={week}
+          weekLabel={fmtRange(week)}
+          current={current}
+          previous={previous}
+          insights={insights}
+        />
       </div>
 
       {/* Print header */}
