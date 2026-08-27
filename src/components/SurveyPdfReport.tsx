@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { FileDown, Loader2 } from "lucide-react";
 import liceuLogoAsset from "@/assets/liceu-jardim.png.asset.json";
+import bornToLeadAsset from "@/assets/born-to-lead.png.asset.json";
 
 export default function SurveyPdfReport() {
   const [generating, setGenerating] = useState(false);
