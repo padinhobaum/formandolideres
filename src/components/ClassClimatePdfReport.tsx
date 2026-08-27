@@ -169,6 +169,7 @@ export default function ClassClimatePdfReport({ week, weekLabel, current, previo
 
       const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
       const logoLiceuUrl = window.location.origin + liceuLogoAsset.url;
+      const logoBornToLeadUrl = window.location.origin + bornToLeadAsset.url;
 
       const html = `<html>
 <head>
