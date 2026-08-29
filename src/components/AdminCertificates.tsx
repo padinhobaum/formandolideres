@@ -113,7 +113,7 @@ export default function AdminCertificates() {
     `).join("");
 
     const liceuLogoHtml = cert.show_liceu_logo ? `
-      <img src="${window.location.origin}/lovable-uploads/logolj-2.webp" alt="Liceu Jardim" style="height:50px;" crossorigin="anonymous" />
+      <img src="${window.location.origin}/__l5e/assets-v1/b1dfc205-a056-4888-ba0c-6d52a91ab9bf/liceu-jardim.png" alt="Liceu Jardim" style="height:50px;" crossorigin="anonymous" />
     ` : '';
 
     const html = `<html>
@@ -307,7 +307,7 @@ export default function AdminCertificates() {
               <div className="flex items-center justify-center gap-4">
                 <img src="/lovable-uploads/footer-logo.png" alt="Formando Líderes" className="h-12" />
                 {previewCert.show_liceu_logo && (
-                  <img src="/lovable-uploads/logolj-2.webp" alt="Liceu Jardim" className="h-10" />
+                  <img src="/__l5e/assets-v1/b1dfc205-a056-4888-ba0c-6d52a91ab9bf/liceu-jardim.png" alt="Liceu Jardim" className="h-10" />
                 )}
               </div>
               <h3 className="font-heading font-black text-2xl text-primary italic underline underline-offset-4 decoration-2">{previewCert.title.toUpperCase()}</h3>
