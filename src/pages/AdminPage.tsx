@@ -160,6 +160,7 @@ export default function AdminPage() {
             {tab === "surveys" && <AdminSurveys />}
             {tab === "edital" && <AdminEdital />}
             {tab === "climate" && <AdminClassClimate />}
+            {tab === "ranking" && <AdminLeaderRanking />}
           </div>
         </div>
       </div>
