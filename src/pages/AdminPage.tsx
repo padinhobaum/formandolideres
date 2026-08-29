@@ -22,8 +22,9 @@ import AdminVideoLessons from "@/components/admin/AdminVideoLessons";
 
 import AdminEdital from "@/components/AdminEdital";
 import AdminClassClimate from "@/components/AdminClassClimate";
+import AdminLeaderRanking from "@/components/AdminLeaderRanking";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate";
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate" | "ranking";
 
 interface CtaButton {
   text: string;
