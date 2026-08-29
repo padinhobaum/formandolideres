@@ -43,6 +43,7 @@ const tabGroups = [
       { key: "surveys" as Tab, label: "Pesquisas", icon: ClipboardList, desc: "Pesquisas de opinião" },
       { key: "edital" as Tab, label: "Edital", icon: ClipboardList, desc: "Edital de Propostas" },
       { key: "climate" as Tab, label: "Clima da Turma", icon: CheckCircle, desc: "Relatório semanal de clima" },
+      { key: "ranking" as Tab, label: "Ranking de Líderes", icon: Trophy, desc: "XP, clima e aprovação por líder" },
     ],
   },
   {
