@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   Trash2, Plus, ExternalLink, Image as ImageIcon, Pencil, Eye, EyeOff, ChevronDown, ChevronUp, Pin, Video, Radio,
   Megaphone, LayoutDashboard, Users, Link2, Tag, KeyRound, MonitorPlay, ImageIcon as BannerIcon,
-  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList, CheckCircle,
+  FileText, Search, ToggleLeft, ToggleRight, Info, CalendarDays, ClipboardList, CheckCircle, Trophy,
 } from "lucide-react";
 import RichTextEditor from "@/components/RichTextEditor";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,8 +22,9 @@ import AdminVideoLessons from "@/components/admin/AdminVideoLessons";
 
 import AdminEdital from "@/components/AdminEdital";
 import AdminClassClimate from "@/components/AdminClassClimate";
+import AdminLeaderRanking from "@/components/AdminLeaderRanking";
 
-type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate";
+type Tab = "notices" | "banners" | "lives" | "materials" | "videos" | "forum-categories" | "links" | "users" | "password" | "events" | "surveys" | "edital" | "climate" | "ranking";
 
 interface CtaButton {
   text: string;
@@ -42,6 +43,7 @@ const tabGroups = [
       { key: "surveys" as Tab, label: "Pesquisas", icon: ClipboardList, desc: "Pesquisas de opinião" },
       { key: "edital" as Tab, label: "Edital", icon: ClipboardList, desc: "Edital de Propostas" },
       { key: "climate" as Tab, label: "Clima da Turma", icon: CheckCircle, desc: "Relatório semanal de clima" },
+      { key: "ranking" as Tab, label: "Ranking de Líderes", icon: Trophy, desc: "XP, clima e aprovação por líder" },
     ],
   },
   {
@@ -158,6 +160,7 @@ export default function AdminPage() {
             {tab === "surveys" && <AdminSurveys />}
             {tab === "edital" && <AdminEdital />}
             {tab === "climate" && <AdminClassClimate />}
+            {tab === "ranking" && <AdminLeaderRanking />}
           </div>
         </div>
       </div>
