@@ -4,6 +4,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
   Heart, TrendingUp, TrendingDown, Minus, ChevronLeft, ChevronRight, Printer, Download, Users, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -57,6 +65,7 @@ export default function AdminClassClimate() {
   const [previous, setPrevious] = useState<Response[]>([]);
   const [leaderNames, setLeaderNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [selectedClassName, setSelectedClassName] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -151,6 +160,18 @@ export default function AdminClassClimate() {
 
     return list;
   }, [stats]);
+
+  const selectedClass = useMemo(
+    () => stats.sortedClasses.find((c) => c.name === selectedClassName) || null,
+    [stats.sortedClasses, selectedClassName]
+  );
+
+  const selectedResponses = useMemo(() => {
+    if (!selectedClass) return [];
+    return current
+      .filter((r) => r.class_name === selectedClass.name)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [selectedClass, current]);
 
   const navigateWeek = (offset: number) => {
     const next = new Date(week);
@@ -290,7 +311,19 @@ export default function AdminClassClimate() {
               {stats.sortedClasses.map(c => {
                 const meta = MOOD_META[Math.round(c.avg)] || MOOD_META[3];
                 return (
-                  <Card key={c.name}>
+                  <Card
+                    key={c.name}
+                    className="cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                    onClick={() => setSelectedClassName(c.name)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        setSelectedClassName(c.name);
+                      }
+                    }}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between mb-2">
                         <div>
@@ -322,12 +355,122 @@ export default function AdminClassClimate() {
                           )}
                         </div>
                       )}
+                      <div className="mt-2 text-[10px] text-primary/70 font-medium text-right">
+                        Clique para ver completo
+                      </div>
                     </CardContent>
                   </Card>
                 );
               })}
             </div>
           </div>
+
+          <Dialog open={!!selectedClassName} onOpenChange={(open) => !open && setSelectedClassName(null)}>
+            <DialogContent className="max-w-2xl w-[calc(100%-2rem)] max-h-[85vh] p-0 overflow-hidden">
+              {selectedClass && (
+                <>
+                  <DialogHeader className="px-6 pt-6 pb-2">
+                    <DialogTitle>Resposta da turma {selectedClass.name}</DialogTitle>
+                    <DialogDescription>
+                      {fmtRange(week)} • {selectedClass.count} resposta(s)
+                    </DialogDescription>
+                  </DialogHeader>
+                  <ScrollArea className="max-h-[calc(85vh-180px)] px-6 pb-6">
+                    <div className="space-y-5">
+                      <div className="grid grid-cols-3 gap-3">
+                        <Card>
+                          <CardContent className="p-3">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1">Respostas</p>
+                            <p className="font-heading font-bold text-2xl">{selectedClass.count}</p>
+                          </CardContent>
+                        </Card>
+                        <Card>
+                          <CardContent className="p-3">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1">Média</p>
+                            <p className="font-heading font-bold text-2xl flex items-center gap-1.5">
+                              {selectedClass.avg.toFixed(1)}
+                              <span className="text-xl">{meta.emoji}</span>
+                            </p>
+                            {selectedClass.delta !== null && (
+                              <p className="text-[10px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
+                                {trendIcon(selectedClass.delta)}
+                                <span>{selectedClass.delta > 0 ? "+" : ""}{selectedClass.delta.toFixed(1)} vs semana anterior</span>
+                              </p>
+                            )}
+                          </CardContent>
+                        </Card>
+                        <Card>
+                          <CardContent className="p-3">
+                            <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-2">Distribuição</p>
+                            <div className="flex items-end gap-1 h-10">
+                              {[1, 2, 3, 4, 5].map(s => {
+                                const v = selectedResponses.filter(r => r.mood_score === s).length;
+                                const max = Math.max(selectedResponses.length, 1);
+                                const h = (v / max) * 100;
+                                return (
+                                  <div key={s} className="flex-1 flex flex-col items-center gap-0.5">
+                                    <div className={cn("w-full rounded-t transition-all", MOOD_META[s].color)} style={{ height: `${h}%`, minHeight: v > 0 ? "3px" : "0" }} />
+                                    <span className="text-[9px]">{MOOD_META[s].emoji}</span>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </div>
+
+                      <div>
+                        <h4 className="font-heading font-bold text-sm mb-2 flex items-center gap-2">
+                          <Users className="w-4 h-4" /> Respostas individuais
+                        </h4>
+                        {selectedResponses.length === 0 ? (
+                          <p className="text-sm text-muted-foreground">Nenhuma resposta individual encontrada.</p>
+                        ) : (
+                          <div className="space-y-3">
+                            {selectedResponses.map((r) => {
+                              const mood = MOOD_META[r.mood_score] || MOOD_META[3];
+                              const author = leaderNames[r.user_id] || "Líder";
+                              const date = new Date(r.created_at).toLocaleDateString("pt-BR", {
+                                day: "2-digit",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              });
+                              return (
+                                <Card key={r.id} className="bg-secondary/30 border-0">
+                                  <CardContent className="p-3">
+                                    <div className="flex items-center justify-between mb-1.5">
+                                      <div className="flex items-center gap-2">
+                                        <span className="text-xl">{mood.emoji}</span>
+                                        <div>
+                                          <p className="font-heading font-bold text-sm">{author}</p>
+                                          <p className="text-[10px] text-muted-foreground">{date}</p>
+                                        </div>
+                                      </div>
+                                      <Badge variant="secondary" className="font-heading font-bold">
+                                        {r.mood_score}/5
+                                      </Badge>
+                                    </div>
+                                    {r.comment?.trim() ? (
+                                      <p className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90">
+                                        {r.comment.trim()}
+                                      </p>
+                                    ) : (
+                                      <p className="text-sm italic text-muted-foreground">Sem comentário escrito.</p>
+                                    )}
+                                  </CardContent>
+                                </Card>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </ScrollArea>
+                </>
+              )}
+            </DialogContent>
+          </Dialog>
         </>
       )}
     </div>
