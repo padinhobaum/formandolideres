@@ -184,19 +184,50 @@ export default function ClassClimatePdfReport({ week, weekLabel, current, previo
           </ul>
         </div>` : "";
 
+      const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+      const listBlock = (title: string, items: string[] | undefined, color: string) =>
+        items && items.length > 0
+          ? `<div style="margin-top:10px;">
+               <p style="font-size:11px;font-weight:700;color:${color};margin:0 0 4px;">${title}</p>
+               <ul style="margin:0;padding-left:16px;">
+                 ${items.map((i) => `<li style="font-size:11px;color:#334155;line-height:1.6;">${esc(i)}</li>`).join("")}
+               </ul>
+             </div>`
+          : "";
+
+      const aiHtml = ai && (ai.resumo || ai.acoes?.length)
+        ? `<div style="margin-top:20px;border:1px solid #bae6fd;border-radius:12px;padding:20px;background:#f8fbff;break-inside:avoid;">
+             <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+               <span style="background:#003d7a;color:#fff;font-size:9px;font-weight:700;padding:3px 8px;border-radius:10px;letter-spacing:0.5px;">Resumo por IA</span>
+               <h3 style="font-size:14px;font-weight:700;color:#003d7a;margin:0;">Resumo das Respostas Escritas</h3>
+             </div>
+             ${ai.resumo ? `<p style="font-size:12px;color:#334155;line-height:1.7;margin:0;">${esc(ai.resumo)}</p>` : ""}
+             <div style="display:flex;gap:20px;flex-wrap:wrap;">
+               <div style="flex:1 1 260px;">
+                 ${listBlock("Temas recorrentes", ai.temas, "#003d7a")}
+                 ${listBlock("Pontos de atenção", ai.pontos_atencao, "#b45309")}
+               </div>
+               <div style="flex:1 1 260px;">
+                 ${listBlock("Ações recomendadas ao gestor", ai.acoes, "#047857")}
+               </div>
+             </div>
+           </div>`
+        : "";
+
       const commentBlocks = classes.filter((c) => c.comments.length > 0);
       const commentsHtml = commentBlocks.length > 0 ? `
         <div style="margin-top:24px;">
           <h3 style="font-size:14px;font-weight:700;color:#003d7a;margin:0 0 12px;">Comentários dos Líderes</h3>
-          ${commentBlocks.map((c) => `
-            <div style="margin-bottom:12px;break-inside:avoid;">
-              <p style="font-size:11px;font-weight:700;color:#003d7a;margin:0 0 6px;">${c.name}</p>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          <div style="column-count:2;column-gap:20px;">
+            ${commentBlocks.map((c) => `
+              <div style="margin-bottom:12px;break-inside:avoid;">
+                <p style="font-size:11px;font-weight:700;color:#003d7a;margin:0 0 6px;">${c.name}</p>
                 ${c.comments.slice(0, 12).map((cm) => `
-                  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:11px;color:#334155;line-height:1.5;flex:1 1 280px;max-width:48%;">"${cm}"</div>
+                  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:11px;color:#334155;line-height:1.5;margin-bottom:6px;break-inside:avoid;">"${esc(cm)}"</div>
                 `).join("")}
-              </div>
-            </div>`).join("")}
+              </div>`).join("")}
+          </div>
         </div>` : "";
 
       const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
