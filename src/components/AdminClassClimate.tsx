@@ -95,12 +95,12 @@ export default function AdminClassClimate() {
     const distribution: Record<number, number> = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
     current.forEach(r => { distribution[r.mood_score] = (distribution[r.mood_score] || 0) + 1; });
 
-    const byClass: Record<string, { count: number; sum: number; avg: number; comments: string[] }> = {};
+    const byClass: Record<string, { count: number; sum: number; avg: number; comments: { author: string; text: string }[] }> = {};
     current.forEach(r => {
       if (!byClass[r.class_name]) byClass[r.class_name] = { count: 0, sum: 0, avg: 0, comments: [] };
       byClass[r.class_name].count += 1;
       byClass[r.class_name].sum += r.mood_score;
-      if (r.comment) byClass[r.class_name].comments.push(r.comment);
+      if (r.comment?.trim()) byClass[r.class_name].comments.push({ author: leaderNames[r.user_id] || "Líder", text: r.comment.trim() });
     });
     Object.values(byClass).forEach(v => { v.avg = v.count > 0 ? v.sum / v.count : 0; });
 
@@ -122,7 +122,7 @@ export default function AdminClassClimate() {
       .sort((a, b) => b.avg - a.avg);
 
     return { total, avg, distribution, sortedClasses, classCount: sortedClasses.length };
-  }, [current, previous]);
+  }, [current, previous, leaderNames]);
 
   // Insights automáticos (sem IA)
   const insights = useMemo(() => {
@@ -186,6 +186,7 @@ export default function AdminClassClimate() {
           current={current}
           previous={previous}
           insights={insights}
+          leaderNames={leaderNames}
         />
       </div>
 
@@ -312,7 +313,9 @@ export default function AdminClassClimate() {
                       {c.comments.length > 0 && (
                         <div className="mt-2 pt-2 border-t space-y-1">
                           {c.comments.slice(0, 3).map((cm, i) => (
-                            <p key={i} className="text-xs italic text-muted-foreground line-clamp-2">"{cm}"</p>
+                            <p key={i} className="text-xs italic text-muted-foreground line-clamp-2">
+                              "{cm.text}" <span className="not-italic font-semibold text-foreground/70">— {cm.author} ({c.name})</span>
+                            </p>
                           ))}
                           {c.comments.length > 3 && (
                             <p className="text-[10px] text-muted-foreground">+ {c.comments.length - 3} comentário(s)</p>
