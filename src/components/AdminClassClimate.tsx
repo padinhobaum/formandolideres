@@ -55,6 +55,7 @@ export default function AdminClassClimate() {
   const [week, setWeek] = useState<Date>(() => isoWeekStart(new Date()));
   const [current, setCurrent] = useState<Response[]>([]);
   const [previous, setPrevious] = useState<Response[]>([]);
+  const [leaderNames, setLeaderNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -68,9 +69,20 @@ export default function AdminClassClimate() {
         supabase.from("class_climate_responses").select("*").eq("week_start", wIso),
         supabase.from("class_climate_responses").select("*").eq("week_start", pIso),
       ]);
+      const curRows = (cur.data || []) as Response[];
+      const prevRows = (prev.data || []) as Response[];
+      const ids = [...new Set([...curRows, ...prevRows].map((r) => r.user_id))];
+      let names: Record<string, string> = {};
+      if (ids.length > 0) {
+        const { data: profs } = await supabase.from("profiles").select("id, name").in("id", ids);
+        (profs || []).forEach((p: { id: string; name: string | null }) => {
+          if (p.name) names[p.id] = p.name;
+        });
+      }
       if (!cancelled) {
-        setCurrent((cur.data || []) as Response[]);
-        setPrevious((prev.data || []) as Response[]);
+        setCurrent(curRows);
+        setPrevious(prevRows);
+        setLeaderNames(names);
         setLoading(false);
       }
     })();
