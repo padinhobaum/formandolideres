@@ -298,6 +298,7 @@ export default function ClassClimatePdfReport({ week, weekLabel, current, previo
     </table>
 
     ${insightsHtml}
+    ${aiHtml}
     ${commentsHtml}
   </div>
 </body>
