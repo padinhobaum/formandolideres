@@ -65,6 +65,7 @@ export default function AdminClassClimate() {
   const [previous, setPrevious] = useState<Response[]>([]);
   const [leaderNames, setLeaderNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [selectedClassName, setSelectedClassName] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
