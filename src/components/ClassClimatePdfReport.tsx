@@ -34,16 +34,47 @@ const MOOD = {
 const moodOf = (avg: number) =>
   avg >= 4.5 ? MOOD[5] : avg >= 3.5 ? MOOD[4] : avg >= 2.5 ? MOOD[3] : avg >= 1.5 ? MOOD[2] : MOOD[1];
 
+interface AiSummary {
+  resumo?: string;
+  temas?: string[];
+  pontos_atencao?: string[];
+  acoes?: string[];
+}
+
 export default function ClassClimatePdfReport({ week, weekLabel, current, previous, insights }: Props) {
   const [generating, setGenerating] = useState(false);
 
-  const generatePdf = () => {
+  const fetchAiSummary = async (): Promise<AiSummary | null> => {
+    const comments = current
+      .filter((r) => r.comment?.trim())
+      .map((r) => ({ class_name: r.class_name, mood_score: r.mood_score, comment: r.comment!.trim() }));
+    if (comments.length === 0) return null;
+    try {
+      const { data, error } = await supabase.functions.invoke("climate-summary", {
+        body: {
+          weekLabel,
+          total: current.length,
+          average: current.reduce((s, r) => s + r.mood_score, 0) / current.length,
+          comments,
+        },
+      });
+      if (error) throw error;
+      return (data?.summary as AiSummary) ?? null;
+    } catch (err) {
+      console.error("climate-summary", err);
+      toast.warning("Não foi possível gerar o resumo com IA. O relatório será gerado sem ele.");
+      return null;
+    }
+  };
+
+  const generatePdf = async () => {
     if (current.length === 0) {
       toast.error("Nenhuma resposta nesta semana para gerar o relatório.");
       return;
     }
     setGenerating(true);
     try {
+      const ai = await fetchAiSummary();
       const total = current.length;
       const avg = current.reduce((s, r) => s + r.mood_score, 0) / total;
 
