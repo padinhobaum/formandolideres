@@ -74,9 +74,9 @@ export default function AdminClassClimate() {
       const ids = [...new Set([...curRows, ...prevRows].map((r) => r.user_id))];
       let names: Record<string, string> = {};
       if (ids.length > 0) {
-        const { data: profs } = await supabase.from("profiles").select("id, name").in("id", ids);
-        (profs || []).forEach((p: { id: string; name: string | null }) => {
-          if (p.name) names[p.id] = p.name;
+        const { data: profs } = await supabase.from("profiles").select("user_id, full_name").in("user_id", ids);
+        (profs || []).forEach((p: { user_id: string; full_name: string | null }) => {
+          if (p.full_name) names[p.user_id] = p.full_name;
         });
       }
       if (!cancelled) {
