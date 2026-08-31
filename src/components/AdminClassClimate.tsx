@@ -161,6 +161,18 @@ export default function AdminClassClimate() {
     return list;
   }, [stats]);
 
+  const selectedClass = useMemo(
+    () => stats.sortedClasses.find((c) => c.name === selectedClassName) || null,
+    [stats.sortedClasses, selectedClassName]
+  );
+
+  const selectedResponses = useMemo(() => {
+    if (!selectedClass) return [];
+    return current
+      .filter((r) => r.class_name === selectedClass.name)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }, [selectedClass, current]);
+
   const navigateWeek = (offset: number) => {
     const next = new Date(week);
     next.setDate(week.getDate() + offset * 7);
