@@ -22,6 +22,7 @@ interface Props {
   current: ClimateResponse[];
   previous: ClimateResponse[];
   insights: string[];
+  leaderNames?: Record<string, string>;
 }
 
 const MOOD = {
@@ -42,13 +43,15 @@ interface AiSummary {
   acoes?: string[];
 }
 
-export default function ClassClimatePdfReport({ week, weekLabel, current, previous, insights }: Props) {
+export default function ClassClimatePdfReport({ week, weekLabel, current, previous, insights, leaderNames = {} }: Props) {
   const [generating, setGenerating] = useState(false);
+
+  const nameOf = (userId: string) => leaderNames[userId] || "Líder";
 
   const fetchAiSummary = async (): Promise<AiSummary | null> => {
     const comments = current
       .filter((r) => r.comment?.trim())
-      .map((r) => ({ class_name: r.class_name, mood_score: r.mood_score, comment: r.comment!.trim() }));
+      .map((r) => ({ class_name: r.class_name, mood_score: r.mood_score, comment: `[${nameOf(r.user_id)}] ${r.comment!.trim()}` }));
     if (comments.length === 0) return null;
     try {
       const { data, error } = await supabase.functions.invoke("climate-summary", {
@@ -83,12 +86,12 @@ export default function ClassClimatePdfReport({ week, weekLabel, current, previo
       current.forEach((r) => { distribution[r.mood_score] = (distribution[r.mood_score] || 0) + 1; });
 
       const agg = (rows: ClimateResponse[]) => {
-        const m: Record<string, { count: number; sum: number; comments: string[] }> = {};
+        const m: Record<string, { count: number; sum: number; comments: { author: string; text: string }[] }> = {};
         rows.forEach((r) => {
           if (!m[r.class_name]) m[r.class_name] = { count: 0, sum: 0, comments: [] };
           m[r.class_name].count += 1;
           m[r.class_name].sum += r.mood_score;
-          if (r.comment?.trim()) m[r.class_name].comments.push(r.comment.trim());
+          if (r.comment?.trim()) m[r.class_name].comments.push({ author: nameOf(r.user_id), text: r.comment.trim() });
         });
         return m;
       };
@@ -224,7 +227,10 @@ export default function ClassClimatePdfReport({ week, weekLabel, current, previo
               <div style="margin-bottom:12px;break-inside:avoid;">
                 <p style="font-size:11px;font-weight:700;color:#003d7a;margin:0 0 6px;">${c.name}</p>
                 ${c.comments.slice(0, 12).map((cm) => `
-                  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:11px;color:#334155;line-height:1.5;margin-bottom:6px;break-inside:avoid;">"${esc(cm)}"</div>
+                  <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:11px;color:#334155;line-height:1.5;margin-bottom:6px;break-inside:avoid;">
+                    "${esc(cm.text)}"
+                    <span style="display:block;margin-top:4px;font-size:10px;font-weight:700;color:#003d7a;">— ${esc(cm.author)} (${esc(c.name)})</span>
+                  </div>
                 `).join("")}
               </div>`).join("")}
           </div>
