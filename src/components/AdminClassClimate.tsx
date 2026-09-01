@@ -389,7 +389,7 @@ export default function AdminClassClimate() {
                             <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold mb-1">Média</p>
                             <p className="font-heading font-bold text-2xl flex items-center gap-1.5">
                               {selectedClass.avg.toFixed(1)}
-                              <span className="text-xl">{meta.emoji}</span>
+                              <span className="text-xl">{(MOOD_META[Math.round(selectedClass.avg)] || MOOD_META[3]).emoji}</span>
                             </p>
                             {selectedClass.delta !== null && (
                               <p className="text-[10px] text-muted-foreground flex items-center gap-0.5 mt-0.5">
