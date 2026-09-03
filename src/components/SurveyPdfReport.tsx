@@ -219,6 +219,7 @@ export default function SurveyPdfReport() {
       const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
       const logoLiceuUrl = window.location.origin + liceuLogoAsset.url;
       const logoBornToLeadUrl = window.location.origin + bornToLeadAsset.url;
+      const logoSeloUrl = window.location.origin + seloParceiraAsset.url;
 
       const html = `<html>
 <head>
