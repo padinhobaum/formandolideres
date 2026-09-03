@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { FileDown, Loader2 } from "lucide-react";
 import liceuLogoAsset from "@/assets/liceu-jardim.png.asset.json";
 import bornToLeadAsset from "@/assets/born-to-lead.png.asset.json";
+import seloParceiraAsset from "@/assets/selo-parceira.png.asset.json";
 
 export default function SurveyPdfReport() {
   const [generating, setGenerating] = useState(false);
@@ -218,6 +219,7 @@ export default function SurveyPdfReport() {
       const logoFormandoUrl = window.location.origin + "/lovable-uploads/footer-logo.png";
       const logoLiceuUrl = window.location.origin + liceuLogoAsset.url;
       const logoBornToLeadUrl = window.location.origin + bornToLeadAsset.url;
+      const logoSeloUrl = window.location.origin + seloParceiraAsset.url;
 
       const html = `<html>
 <head>
@@ -275,10 +277,16 @@ export default function SurveyPdfReport() {
     ${commentsHtml}
 
     <!-- Footer -->
-    <div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:16px;">
-      <img src="${logoBornToLeadUrl}" alt="Born to Lead" style="height:22px;" crossorigin="anonymous" />
+    <div style="margin-top:24px;border-top:2px solid #e5e7eb;padding-top:12px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img src="${logoLiceuUrl}" alt="Liceu Jardim" style="height:28px;" crossorigin="anonymous" />
+        <img src="${logoSeloUrl}" alt="Escola Parceira Formando Líderes" style="height:34px;" crossorigin="anonymous" />
+      </div>
       <p style="font-size:10px;color:#94a3b8;flex:1;text-align:center;">© ${new Date().getFullYear()} Formando Líderes — Todos os direitos reservados.</p>
-      <p style="font-size:10px;color:#94a3b8;">www.formandolideres.org</p>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <img src="${logoBornToLeadUrl}" alt="Born to Lead" style="height:22px;" crossorigin="anonymous" />
+        <p style="font-size:10px;color:#94a3b8;">www.formandolideres.org</p>
+      </div>
     </div>
   </div>
 </body>
