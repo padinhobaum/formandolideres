@@ -178,9 +178,24 @@ export default function PublicSurveyPage() {
           </Button>
         </form>
 
-        <p className="text-center text-xs text-gray-400 mt-6">
-          © {new Date().getFullYear()} Formando Líderes – Seus dados são tratados com confidencialidade.
-        </p>
+        {/* Footer */}
+        <footer className="mt-10 pt-6 border-t border-gray-200">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+            <img
+              src="/__l5e/assets-v1/914d2954-9cde-40e8-b747-b788d1aa586a/liceu-jardim.png"
+              alt="Liceu Jardim"
+              className="h-10 sm:h-12 w-auto object-contain"
+            />
+            <img
+              src="/__l5e/assets-v1/52b35f36-7102-4a73-9e1c-ffa0c4dd4787/selo-parceira.png"
+              alt="Formando Líderes – Escola Parceira"
+              className="h-12 sm:h-14 w-auto object-contain"
+            />
+          </div>
+          <p className="text-center text-xs text-gray-400 mt-4">
+            © {new Date().getFullYear()} Formando Líderes – Seus dados são tratados com confidencialidade.
+          </p>
+        </footer>
       </div>
     </div>
   );
