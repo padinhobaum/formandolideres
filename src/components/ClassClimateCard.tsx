@@ -194,6 +194,7 @@ export default function ClassClimateCard() {
             <Textarea
               value={comment}
               onChange={(e) => setComment(e.target.value.slice(0, 500))}
+              maxLength={500}
               placeholder="Quer comentar algo? (opcional)"
               className="rounded-xl resize-none bg-card/80 backdrop-blur-sm"
               rows={2}
