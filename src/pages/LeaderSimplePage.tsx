@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import ClassClimateCard from "@/components/ClassClimateCard";
-import { ClipboardList, LogOut } from "lucide-react";
+import ChangePasswordDialog from "@/components/ChangePasswordDialog";
+import { ClipboardList, KeyRound, LogOut } from "lucide-react";
 import logoFl from "@/assets/logo-fl.png.asset.json";
 import bornToLead from "@/assets/born-to-lead.png.asset.json";
 
@@ -13,6 +14,7 @@ export default function LeaderSimplePage() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const [hasResults, setHasResults] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -73,7 +75,17 @@ export default function LeaderSimplePage() {
           </Button>
         )}
 
-        <div className="flex justify-center">
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setPasswordDialogOpen(true)}
+            className="gap-2"
+          >
+            <KeyRound className="w-4 h-4" />
+            Alterar senha
+          </Button>
           <button
             onClick={async () => {
               await signOut();
@@ -85,6 +97,11 @@ export default function LeaderSimplePage() {
             Sair
           </button>
         </div>
+
+        <ChangePasswordDialog
+          open={passwordDialogOpen}
+          onOpenChange={setPasswordDialogOpen}
+        />
 
         <div className="pt-6 flex justify-center">
           <img src={bornToLead.url} alt="Born to Lead" className="h-8 sm:h-10 w-auto opacity-90" />
