@@ -46,7 +46,6 @@ export default function ChangePasswordDialog({ open, onOpenChange }: ChangePassw
 
     setLoading(true);
 
-    // Verify current password by re-signing in
     const { data: { user } } = await supabase.auth.getUser();
     if (!user?.email) {
       toast({ title: "Erro", description: "Não foi possível identificar o usuário.", variant: "destructive" });
@@ -54,21 +53,18 @@ export default function ChangePasswordDialog({ open, onOpenChange }: ChangePassw
       return;
     }
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: currentPassword,
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+      current_password: currentPassword,
     });
 
-    if (signInError) {
-      toast({ title: "Erro", description: "Senha atual incorreta.", variant: "destructive" });
-      setLoading(false);
-      return;
-    }
-
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-
     if (error) {
-      toast({ title: "Erro", description: error.message, variant: "destructive" });
+      const incorrectPassword = error.message.toLowerCase().includes("password");
+      toast({
+        title: "Erro",
+        description: incorrectPassword ? "Senha atual incorreta." : "Não foi possível alterar a senha. Tente novamente.",
+        variant: "destructive",
+      });
     } else {
       toast({ title: "Sucesso", description: "Senha alterada com sucesso!" });
       reset();

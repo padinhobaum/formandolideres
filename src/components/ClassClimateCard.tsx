@@ -193,13 +193,13 @@ export default function ClassClimateCard() {
           <div className="space-y-3 animate-fade-in">
             <Textarea
               value={comment}
-              onChange={(e) => setComment(e.target.value.slice(0, 280))}
+              onChange={(e) => setComment(e.target.value.slice(0, 500))}
               placeholder="Quer comentar algo? (opcional)"
               className="rounded-xl resize-none bg-card/80 backdrop-blur-sm"
               rows={2}
             />
             <div className="flex items-center justify-between gap-3">
-              <span className="text-[11px] text-muted-foreground">{comment.length}/280</span>
+              <span className="text-[11px] text-muted-foreground">{comment.length}/500</span>
               <Button
                 onClick={handleSubmit}
                 disabled={submitting}
