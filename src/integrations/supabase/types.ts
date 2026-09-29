@@ -329,6 +329,30 @@ export type Database = {
         }
         Relationships: []
       }
+      climate_email_deliveries: {
+        Row: {
+          id: string
+          reminder_type: string
+          sent_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          id?: string
+          reminder_type: string
+          sent_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          id?: string
+          reminder_type?: string
+          sent_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: []
+      }
       custom_links: {
         Row: {
           created_at: string

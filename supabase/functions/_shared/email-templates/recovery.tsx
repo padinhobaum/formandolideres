@@ -12,6 +12,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandHeader } from './brand.tsx'
 
 interface RecoveryEmailProps {
   siteName: string
@@ -29,6 +30,7 @@ export const RecoveryEmail = ({
     <Preview>Redefina sua senha no {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Redefina sua senha</Heading>
         <Text style={text}>
           Recebemos uma solicitação para redefinir sua senha no {siteName}.
