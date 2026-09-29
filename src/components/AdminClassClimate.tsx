@@ -10,10 +10,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
-  Heart, TrendingUp, TrendingDown, Minus, ChevronLeft, ChevronRight, Printer, Download, Users, Sparkles,
+  Heart, TrendingUp, TrendingDown, Minus, ChevronLeft, ChevronRight, Users, Sparkles, Mail, Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import liceuLogoAsset from "@/assets/liceu-jardim.png.asset.json";
 import ClassClimatePdfReport from "@/components/ClassClimatePdfReport";
@@ -65,6 +77,7 @@ export default function AdminClassClimate() {
   const [previous, setPrevious] = useState<Response[]>([]);
   const [leaderNames, setLeaderNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
+  const [sendingReminders, setSendingReminders] = useState(false);
   const [selectedClassName, setSelectedClassName] = useState<string | null>(null);
 
   useEffect(() => {
@@ -181,6 +194,28 @@ export default function AdminClassClimate() {
 
   const isCurrentWeek = week.toISOString().slice(0, 10) === isoWeekStart(new Date()).toISOString().slice(0, 10);
 
+  const sendPendingReminders = async () => {
+    setSendingReminders(true);
+    const { data, error } = await supabase.functions.invoke("send-climate-reminders", {
+      body: { sendMondayNow: true },
+    });
+    setSendingReminders(false);
+
+    if (error) {
+      toast.error("Não foi possível enviar os lembretes. Tente novamente.");
+      return;
+    }
+
+    const sent = typeof data?.sent === "number" ? data.sent : 0;
+    const skipped = typeof data?.skipped === "number" ? data.skipped : 0;
+    if (sent === 0) {
+      toast.success("Nenhum líder pendente precisava receber o lembrete.");
+      return;
+    }
+
+    toast.success(`${sent} lembrete${sent === 1 ? " enviado" : "s enviados"} com sucesso${skipped > 0 ? `; ${skipped} não pôde${skipped === 1 ? "" : "ram"} ser enviado${skipped === 1 ? "" : "s"}` : ""}.`);
+  };
+
   return (
     <div className="space-y-6">
       {/* Week navigator */}
@@ -201,14 +236,39 @@ export default function AdminClassClimate() {
             </Button>
           )}
         </div>
-        <ClassClimatePdfReport
-          week={week}
-          weekLabel={fmtRange(week)}
-          current={current}
-          previous={previous}
-          insights={insights}
-          leaderNames={leaderNames}
-        />
+        <div className="flex items-center gap-2">
+          {isCurrentWeek && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="rounded-xl gap-2" disabled={sendingReminders}>
+                  {sendingReminders ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+                  <span className="hidden sm:inline">Enviar lembretes</span>
+                  <span className="sm:hidden">Lembrar</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Enviar lembrete aos líderes?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    O e-mail será enviado agora somente aos líderes que ainda não responderam ao Clima da Turma nesta semana.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={sendPendingReminders}>Enviar agora</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          )}
+          <ClassClimatePdfReport
+            week={week}
+            weekLabel={fmtRange(week)}
+            current={current}
+            previous={previous}
+            insights={insights}
+            leaderNames={leaderNames}
+          />
+        </div>
       </div>
 
       {/* Print header */}
