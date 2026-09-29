@@ -87,8 +87,8 @@ export const template = {
   previewData: { name: 'Arthur', reminderType: 'monday', climateUrl: 'https://app.formandolideres.org' },
 } satisfies TemplateEntry
 
-const LOGO_URL = 'https://app.formandolideres.org/__l5e/assets-v1/8410690f-68d0-4655-8708-889dbadf317b/logo-fl-full.png'
-const BORN_TO_LEAD_URL = 'https://app.formandolideres.org/__l5e/assets-v1/eb0a48ee-e571-4812-a188-dd10d1cb81d3/born-to-lead.png'
+const LOGO_URL = 'https://pxomjhnxdpllcmrzdfef.supabase.co/storage/v1/object/public/icons/email%2Flogo-formando-lideres.webp'
+const BORN_TO_LEAD_URL = 'https://pxomjhnxdpllcmrzdfef.supabase.co/storage/v1/object/public/icons/email%2Fborn-to-lead.webp'
 const main = { backgroundColor: '#ffffff', fontFamily: 'Helvetica, Arial, sans-serif', margin: 0, padding: '24px 10px' }
 const container = { backgroundColor: '#f7f9fb', border: '1px solid #dce5ec', borderRadius: '8px', margin: '0 auto', maxWidth: '560px', padding: '36px 36px 28px' }
 const logo = { display: 'block', margin: '0 auto 28px', maxWidth: '210px', height: 'auto' }
