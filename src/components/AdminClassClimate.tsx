@@ -208,12 +208,16 @@ export default function AdminClassClimate() {
 
     const sent = typeof data?.sent === "number" ? data.sent : 0;
     const skipped = typeof data?.skipped === "number" ? data.skipped : 0;
+    const accepted = typeof data?.accepted === "number" ? data.accepted : sent;
+    if (skipped > 0) {
+      toast.error(`${skipped} e-mail${skipped === 1 ? " não foi aceito" : "s não foram aceitos"} pelo serviço de envio.`);
+    }
     if (sent === 0) {
-      toast.success("Nenhum líder pendente precisava receber o lembrete.");
+      if (skipped === 0) toast.success("Nenhum líder pendente precisava receber o lembrete.");
       return;
     }
 
-    toast.success(`${sent} lembrete${sent === 1 ? " enviado" : "s enviados"} com sucesso${skipped > 0 ? `; ${skipped} não pôde${skipped === 1 ? "" : "ram"} ser enviado${skipped === 1 ? "" : "s"}` : ""}.`);
+    toast.success(`${accepted} e-mail${accepted === 1 ? " foi aceito" : "s foram aceitos"} para entrega.`);
   };
 
   return (

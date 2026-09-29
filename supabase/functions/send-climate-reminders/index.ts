@@ -38,6 +38,7 @@ Deno.serve(async (req) => {
     }
 
     const now = new Date()
+    const dispatchId = crypto.randomUUID()
     const parts = new Intl.DateTimeFormat('en-CA', {
       timeZone: 'America/Sao_Paulo', weekday: 'short', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', hourCycle: 'h23',
     }).formatToParts(now).reduce<Record<string, string>>((acc, part) => ({ ...acc, [part.type]: part.value }), {})
@@ -63,11 +64,16 @@ Deno.serve(async (req) => {
     const profileMap = new Map((profiles ?? []).map((profile) => [profile.user_id, profile.full_name]))
     let sent = 0
     let skipped = 0
+    const failures: Array<{ reason: string; status?: number }> = []
 
     for (const userId of leaderIds) {
       const { data: authData } = await admin.auth.admin.getUserById(userId)
       const email = authData.user?.email
-      if (!email) { skipped += 1; continue }
+      if (!email) {
+        skipped += 1
+        failures.push({ reason: 'missing_email' })
+        continue
+      }
       const htmlContent = await renderAsync(React.createElement(ClimateReminderEmail, {
         name: profileMap.get(userId) ?? 'Líder', reminderType, climateUrl: APP_URL,
       }))
@@ -80,20 +86,29 @@ Deno.serve(async (req) => {
           subject: SUBJECTS[reminderType],
           htmlContent,
           tags: ['clima-da-turma', reminderType],
-          headers: { 'idempotency-key': forcedMonday ? `climate-monday-manual-${parts.year}-${parts.month}-${parts.day}-${userId}` : `climate-${reminderType}-${weekStart}-${userId}` },
+          headers: { 'idempotency-key': forcedMonday ? `climate-monday-manual-${dispatchId}-${userId}` : `climate-${reminderType}-${weekStart}-${userId}` },
         }),
       })
       if (!response.ok) {
         const details = await response.text()
         console.error(`Brevo send failed [${response.status}]: ${details}`)
         skipped += 1
+        failures.push({ reason: 'provider_rejected', status: response.status })
+        continue
+      }
+      const result = await response.json().catch(() => null)
+      const messageId = typeof result?.messageId === 'string' ? result.messageId : null
+      if (!messageId) {
+        console.error('Brevo response did not include a messageId')
+        skipped += 1
+        failures.push({ reason: 'missing_message_id' })
         continue
       }
       const { error: deliveryError } = await admin.from('climate_email_deliveries').insert({ user_id: userId, week_start: weekStart, reminder_type: reminderType })
       if (deliveryError && deliveryError.code !== '23505') console.error('Delivery log failed', deliveryError)
       sent += 1
     }
-    return json({ sent, skipped }, 200)
+    return json({ sent, skipped, accepted: sent, dispatchId, failures }, 200)
   } catch (error) {
     console.error('send-climate-reminders error', error)
     return json({ error: 'Unable to process reminders' }, 500)
