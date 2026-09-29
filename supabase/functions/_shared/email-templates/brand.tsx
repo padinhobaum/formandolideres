@@ -3,7 +3,7 @@
 import * as React from 'npm:react@18.3.1'
 import { Img } from 'npm:@react-email/components@0.0.22'
 
-const LOGO_URL = 'https://pxomjhnxdpllcmrzdfef.supabase.co/storage/v1/object/public/icons/email%2Flogo-formando-lideres.webp'
+const LOGO_URL = 'https://pxomjhnxdpllcmrzdfef.supabase.co/storage/v1/object/public/icons/email%2Flogo-formando-lideres.png'
 
 export const BrandHeader = () => (
   <Img

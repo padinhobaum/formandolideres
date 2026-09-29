@@ -30,21 +30,21 @@ const COPY: Record<ClimateReminderType, { preview: string; eyebrow: string; titl
     eyebrow: 'NOVA SEMANA',
     title: 'O Clima da Turma já está liberado',
     body: 'Conte como sua turma está se sentindo nesta semana. Sua percepção ajuda a escola a agir com mais cuidado e atenção.',
-    subject: 'Clima da Turma liberado — participe nesta semana',
+    subject: 'Clima de Turma disponível! | Formando Líderes',
   },
   friday: {
     preview: 'Lembrete para responder o Clima da Turma desta semana.',
     eyebrow: 'LEMBRETE',
     title: 'Sua percepção faz diferença',
     body: 'Você ainda pode responder o Clima da Turma desta semana. Leva poucos minutos e contribui diretamente com o acompanhamento da sua sala.',
-    subject: 'Lembrete: responda o Clima da Turma',
+    subject: 'Clima de Turma disponível! | Formando Líderes',
   },
   sunday: {
     preview: 'Hoje é o último dia para responder o Clima da Turma.',
     eyebrow: 'ÚLTIMO DIA',
     title: 'Hoje é o último dia',
     body: 'Ainda dá tempo de registrar como foi a semana da sua turma. Envie sua percepção até o fim de hoje.',
-    subject: 'Último dia para responder o Clima da Turma',
+    subject: 'Último dia para responder! | Formando Líderes',
   },
 }
 
@@ -87,8 +87,8 @@ export const template = {
   previewData: { name: 'Arthur', reminderType: 'monday', climateUrl: 'https://app.formandolideres.org' },
 } satisfies TemplateEntry
 
-const LOGO_URL = 'https://pxomjhnxdpllcmrzdfef.supabase.co/storage/v1/object/public/icons/email%2Flogo-formando-lideres.webp'
-const BORN_TO_LEAD_URL = 'https://pxomjhnxdpllcmrzdfef.supabase.co/storage/v1/object/public/icons/email%2Fborn-to-lead.webp'
+const LOGO_URL = 'https://pxomjhnxdpllcmrzdfef.supabase.co/storage/v1/object/public/icons/email%2Flogo-formando-lideres.png'
+const BORN_TO_LEAD_URL = 'https://pxomjhnxdpllcmrzdfef.supabase.co/storage/v1/object/public/icons/email%2Fborn-to-lead.png'
 const main = { backgroundColor: '#ffffff', fontFamily: 'Helvetica, Arial, sans-serif', margin: 0, padding: '24px 10px' }
 const container = { backgroundColor: '#f7f9fb', border: '1px solid #dce5ec', borderRadius: '8px', margin: '0 auto', maxWidth: '560px', padding: '36px 36px 28px' }
 const logo = { display: 'block', margin: '0 auto 28px', maxWidth: '210px', height: 'auto' }
