@@ -12,6 +12,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandHeader } from './brand.tsx'
 
 interface MagicLinkEmailProps {
   siteName: string
@@ -29,6 +30,7 @@ export const MagicLinkEmail = ({
     <Preview>Seu link de acesso ao {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Seu link de acesso</Heading>
         <Text style={text}>
           Clique no botão abaixo para acessar o {siteName}. Este link expira em breve.

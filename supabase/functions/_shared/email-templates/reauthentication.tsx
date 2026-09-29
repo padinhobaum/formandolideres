@@ -11,6 +11,7 @@ import {
   Preview,
   Text,
 } from 'npm:@react-email/components@0.0.22'
+import { BrandHeader } from './brand.tsx'
 
 interface ReauthenticationEmailProps {
   token: string
@@ -22,6 +23,7 @@ export const ReauthenticationEmail = ({ token }: ReauthenticationEmailProps) => 
     <Preview>Seu código de verificação</Preview>
     <Body style={main}>
       <Container style={container}>
+        <BrandHeader />
         <Heading style={h1}>Confirme sua identidade</Heading>
         <Text style={text}>Use o código abaixo para continuar:</Text>
         <Text style={codeStyle}>{token}</Text>

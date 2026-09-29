@@ -1,4 +1,6 @@
 import type { ComponentType } from 'npm:react@18.3.1'
+import { template as climateReminderTemplate } from './climate-reminder.tsx'
+import { template as climateConfirmationTemplate } from './climate-confirmation.tsx'
 
 export interface TemplateEntry {
   component: ComponentType<any>
@@ -18,6 +20,6 @@ export interface TemplateEntry {
  *   // then add to TEMPLATES: 'welcome': welcomeTemplate
  */
 export const TEMPLATES: Record<string, TemplateEntry> = {
-  // Add templates here as they are created, e.g.:
-  // 'welcome': welcomeTemplate,
+  'climate-reminder': climateReminderTemplate,
+  'climate-confirmation': climateConfirmationTemplate,
 }

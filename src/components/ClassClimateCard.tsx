@@ -93,6 +93,11 @@ export default function ClassClimateCard() {
     }
     toast.success("Obrigado! Sua resposta foi registrada 💚");
     setExisting(data);
+    void supabase.functions.invoke("send-climate-confirmation", {
+      body: { responseId: data.id },
+    }).then(({ error: emailError }) => {
+      if (emailError) console.error("Climate confirmation email failed", emailError);
+    });
   };
 
   if (isAdmin) return null; // Admins não respondem
